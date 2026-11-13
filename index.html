@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Novo Sabor – Ficha Técnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#121110;--card:#1b1917;--card2:#25221f;--line:#36312b;--txt:#f3eee8;--mut:#a59d93;
+  --acc:#f2a33a;--bad:#e5534b;--ok:#4cbb7a;
+  --c-ing:#f2a33a;--c-emb:#c9b08a;--c-taxa:#9a7fe0;--c-ent:#e07b9a;--c-fixo:#5b8fd6;--c-lucro:#4cbb7a;
+  --c-hb:#f2a33a;--c-al:#5b8fd6;--c-cb:#e07b9a;--c-bb:#c9b08a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.4}
+header{max-width:1100px;margin:0 auto;padding:20px 20px 0}
+h1{font-size:24px;margin:0;letter-spacing:-.3px}
+h2{font-size:17px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:14px 20px;max-width:1100px;margin:0 auto;position:sticky;top:0;background:var(--bg);z-index:5;align-items:center}
+nav .gbtn{background:transparent;border:1px solid var(--acc);color:var(--acc);font-weight:600}
+nav .gbtn.on{background:#2a2117;color:var(--acc);border-color:var(--acc)}
+nav .sep{width:1px;height:26px;background:var(--line);margin:0 4px;flex:none}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .hd{font-size:11px;color:var(--mut);text-align:center;padding:4px}
+.cal .d{background:var(--card2);border:1px solid var(--line);border-radius:8px;min-height:78px;padding:5px;cursor:pointer;text-align:left;font:inherit;color:var(--txt);display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal .d.hoje{border-color:var(--acc)}
+.cal .d.sel{box-shadow:0 0 0 2px var(--acc) inset}
+.cal .d .n{font-size:12px;font-weight:600}
+.cal .vz{background:transparent;border:0;cursor:default}
+.pl{font-size:10.5px;border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.pl.ok{background:#173524;color:#9fe0b8}.pl.falta{background:#4a1d1a;color:#ffb3ab}.pl.pend{background:#3a2f1d;color:#f0d9b5}.pl.esc{background:#2c2925;color:var(--mut)}.pl.extra{background:#1d2a3a;color:#a9c8f0}
+.legenda .pl{display:inline-block;margin-right:4px}
+nav button,.chip{background:var(--card);border:1px solid var(--line);color:var(--mut);padding:9px 14px;border-radius:999px;font:inherit;font-weight:500;cursor:pointer;white-space:nowrap}
+nav button.on,.chip.on{background:var(--acc);color:#1a1206;border-color:var(--acc)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chips .lbl{font-size:12px;color:var(--mut);margin-right:4px}
+.chip{padding:7px 12px;font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:4px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:6px 0 14px}
+.dica{background:#2a2117;border:1px solid #4a3a24;color:#f0d9b5;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+.alerta{background:#2d1715;border:1px solid #6b2a25;color:#ffc9c4;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:14px}
+input,select,textarea{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;font:inherit;min-width:0;width:100%}
+input[type=month],input[type=date]{color-scheme:dark}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--mut)}
+.btn.pri{background:var(--acc);color:#1a1206;border-color:var(--acc);font-weight:600}
+.btn.del{color:var(--bad)}
+.btn.del.arm{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn.x{padding:6px 10px}
+.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
+.ck{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--txt);padding:8px 0;cursor:pointer}
+.linha{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:12px 0;border-top:1px solid var(--line)}
+.linha:first-child{border-top:0;padding-top:0}
+.calcv{font-weight:600;color:var(--txt);font-size:14px;padding:8px 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.kpis .card{margin-bottom:0}
+.kpi .l{color:var(--mut);font-size:13px}
+.kpi .v{font-size:24px;font-weight:700;margin-top:4px}
+.kpi .s{color:var(--mut);font-size:12px;margin-top:2px}
+.pos{color:var(--ok)} .neg{color:var(--bad)}
+.legenda{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:8px 0 14px}
+.legenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.lb{margin-bottom:14px}
+.lbh{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-bottom:5px;flex-wrap:wrap}
+.lbh span{color:var(--mut)}
+.bar{display:flex;height:24px;border-radius:6px;overflow:hidden;background:var(--card2)}
+.bar span{height:100%;border-right:2px solid var(--card)}
+.bar span:last-child{border-right:0}
+.lh{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.lh .nome{font-size:17px;font-weight:600}
+.item{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.item select{flex:1 1 220px}
+.item .q{width:90px}
+.item .un{color:var(--mut);font-size:13px;min-width:56px}
+.item .lc{min-width:80px;text-align:right;font-size:14px}
+.boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px}
+.cbox{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:var(--txt)}
+.cbox.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.cbox .n{font-size:12px;color:var(--mut)}
+.cbox .p{font-size:12px;color:var(--mut);margin-top:2px}
+.cbox .v{font-size:18px;font-weight:700;margin-top:2px}
+.resumo{margin-top:10px;background:var(--card2);border-radius:10px;padding:12px 14px}
+.resumo .r{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:3px 0}
+.resumo .r span:first-child{color:var(--mut)}
+.resumo .r i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.resumo .tot{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:600}
+.resumo .big{font-size:16px}
+.resumo .ttl{font-size:13px;color:var(--acc);font-weight:600;margin-bottom:6px}
+.sug{margin-top:8px;font-size:13px;color:#f0d9b5}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.grid2 .card{margin-bottom:0}
+.vazio{color:var(--mut);text-align:center;padding:30px}
+.ok-msg{color:var(--ok);font-size:13px;margin-left:8px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--mut);margin-left:6px;vertical-align:2px}
+.tag.bad{background:#4a1d1a;color:#ffb3ab}
+.tag.ok{background:#173524;color:#9fe0b8}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n,th.n{text-align:right;white-space:nowrap}
+tr.grp td{color:var(--acc);font-weight:600;font-size:13px;padding-top:16px;border-bottom:0}
+tr.falta td{color:#ffb3ab}
+.scroll{max-height:440px;overflow:auto}
+.tblwrap{overflow-x:auto}
+.rk{display:grid;grid-template-columns:minmax(120px,190px) 1fr 60px;gap:10px;align-items:center;margin-bottom:8px;font-size:14px}
+.rk .b{height:18px;border-radius:5px}
+.chart{display:flex;align-items:flex-end;gap:18px;height:200px;padding:10px 4px 0;border-bottom:1px solid var(--line);overflow-x:auto}
+.mes{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:70px;height:100%;justify-content:flex-end}
+.mes .bs{display:flex;align-items:flex-end;gap:5px;height:100%}
+.mes .bs div{width:24px;border-radius:5px 5px 0 0}
+.mes .lab{font-size:12px;color:var(--mut)}
+.mes.on .lab{color:var(--acc);font-weight:600}
+.dias{display:flex;gap:4px}
+.dias button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.dias button.on{background:var(--acc);color:#1a1206;border-color:var(--acc)}
+.prev{font-size:14px;color:var(--mut);padding:8px 0}
+.prev b{color:var(--txt);font-size:16px}
+svg text{font-family:Inter,system-ui,sans-serif}
+footer{color:var(--mut);font-size:12px;text-align:center;padding:10px 20px 30px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="loja">Novo Sabor</h1>
+  <div class="sub">Ficha técnica e gestão da hamburgueria e do almoço</div>
+</header>
+<nav id="nav"></nav>
+<main id="main"></main>
+<footer>Os dados ficam salvos neste navegador. Para passar para outro aparelho, use o backup em "Ajustes".</footer>
+
+<script>
+const KEY = 'novoSabor_v4';
+const fmt = v => (isFinite(v) ? v : 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+const fmtUn = v => (isFinite(v) ? v : 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL', minimumFractionDigits:2, maximumFractionDigits: Math.abs(v) < 1 ? 3 : 2});
+const pct = v => (isFinite(v) ? v : 0).toLocaleString('pt-BR', {maximumFractionDigits:1}) + '%';
+const int = v => Math.round(v || 0).toLocaleString('pt-BR');
+const num = v => { let s = String(v ?? '').trim(); if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.'); const n = parseFloat(s); return isNaN(n) ? 0 : n; };
+const nv = n => (n === '' || n == null) ? '' : String(n).replace('.', ',');
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const byId = (arr, id) => arr.find(x => x.id === id);
+const pad = n => String(n).padStart(2, '0');
+const hoje = new Date();
+const mesHoje = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}`;
+const dataHoje = `${mesHoje}-${pad(hoje.getDate())}`;
+const addMes = (ym, d) => { const [y, m] = ym.split('-').map(Number); const dt = new Date(y, m - 1 + d, 1); return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}`; };
+const diasMes = ym => { const [y, m] = ym.split('-').map(Number); return new Date(y, m, 0).getDate(); };
+const nomeMes = (ym, longo) => { const [y, m] = ym.split('-').map(Number); return new Date(y, m - 1, 1).toLocaleDateString('pt-BR', longo ? {month:'long', year:'numeric'} : {month:'short', year:'2-digit'}).replace('.', '').replace(' de ', '/'); };
+const dataBR = d => d.split('-').reverse().join('/');
+const dow = d => new Date(d + 'T12:00').getDay();
+const DIAS = ['D','S','T','Q','Q','S','S'];
+const DIAS_NOME = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const SETORES = {hamburgueria:'Hamburgueria', almoco:'Almoço', combo:'Combos'};
+const COR_SETOR = {hamburgueria:'var(--c-hb)', almoco:'var(--c-al)', combo:'var(--c-cb)', bebida:'var(--c-bb)'};
+
+/* =================== EXEMPLO =================== */
+function exemplo(){
+  const I = (nome, cat, preco, rende, unidade) => ({id:uid(), nome, cat, preco, rende, unidade});
+  const ing = [
+    I('Pão de hambúrguer (pacote)','ingrediente',12,12,'un'),
+    I('Carne moída (kg)','ingrediente',40,1000,'g'),
+    I('Mussarela (kg)','ingrediente',42,1000,'g'),
+    I('Bacon (kg)','ingrediente',38,1000,'g'),
+    I('Alface (pé)','ingrediente',4,20,'porção'),
+    I('Tomate (kg)','ingrediente',7,40,'fatia'),
+    I('Cebola caramelizada (receita)','ingrediente',6,15,'porção'),
+    I('Maionese da casa (pote)','ingrediente',18,60,'porção'),
+    I('Ovo (bandeja com 30)','ingrediente',22,30,'un'),
+    I('Batata palito congelada (2 kg)','ingrediente',25,2000,'g'),
+    I('Arroz (pacote 5 kg)','ingrediente',28,5000,'g'),
+    I('Feijão (kg)','ingrediente',9,1000,'g'),
+    I('Frango (kg)','ingrediente',18,1000,'g'),
+    I('Bife / contra-filé (kg)','ingrediente',45,1000,'g'),
+    I('Batata (kg)','ingrediente',6,1000,'g'),
+    I('Óleo (900 ml)','ingrediente',8,900,'ml'),
+    I('Caixa de hambúrguer (pacote 100)','embalagem',45,100,'un'),
+    I('Embalagem de batata (pacote 100)','embalagem',30,100,'un'),
+    I('Sachê de ketchup (caixa 200)','embalagem',25,200,'un'),
+    I('Guardanapo + saquinho (pacote 100)','embalagem',20,100,'un'),
+    I('Marmitex alumínio (pacote 100)','embalagem',55,100,'un'),
+    I('Kit talher descartável (pacote 50)','embalagem',12,50,'un'),
+  ];
+  const g = n => ing.find(i => i.nome.startsWith(n)).id;
+  const it = (n, q) => ({ing:g(n), qtd:q});
+  const base = () => [it('Pão',1),it('Carne',150),it('Mussarela',40),it('Maionese',1),it('Caixa',1),it('Sachê',2),it('Guardanapo',1)];
+  const P = (nome, setor, preco, precoApp, itens) => ({id:uid(), nome, setor, preco, precoApp, itens});
+  const xb = P('X-Burguer','hamburgueria',22,26,base());
+  const bat = P('Batata frita (porção)','hamburgueria',14,17,[it('Batata palito',250),it('Óleo',50),it('Embalagem de batata',1),it('Sachê',2)]);
+  const produtos = [
+    xb,
+    P('X-Bacon','hamburgueria',27,32,[...base(),it('Bacon',30),it('Alface',1),it('Tomate',2)]),
+    P('X-Cebola Caramelizada','hamburgueria',28,33,[...base(),it('Cebola',1),it('Bacon',20)]),
+    P('X-Tudo','hamburgueria',32,38,[...base(),it('Bacon',30),it('Ovo',1),it('Alface',1),it('Tomate',2),it('Cebola',1)]),
+    bat,
+    P('Marmita P (frango)','almoco',18,22,[it('Arroz',150),it('Feijão',100),it('Frango',150),it('Batata (kg)',100),it('Alface',1),it('Óleo',20),it('Marmitex',1),it('Kit talher',1)]),
+    P('Marmita G (bife)','almoco',25,30,[it('Arroz',250),it('Feijão',150),it('Bife',180),it('Batata (kg)',150),it('Alface',1),it('Óleo',30),it('Marmitex',1),it('Kit talher',1)]),
+    P('Prato feito no local','almoco',22,0,[it('Arroz',200),it('Feijão',120),it('Bife',160),it('Batata (kg)',120),it('Alface',1),it('Tomate',2),it('Óleo',25)]),
+  ];
+  const revenda = [
+    {id:uid(), nome:'Refrigerante lata 350ml', custo:3.2, preco:6},
+    {id:uid(), nome:'Refrigerante 2L', custo:7.5, preco:14},
+    {id:uid(), nome:'Água 500ml', custo:1.2, preco:4},
+  ];
+  produtos.push({id:uid(), nome:'Combo X-Burguer', setor:'combo', preco:34, precoApp:40, itens:[], comp:[{tipo:'prod', id:xb.id, qtd:1},{tipo:'prod', id:bat.id, qtd:1},{tipo:'rev', id:revenda[0].id, qtd:1}]});
+  const apps = [
+    {id:'app_ifood', nome:'iFood', comissao:12, taxaPag:3.2, quemEntrega:'loja', freteGratis:false, frete:6},
+    {id:'app_99', nome:'99Food', comissao:10, taxaPag:3.2, quemEntrega:'app', freteGratis:true, frete:6},
+  ];
+  const turnos = [
+    {id:uid(), nome:'Almoço', minimo:60, porEntrega:8},
+    {id:uid(), nome:'Noite (até 23h30)', minimo:80, porEntrega:10},
+  ];
+  const funcs = [
+    {id:uid(), nome:'João (exemplo)', tipo:'entregador', diaria:0, ativo:true, escala:{dias:[0,1,2,3,4,5,6], turno:turnos[1].id}},
+    {id:uid(), nome:'Pedro (exemplo)', tipo:'entregador', diaria:0, ativo:true, escala:{dias:[1,2,3,4,5], turno:turnos[0].id}},
+    {id:uid(), nome:'Maria – cozinha (exemplo)', tipo:'fixo', diaria:70, ativo:true, escala:{dias:[0,1,2,3,4,5,6], turno:turnos[1].id}},
+    {id:uid(), nome:'Lucas (saiu – exemplo)', tipo:'entregador', diaria:0, ativo:false, escala:{dias:[5,6], turno:turnos[1].id}},
+  ];
+  let seed = 11; const rnd = (a, b) => { seed = (seed * 16807) % 2147483647; return a + (seed % (b - a + 1)); };
+  const diarias = [], faltas = [], vendas = {};
+  const baseMes = {}; [380,320,170,260,300,300,220,110,180].forEach((q, i) => baseMes[produtos[i].id] = q);
+  [520,120,160].forEach((q, i) => baseMes[revenda[i].id] = q);
+  const canaisEx = [['balcao',.40],['propria',.30],['app_ifood',.22],['app_99',.08]];
+  const faltasPedro = new Set([3, 6, 10]);
+  [-2, -1, 0].forEach(off => {
+    const ym = addMes(mesHoje, off), dm = diasMes(ym), ate = off === 0 ? hoje.getDate() : dm;
+    for (let d = 1; d <= ate; d++) {
+      const data = `${ym}-${pad(d)}`, dw = dow(data);
+      const L = (f, t, e) => { const tr = turnos[t], fu = funcs[f]; const valor = fu.tipo === 'fixo' ? fu.diaria : Math.max(tr.minimo, e * tr.porEntrega); diarias.push({id:uid(), data, func:fu.id, turno:tr.id, entregas:e, valor}); };
+      L(0, 1, rnd(5, 15));
+      L(2, 1, 0);
+      if (dw >= 1 && dw <= 5) {
+        if (off === 0 && faltasPedro.has(d)) faltas.push({id:uid(), data, func:funcs[1].id, turno:turnos[0].id});
+        else L(1, 0, rnd(4, 10));
+      }
+      if ((dw === 5 || dw === 6) && off < 0) L(3, 1, rnd(6, 14));
+      // vendas do dia
+      const fds = (dw === 5 || dw === 6) ? 1.4 : (dw === 0 ? 1.1 : 0.85);
+      const dia = {};
+      canaisEx.forEach(([c, share]) => {
+        const v = {}; let pedidos = 0;
+        Object.entries(baseMes).forEach(([id, q]) => {
+          const prod = byId(produtos, id);
+          if (prod && prod.setor === 'almoco' && (dw === 0 || dw === 6)) return;
+          if (prod && prod.setor === 'almoco' && c === 'app_99') return;
+          const qt = Math.round(q / 30 * share * fds * (0.6 + rnd(0, 80) / 100));
+          if (qt > 0) { v[id] = qt; if (prod) pedidos += qt; }
+        });
+        if (c !== 'balcao') v._pedidos = Math.round(pedidos * 0.75);
+        dia[c] = v;
+      });
+      vendas[data] = dia;
+    }
+  });
+  return {
+    loja:'Novo Sabor',
+    config:{taxa:3.5, margem:30, vendasMes:1900, taxaEntrega:0, custoEntrega:9, limiteFaltas:2, sim:1900},
+    apps, ingredientes:ing, produtos, revenda,
+    gastos:[
+      {id:uid(), nome:'Aluguel', valor:1500},
+      {id:uid(), nome:'Energia', valor:450},
+      {id:uid(), nome:'Gás', valor:380},
+      {id:uid(), nome:'Água', valor:120},
+      {id:uid(), nome:'Internet', valor:100},
+      {id:uid(), nome:'MEI / contador', valor:80},
+    ],
+    turnos, funcionarios:funcs, diarias, faltas, vendas,
+    ui:{}
+  };
+}
+
+/* =================== ESTADO =================== */
+let S, CACHE = {};
+const UI_PADRAO = () => ({mes:mesHoje, dia:dataHoje, setor:'hamburgueria', painelSetor:'todos', canal:'balcao', canalDia:'balcao'});
+function valido(d){ return d && d.config && ['ingredientes','produtos','revenda','gastos','turnos','funcionarios','diarias','apps'].every(k => Array.isArray(d[k])) && d.vendas && typeof d.vendas === 'object'; }
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); if (valido(d)) return d; } } catch(e) {}
+  return exemplo();
+}
+function save(){ CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
+S = load(); prep();
+
+/* =================== CÁLCULOS =================== */
+function canais(){ return [{id:'balcao', nome:'Balcão'}, {id:'propria', nome:'Entrega própria'}, ...S.apps.map(a => ({id:a.id, nome:a.nome, app:a}))]; }
+const nomeCanal = id => (canais().find(c => c.id === id) || {nome:'?'}).nome;
+const custoUn = i => num(i.rende) > 0 ? num(i.preco) / num(i.rende) : 0;
+const totalFixos = () => S.gastos.reduce((a, g) => a + num(g.valor), 0);
+const custoItem = it => { const i = byId(S.ingredientes, it.ing); return i ? custoUn(i) * num(it.qtd) : 0; };
+const usoIng = id => S.produtos.filter(p => (p.itens || []).some(it => it.ing === id)).length;
+
+function equipeMes(ym){
+  const ls = S.diarias.filter(d => d.data.startsWith(ym));
+  const isEnt = d => { const f = byId(S.funcionarios, d.func); return f && f.tipo === 'entregador'; };
+  return {
+    ls, total: ls.reduce((a, d) => a + num(d.valor), 0),
+    entregas: ls.reduce((a, d) => a + (isEnt(d) ? num(d.entregas) : 0), 0),
+    pagoEntreg: ls.reduce((a, d) => a + (isEnt(d) ? num(d.valor) : 0), 0),
+    faltas: S.faltas.filter(f => f.data.startsWith(ym)),
+  };
+}
+function funcMensal(){
+  if (CACHE.fm) return CACHE.fm;
+  const meses = [...new Set(S.diarias.map(d => d.data.slice(0, 7)))].filter(m => m < mesHoje).sort().slice(-3);
+  let r;
+  if (meses.length) r = {valor: meses.reduce((a, m) => a + equipeMes(m).total, 0) / meses.length, fonte: 'média de ' + meses.map(m => nomeMes(m)).join(', ')};
+  else { const eq = equipeMes(mesHoje); r = eq.total > 0 ? {valor: eq.total / hoje.getDate() * diasMes(mesHoje), fonte:'previsão pelo que já foi lançado este mês'} : {valor:0, fonte:'ainda sem lançamentos'}; }
+  return CACHE.fm = r;
+}
+function qtdMes(ym){
+  let q = 0; Object.entries(S.vendas).forEach(([d, dia]) => { if (!d.startsWith(ym)) return; Object.values(dia).forEach(c => Object.entries(c).forEach(([id, v]) => { if (id !== '_pedidos' && byId(S.produtos, id)) q += num(v); })); });
+  return q;
+}
+function vendasMes(){
+  if (CACHE.vm) return CACHE.vm;
+  const meses = [...new Set(Object.keys(S.vendas).map(d => d.slice(0, 7)))].filter(m => m < mesHoje).sort().slice(-3);
+  let r;
+  if (meses.length) r = {valor: meses.reduce((a, m) => a + qtdMes(m), 0) / meses.length, fonte: 'média real de ' + meses.map(m => nomeMes(m)).join(', ')};
+  else { const q = qtdMes(mesHoje); r = q > 0 ? {valor: q / hoje.getDate() * diasMes(mesHoje), fonte:'previsão pelo que já foi lançado este mês'} : {valor: num(S.config.vendasMes), fonte:'estimativa (ainda sem lançamentos)'}; }
+  return CACHE.vm = r;
+}
+const contasMes = () => totalFixos() + funcMensal().valor;
+const fixoPorVenda = () => { if (CACHE.fpv == null) { const v = vendasMes().valor; CACHE.fpv = v > 0 ? contasMes() / v : 0; } return CACHE.fpv; };
+
+function base(p){
+  let ing = 0, emb = 0;
+  if (p.setor === 'combo') {
+    (p.comp || []).forEach(c => {
+      const q = num(c.qtd);
+      if (c.tipo === 'rev') { const r = byId(S.revenda, c.id); if (r) ing += num(r.custo) * q; }
+      else { const pp = byId(S.produtos, c.id); if (pp && pp.setor !== 'combo') { const b = base(pp); ing += b.ing * q; emb += b.emb * q; } }
+    });
+  } else (p.itens || []).forEach(it => { const i = byId(S.ingredientes, it.ing); if (!i) return; const v = custoUn(i) * num(it.qtd); if (i.cat === 'embalagem') emb += v; else ing += v; });
+  return {ing, emb};
+}
+function precoSeparado(p){
+  return (p.comp || []).reduce((a, c) => { const x = c.tipo === 'rev' ? byId(S.revenda, c.id) : byId(S.produtos, c.id); return a + (x ? num(x.preco) * num(c.qtd) : 0); }, 0);
+}
+// entrega por pedido no canal (positivo = custo, negativo = sobra)
+function entregaPedido(canal){
+  const app = byId(S.apps, canal);
+  if (canal === 'propria') return {v: num(S.config.custoEntrega) - num(S.config.taxaEntrega), txt: num(S.config.taxaEntrega) > 0 ? `Entrega (paga ${fmt(num(S.config.custoEntrega))} ao entregador, cliente paga ${fmt(num(S.config.taxaEntrega))})` : `Entrega (paga ${fmt(num(S.config.custoEntrega))} ao entregador, cliente não paga)`};
+  if (!app) return {v:0, txt:''};
+  if (app.quemEntrega === 'loja') return app.freteGratis ? {v: num(S.config.custoEntrega), txt:'Entrega com frete grátis (paga o entregador)'} : {v: num(S.config.custoEntrega) - num(app.frete), txt:`Entrega (paga ${fmt(num(S.config.custoEntrega))} ao entregador, cliente paga ${fmt(num(app.frete))})`};
+  return app.freteGratis ? {v: num(app.frete), txt:`Frete grátis (a loja paga ${fmt(num(app.frete))} ao app)`} : {v:0, txt:''};
+}
+// calc de um item num canal. vendas=true: sem entrega e sem contas (usado na soma do mês)
+function calc(p, canal, vendas){
+  const b = base(p), app = byId(S.apps, canal);
+  const preco = app ? (num(p.precoApp) || num(p.preco)) : num(p.preco);
+  const pctTaxa = app ? num(app.comissao) + num(app.taxaPag) : num(S.config.taxa);
+  const taxa = preco * pctTaxa / 100;
+  const ent = vendas ? {v:0, txt:''} : entregaPedido(canal);
+  const fixo = vendas ? 0 : fixoPorVenda();
+  const total = b.ing + b.emb + taxa + ent.v + fixo, lucro = preco - total, margem = preco > 0 ? lucro / preco * 100 : 0;
+  const div = 1 - pctTaxa / 100 - num(S.config.margem) / 100;
+  const sugerido = div > 0 ? (b.ing + b.emb + ent.v + fixo) / div : 0;
+  return {preco, ing:b.ing, emb:b.emb, taxa, pctTaxa, app, ent, fixo, total, lucro, margem, sugerido, contrib: preco - b.ing - b.emb - taxa - ent.v};
+}
+function calcRev(r, canal){
+  const app = byId(S.apps, canal), preco = num(r.preco), pctTaxa = app ? num(app.comissao) + num(app.taxaPag) : num(S.config.taxa);
+  const taxa = preco * pctTaxa / 100, lucro = preco - num(r.custo) - taxa;
+  return {preco, custo:num(r.custo), taxa, lucro, contrib:lucro, margem: preco > 0 ? lucro / preco * 100 : 0};
+}
+function pagar(funcId, turnoId, entregas){
+  const f = byId(S.funcionarios, funcId); if (!f) return 0;
+  if (f.tipo === 'fixo') return num(f.diaria);
+  const t = byId(S.turnos, turnoId); if (!t) return 0;
+  return Math.max(num(t.minimo), num(entregas) * num(t.porEntrega));
+}
+// resultado de um dia (todas as vendas lançadas)
+function resultadoDia(data){
+  const dia = S.vendas[data] || {}; let fat = 0, contrib = 0, itens = 0;
+  const porCanal = {}, porItem = {};
+  Object.entries(dia).forEach(([canal, v]) => {
+    const app = byId(S.apps, canal); let cf = 0, cc = 0;
+    Object.entries(v).forEach(([id, q]) => {
+      if (id === '_pedidos') return; q = num(q); if (!q) return;
+      const p = byId(S.produtos, id), r = p ? null : byId(S.revenda, id); if (!p && !r) return;
+      const c = p ? calc(p, canal, true) : calcRev(r, canal);
+      cf += q * c.preco; cc += q * c.contrib; if (p) itens += q;
+      const pi = porItem[id] = porItem[id] || {q:0, fat:0, lucro:0}; pi.q += q; pi.fat += q * c.preco; pi.lucro += q * c.contrib;
+    });
+    const ped = num(v._pedidos);
+    if (canal === 'propria') { cf += ped * num(S.config.taxaEntrega); cc += ped * num(S.config.taxaEntrega); }
+    else if (app) {
+      if (app.quemEntrega === 'loja' && !app.freteGratis) { cf += ped * num(app.frete); cc += ped * num(app.frete); }
+      if (app.quemEntrega === 'app' && app.freteGratis) cc -= ped * num(app.frete);
+    }
+    porCanal[canal] = {fat:cf, contrib:cc, pedidos:ped};
+    fat += cf; contrib += cc;
+  });
+  return {fat, contrib, itens, porCanal, porItem};
+}
+function resultadoMes(ym){
+  const key = 'rm' + ym; if (CACHE[key]) return CACHE[key];
+  const dm = diasMes(ym), fixos = totalFixos(), eq = equipeMes(ym);
+  let fat = 0, contrib = 0, itens = 0; const porCanal = {}, porItem = {}, porDia = [];
+  for (let d = 1; d <= dm; d++) {
+    const data = `${ym}-${pad(d)}`, r = resultadoDia(data);
+    fat += r.fat; contrib += r.contrib; itens += r.itens;
+    Object.entries(r.porCanal).forEach(([c, x]) => { const pc = porCanal[c] = porCanal[c] || {fat:0, contrib:0}; pc.fat += x.fat; pc.contrib += x.contrib; });
+    Object.entries(r.porItem).forEach(([id, x]) => { const pi = porItem[id] = porItem[id] || {q:0, fat:0, lucro:0}; pi.q += x.q; pi.fat += x.fat; pi.lucro += x.lucro; });
+    const func = eq.ls.filter(x => x.data === data).reduce((a, x) => a + num(x.valor), 0);
+    porDia.push({d, data, fat:r.fat, contrib:r.contrib, func, temVenda: !!S.vendas[data]});
+  }
+  const fixosM = ym === mesHoje ? fixos * hoje.getDate() / dm : (ym > mesHoje ? 0 : fixos);
+  const func = eq.total, lucro = contrib - fixosM - func;
+  return CACHE[key] = {fat, contrib, custos: fat - contrib, fixos:fixosM, fixosCheio:fixos, func, lucro, itens, porCanal, porItem, porDia, temDados: fat > 0};
+}
+
+/* =================== NAVEGAÇÃO =================== */
+const GRUPOS = [
+  ['gestao','Gestão',[['painel','Painel'],['vendas','Vendas do dia'],['equipe','Funcionários'],['gastos','Gastos do mês'],['bebidas','Bebidas'],['ajustes','Ajustes']]],
+  ['ficha','Ficha técnica',[['cardapio','Cardápio'],['ingredientes','Ingredientes']]],
+];
+const ABAS = GRUPOS.flatMap(g => g[2].map(t => t[0]));
+const grupoDe = a => GRUPOS.find(g => g[2].some(t => t[0] === a))[0];
+let aba = ABAS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'painel';
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (ABAS.includes(h)) { aba = h; render(); } });
+const main = document.getElementById('main');
+function render(){
+  prep();
+  document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
+  document.getElementById('nav').innerHTML = GRUPOS.map(([gk, gn, abas]) => { const on = grupoDe(aba) === gk; return `<button class="gbtn ${on ? 'on' : ''}" data-tab="${abas[0][0]}">${gn} ${on ? '▾' : '▸'}</button>` + (on ? abas.map(([k, n]) => `<button class="${k === aba ? 'on' : ''}" data-tab="${k}">${n}</button>`).join('') : ''); }).join('<span class="sep"></span>');
+  main.innerHTML = ({painel:rPainel, cardapio:rCardapio, ingredientes:rIngredientes, bebidas:rBebidas, equipe:rEquipe, gastos:rGastos, vendas:rVendas, ajustes:rAjustes})[aba]();
+  if (aba === 'equipe') prevLanc();
+}
+document.getElementById('nav').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  aba = b.dataset.tab; try { history.replaceState(null, '', '#' + aba); } catch(_) { location.hash = aba; }
+  render(); window.scrollTo(0, 0);
+});
+const mesPicker = () => `<label class="f" style="width:190px">Mês<input type="month" data-k="mes" value="${S.ui.mes}"></label>`;
+const chipsCanal = (sel, act) => canais().map(c => `<button class="chip ${sel === c.id ? 'on' : ''}" data-act="${act}" data-v="${c.id}">${esc(c.nome)}</button>`).join('');
+
+/* =================== PAINEL =================== */
+function rPainel(){
+  const ps = S.ui.painelSetor, canal = S.ui.canal;
+  const todos = S.produtos.map(p => ({p, c:calc(p, canal)}));
+  const ls = todos.filter(x => ps === 'todos' || x.p.setor === ps);
+  const naoCombo = todos.filter(x => x.p.setor !== 'combo');
+  const contrib = naoCombo.length ? naoCombo.reduce((a, x) => a + x.c.contrib, 0) / naoCombo.length : 0;
+  const equil = contrib > 0 ? Math.ceil(contasMes() / contrib) : 0;
+  const best = [...todos].sort((a, b) => b.c.lucro - a.c.lucro)[0];
+  const gmax = Math.max(1, ...ls.map(x => Math.max(x.c.preco, x.c.total)));
+  const atual = resultadoMes(mesHoje);
+  const mediaCanal = canais().map(cn => { const cs = S.produtos.filter(p => p.setor !== 'combo').map(p => calc(p, cn.id)); return {cn, lucro: cs.length ? cs.reduce((a, c) => a + c.lucro, 0) / cs.length : 0, margem: cs.length ? cs.reduce((a, c) => a + c.margem, 0) / cs.length : 0}; });
+
+  const barras = ls.map(({p, c}) => {
+    const tot = Math.max(c.preco, c.total) || 1;
+    const seg = (v, cor, nome) => v > 0 ? `<span style="width:${v / tot * 100}%;background:${cor}" title="${nome}: ${fmt(v)}"></span>` : '';
+    return `<div class="lb">
+      <div class="lbh"><b>${esc(p.nome)}<span class="tag">${SETORES[p.setor]}</span></b><span>Vende por ${fmt(c.preco)} · ${c.lucro >= 0 ? 'sobra' : 'prejuízo de'} <b class="${c.lucro >= 0 ? 'pos' : 'neg'}">${fmt(Math.abs(c.lucro))}</b> (${pct(c.margem)})</span></div>
+      <div class="bar" style="width:${tot / gmax * 100}%">
+        ${seg(c.ing,'var(--c-ing)', p.setor === 'combo' ? 'Itens do combo' : 'Ingredientes')}${seg(c.emb,'var(--c-emb)','Embalagem')}${seg(c.taxa,'var(--c-taxa)', c.app ? 'Taxas do app' : 'Taxa da maquininha')}${seg(c.ent.v,'var(--c-ent)','Entrega / frete')}${seg(c.fixo,'var(--c-fixo)','Contas do mês')}${seg(c.lucro,'var(--c-lucro)','Lucro')}
+      </div></div>`;
+  }).join('');
+
+  return `
+  <div class="kpis">
+    <div class="card kpi"><div class="l">Contas do mês</div><div class="v">${fmt(contasMes())}</div><div class="s">${fmt(totalFixos())} fixas + ${fmt(funcMensal().valor)} funcionários</div></div>
+    <div class="card kpi"><div class="l">Cada venda paga de contas</div><div class="v">${fmt(fixoPorVenda())}</div><div class="s">contas ÷ ${int(vendasMes().valor)} vendas por mês</div></div>
+    <div class="card kpi"><div class="l">${nomeMes(mesHoje, true)} até agora</div><div class="v ${atual.lucro >= 0 ? 'pos' : 'neg'}">${atual.temDados ? fmt(atual.lucro) : '—'}</div><div class="s">${atual.temDados ? 'de lucro · faturou ' + fmt(atual.fat) : 'lance as vendas em "Vendas do dia"'}</div></div>
+    <div class="card kpi"><div class="l">Mais lucrativo (${esc(nomeCanal(canal))})</div><div class="v" style="font-size:19px">${best ? esc(best.p.nome) : '—'}</div><div class="s">${best ? fmt(best.c.lucro) + ' em cada' : ''}</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Quanto sobra em cada canal</h2>
+    <div class="sub">Média dos lanches e pratos (sem combos), já com as contas do mês. Clique para ver no gráfico.</div>
+    <div class="boxes">${mediaCanal.map(x => `<button class="cbox ${x.cn.id === canal ? 'on' : ''}" data-act="canal" data-v="${x.cn.id}"><div class="n">${esc(x.cn.nome)}</div><div class="v ${x.lucro >= 0 ? 'pos' : 'neg'}">${fmt(x.lucro)}</div><div class="p">${pct(x.margem)} por item</div></button>`).join('')}</div>
+  </div>
+
+  <div class="card">
+    <h2>Para onde vai o dinheiro de cada item</h2>
+    <div class="sub">Passe o dedo ou o mouse nas cores para ver os valores.</div>
+    <div class="chips" style="margin-top:12px"><span class="lbl">Canal:</span>${chipsCanal(canal, 'canal')}</div>
+    <div class="chips"><span class="lbl">Setor:</span>${[['todos','Tudo'],...Object.entries(SETORES)].map(([k, n]) => `<button class="chip ${ps === k ? 'on' : ''}" data-act="painelSetor" data-v="${k}">${n}</button>`).join('')}</div>
+    <div class="legenda">
+      <span><i style="background:var(--c-ing)"></i>Ingredientes</span><span><i style="background:var(--c-emb)"></i>Embalagem</span>
+      <span><i style="background:var(--c-taxa)"></i>Taxas (maquininha ou app)</span><span><i style="background:var(--c-ent)"></i>Entrega / frete</span>
+      <span><i style="background:var(--c-fixo)"></i>Contas do mês</span><span><i style="background:var(--c-lucro)"></i>Lucro</span>
+    </div>
+    ${barras || '<div class="vazio">Nada cadastrado aqui ainda.</div>'}
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Ponto de equilíbrio</h2>
+      <div class="sub">Quantas vendas por mês só para pagar as contas (fixas + funcionários), no canal ${esc(nomeCanal(canal))}.</div>
+      <div class="kpi"><div class="v">${equil ? int(equil) + ' vendas' : '—'}</div>
+      <div class="s">Cada venda deixa em média ${fmt(contrib)} depois de ingredientes, embalagem, taxas e entrega.</div></div>
+    </div>
+    <div class="card">
+      <h2>Simulador do mês</h2>
+      <div class="sub">E se vender essa quantidade (lanches + pratos) no canal ${esc(nomeCanal(canal))}?</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+        <input style="width:120px" inputmode="numeric" data-k="cfg" data-f="sim" data-num="1" value="${nv(S.config.sim)}"> <span class="sub">vendas</span>
+      </div>
+      <div class="kpi" id="simres" style="margin-top:10px">${simTexto(contrib)}</div>
+    </div>
+  </div>`;
+}
+function simTexto(contrib){
+  const sobra = num(S.config.sim) * contrib - contasMes();
+  return `<div class="v ${sobra >= 0 ? 'pos' : 'neg'}">${sobra >= 0 ? 'Sobra ' : 'Falta '}${fmt(Math.abs(sobra))}</div><div class="s">no fim do mês, já pagando as contas (sem bebidas)</div>`;
+}
+function refreshSim(){
+  const cs = S.produtos.filter(p => p.setor !== 'combo').map(p => calc(p, S.ui.canal));
+  const contrib = cs.length ? cs.reduce((a, c) => a + c.contrib, 0) / cs.length : 0;
+  const el = document.getElementById('simres'); if (el) el.innerHTML = simTexto(contrib);
+}
+
+/* =================== CARDÁPIO =================== */
+function opcoesIng(sel){
+  const grp = (emb, nome) => { const it = S.ingredientes.filter(i => (i.cat === 'embalagem') === emb); return it.length ? `<optgroup label="${nome}">${it.map(i => `<option value="${i.id}" ${i.id === sel ? 'selected' : ''}>${esc(i.nome)}</option>`).join('')}</optgroup>` : ''; };
+  return (byId(S.ingredientes, sel) ? '' : '<option value="">Escolha...</option>') + grp(false, 'Ingredientes') + grp(true, 'Embalagens');
+}
+function opcoesComp(c){
+  const val = c.tipo + ':' + c.id;
+  const op = (t, x) => `<option value="${t}:${x.id}" ${val === t + ':' + x.id ? 'selected' : ''}>${esc(x.nome)} (${fmt(num(x.preco))})</option>`;
+  const prods = s => S.produtos.filter(p => p.setor === s);
+  return `${(byId(S.produtos, c.id) || byId(S.revenda, c.id)) ? '' : '<option value="">Escolha...</option>'}
+    <optgroup label="Hamburgueria">${prods('hamburgueria').map(p => op('prod', p)).join('')}</optgroup>
+    <optgroup label="Almoço">${prods('almoco').map(p => op('prod', p)).join('')}</optgroup>
+    <optgroup label="Bebidas">${S.revenda.map(r => op('rev', r)).join('')}</optgroup>`;
+}
+function linhaItem(p, it, idx){
+  const i = byId(S.ingredientes, it.ing);
+  return `<div class="item">
+    <select data-k="item" data-id="${p.id}" data-idx="${idx}" data-f="ing">${opcoesIng(it.ing)}</select>
+    <input class="q" inputmode="decimal" data-k="item" data-id="${p.id}" data-idx="${idx}" data-f="qtd" data-num="1" value="${nv(it.qtd)}">
+    <span class="un">${i ? esc(i.unidade) : ''}</span>
+    <span class="lc" id="lc-${p.id}-${idx}">${fmt(custoItem(it))}</span>
+    <button class="btn x del" data-act="rmItem" data-id="${p.id}" data-idx="${idx}" title="Tirar">✕</button>
+  </div>`;
+}
+function custoComp(c){
+  if (c.tipo === 'rev') { const r = byId(S.revenda, c.id); return r ? num(r.custo) * num(c.qtd) : 0; }
+  const p = byId(S.produtos, c.id); if (!p) return 0; const b = base(p); return (b.ing + b.emb) * num(c.qtd);
+}
+function linhaComp(p, c, idx){
+  return `<div class="item">
+    <select data-k="comp" data-id="${p.id}" data-idx="${idx}" data-f="sel">${opcoesComp(c)}</select>
+    <input class="q" inputmode="decimal" data-k="comp" data-id="${p.id}" data-idx="${idx}" data-f="qtd" data-num="1" value="${nv(c.qtd)}">
+    <span class="un">un</span>
+    <span class="lc" id="lc-${p.id}-${idx}" title="Custo">${fmt(custoComp(c))}</span>
+    <button class="btn x del" data-act="rmComp" data-id="${p.id}" data-idx="${idx}" title="Tirar">✕</button>
+  </div>`;
+}
+function calcHTML(p){
+  const canal = S.ui.canal, c = calc(p, canal);
+  const boxes = canais().map(cn => { const x = calc(p, cn.id); return `<button class="cbox ${cn.id === canal ? 'on' : ''}" data-act="canal" data-v="${cn.id}"><div class="n">${esc(cn.nome)}</div><div class="v ${x.lucro >= 0 ? 'pos' : 'neg'}">${fmt(x.lucro)}</div><div class="p">vende ${fmt(x.preco)} · ${pct(x.margem)}</div></button>`; }).join('');
+  const r = (cor, nome, v) => `<div class="r"><span><i style="background:${cor}"></i>${nome}</span><span>${fmt(v)}</span></div>`;
+  const dif = c.sugerido - c.preco;
+  let combo = '';
+  if (p.setor === 'combo') { const sep = precoSeparado(p), desc = sep - num(p.preco); combo = `<div class="sug" style="margin-top:0;margin-bottom:8px">Separado, sairia <b>${fmt(sep)}</b>. No combo: <b>${fmt(num(p.preco))}</b> → desconto de ${fmt(desc)} (${pct(sep > 0 ? desc / sep * 100 : 0)}).</div>`; }
+  return `
+    <div class="boxes">${boxes}</div>
+    <div class="resumo">
+      <div class="ttl">Detalhe: ${esc(nomeCanal(canal))}</div>
+      ${combo}
+      ${r('var(--c-ing)', p.setor === 'combo' ? 'Itens do combo' : 'Ingredientes', c.ing)}
+      ${r('var(--c-emb)','Embalagem',c.emb)}
+      ${r('var(--c-taxa)', c.app ? `Taxas do ${esc(c.app.nome)} (${pct(c.pctTaxa)})` : `Taxa da maquininha (${pct(c.pctTaxa)})`, c.taxa)}
+      ${c.ent.txt ? r('var(--c-ent)', c.ent.txt, c.ent.v) : ''}
+      ${r('var(--c-fixo)','Contas do mês (parte deste item)',c.fixo)}
+      <div class="r tot"><span>Custo total</span><span>${fmt(c.total)}</span></div>
+      <div class="r big"><span>${c.lucro >= 0 ? 'Lucro em cada' : 'Prejuízo em cada'} (vendendo a ${fmt(c.preco)})</span><span class="${c.lucro >= 0 ? 'pos' : 'neg'}"><b>${fmt(Math.abs(c.lucro))}</b> (${pct(c.margem)})</span></div>
+      ${c.sugerido > 0 ? `<div class="sug">Para lucrar ${pct(num(S.config.margem))} nesse canal, o preço seria <b>${fmt(c.sugerido)}</b>${Math.abs(dif) >= 0.05 ? (dif > 0 ? ` (${fmt(dif)} a mais que hoje)` : ` (hoje já está ${fmt(-dif)} acima)`) : ''}.</div>` : ''}
+    </div>`;
+}
+function rCardapio(){
+  const st = S.ui.setor, lista = S.produtos.filter(p => p.setor === st);
+  const novo = {hamburgueria:'lanche', almoco:'prato', combo:'combo'}[st];
+  return `
+  <div class="top"><div><h2>Cardápio</h2><div class="sub">Monte cada item com o que vai dentro. O custo e o lucro em cada canal saem sozinhos.</div></div>
+    <button class="btn pri" data-act="addProd">+ Novo ${novo}</button></div>
+  <div class="chips">${Object.entries(SETORES).map(([k, n]) => `<button class="chip ${st === k ? 'on' : ''}" data-act="setor" data-v="${k}">${n} (${S.produtos.filter(p => p.setor === k).length})</button>`).join('')}</div>
+  <div class="dica">${st === 'combo' ? 'Um combo junta itens do cardápio e bebidas com um preço menor. O site mostra quanto de desconto ela está dando e quanto ainda sobra.' : 'Item parecido com outro? Clique em <b>Duplicar</b> e só troque o que muda.'} Os quadradinhos mostram quanto sobra em cada canal. Clique em um para ver o detalhe.</div>
+  ${lista.length ? lista.map(p => `
+    <div class="card">
+      <div class="lh">
+        <label class="f" style="flex:2 1 220px">Nome<input class="nome" data-k="prod" data-id="${p.id}" data-f="nome" value="${esc(p.nome)}"></label>
+        ${p.setor !== 'combo' ? `<label class="f" style="flex:0 1 140px">Setor<select data-k="prod" data-id="${p.id}" data-f="setor">${['hamburgueria','almoco'].map(k => `<option value="${k}" ${p.setor === k ? 'selected' : ''}>${SETORES[k]}</option>`).join('')}</select></label>` : ''}
+        <label class="f" style="flex:0 1 120px">Preço (R$)<input inputmode="decimal" data-k="prod" data-id="${p.id}" data-f="preco" data-num="1" value="${nv(p.preco)}"></label>
+        <label class="f" style="flex:0 1 120px">Preço nos apps<input inputmode="decimal" data-k="prod" data-id="${p.id}" data-f="precoApp" data-num="1" value="${nv(p.precoApp || 0)}"></label>
+        <button class="btn" data-act="dupProd" data-id="${p.id}">Duplicar</button>
+        <button class="btn del" data-act="delProd" data-id="${p.id}">Excluir</button>
+      </div>
+      ${p.setor === 'combo' ? `
+        <div class="sub" style="margin-bottom:8px">O que vem no combo:</div>
+        ${(p.comp || []).map((c, idx) => linhaComp(p, c, idx)).join('')}
+        <button class="btn" data-act="addComp" data-id="${p.id}">+ Adicionar item ao combo</button>` : `
+        <div class="sub" style="margin-bottom:8px">O que vai e quanto:</div>
+        ${p.itens.map((it, idx) => linhaItem(p, it, idx)).join('')}
+        <button class="btn" data-act="addItem" data-id="${p.id}">+ Adicionar ingrediente ou embalagem</button>`}
+      <div id="calc-${p.id}">${calcHTML(p)}</div>
+    </div>`).join('') : '<div class="card vazio">Nada aqui ainda.</div>'}
+  <div class="sub">"Preço nos apps": se deixar 0, usa o mesmo preço do balcão.</div>`;
+}
+function refreshCalc(p){ const el = document.getElementById('calc-' + p.id); if (el) el.innerHTML = calcHTML(p); }
+
+/* =================== INGREDIENTES =================== */
+function custoTexto(i){ const u = usoIng(i.id); return `${fmtUn(custoUn(i))} por ${esc(i.unidade || 'unidade')} <span class="sub" style="font-weight:400">· em ${u} ite${u === 1 ? 'm' : 'ns'}</span>`; }
+function rIngredientes(){
+  const bloco = (cat, titulo, desc) => {
+    const lista = S.ingredientes.filter(i => (i.cat === 'embalagem') === (cat === 'embalagem'));
+    return `<div class="card"><div class="top" style="margin-top:0"><div><h2>${titulo}</h2><div class="sub">${desc}</div></div>
+      <button class="btn pri" data-act="addIng" data-cat="${cat}">+ Adicionar</button></div>
+      ${lista.length ? lista.map(i => `
+      <div class="linha">
+        <label class="f" style="flex:2 1 220px">Nome (como compra)<input data-k="ing" data-id="${i.id}" data-f="nome" value="${esc(i.nome)}"></label>
+        <label class="f" style="flex:0 1 120px">Preço pago (R$)<input inputmode="decimal" data-k="ing" data-id="${i.id}" data-f="preco" data-num="1" value="${nv(i.preco)}"></label>
+        <label class="f" style="flex:0 1 100px">Rende<input inputmode="decimal" data-k="ing" data-id="${i.id}" data-f="rende" data-num="1" value="${nv(i.rende)}"></label>
+        <label class="f" style="flex:0 1 100px">Unidade<input data-k="ing" data-id="${i.id}" data-f="unidade" value="${esc(i.unidade)}" placeholder="un, g, fatia"></label>
+        <label class="f" style="flex:0 1 130px">Tipo<select data-k="ing" data-id="${i.id}" data-f="cat">
+          <option value="ingrediente" ${i.cat !== 'embalagem' ? 'selected' : ''}>Ingrediente</option>
+          <option value="embalagem" ${i.cat === 'embalagem' ? 'selected' : ''}>Embalagem</option></select></label>
+        <div class="f" style="flex:1 1 150px">Custo de cada<div class="calcv" id="ic-${i.id}">${custoTexto(i)}</div></div>
+        <button class="btn del" data-act="delIng" data-id="${i.id}">Excluir</button>
+      </div>`).join('') : '<div class="vazio">Nada cadastrado.</div>'}
+    </div>`;
+  };
+  return `
+  <div class="top"><div><h2>Ingredientes e embalagens</h2><div class="sub">Cadastre uma vez. Quando o preço mudar, troque aqui e <b>todo o cardápio se atualiza</b>.</div></div></div>
+  <div class="dica">Exemplos: pacote de pão R$ 12 rende 12 <b>un</b> · carne R$ 40 o kg rende 1000 <b>g</b> · pé de alface R$ 4 rende uns 20 <b>porção</b> (pode ser estimativa).</div>
+  ${bloco('ingrediente','Ingredientes','O que vai dentro dos lanches e pratos.')}
+  ${bloco('embalagem','Embalagens','Caixa, marmitex, sachê, guardanapo, talher, saquinho...')}`;
+}
+
+/* =================== BEBIDAS =================== */
+function revTexto(r){ return canais().filter(c => c.id !== 'propria').map(c => { const x = calcRev(r, c.id); return `<span style="margin-right:12px;white-space:nowrap"><span class="sub" style="font-weight:400">${esc(c.nome)}:</span> <span class="${x.lucro >= 0 ? 'pos' : 'neg'}">${fmt(x.lucro)}</span></span>`; }).join(''); }
+function rBebidas(){
+  return `
+  <div class="top"><div><h2>Bebidas e revenda</h2><div class="sub">O que ela compra pronto e revende. O lucro já desconta a taxa de cada canal.</div></div>
+    <button class="btn pri" data-act="addRev">+ Adicionar</button></div>
+  <div class="card">${S.revenda.length ? S.revenda.map(r => `
+    <div class="linha">
+      <label class="f" style="flex:2 1 200px">Produto<input data-k="rev" data-id="${r.id}" data-f="nome" value="${esc(r.nome)}"></label>
+      <label class="f" style="flex:0 1 120px">Paga (R$ cada)<input inputmode="decimal" data-k="rev" data-id="${r.id}" data-f="custo" data-num="1" value="${nv(r.custo)}"></label>
+      <label class="f" style="flex:0 1 120px">Vende (R$)<input inputmode="decimal" data-k="rev" data-id="${r.id}" data-f="preco" data-num="1" value="${nv(r.preco)}"></label>
+      <div class="f" style="flex:1 1 260px">Lucro em cada<div class="calcv" id="rv-${r.id}">${revTexto(r)}</div></div>
+      <button class="btn del" data-act="delRev" data-id="${r.id}">Excluir</button>
+    </div>`).join('') : '<div class="vazio">Nenhum produto ainda.</div>'}</div>`;
+}
+
+/* =================== FUNCIONÁRIOS =================== */
+const ativos = () => S.funcionarios.filter(f => f.ativo !== false);
+function escalado(f, data){
+  const e = f.escala; if (f.ativo === false || !e || !(e.dias || []).includes(dow(data))) return false;
+  if (e.ini && data < e.ini) return false; if (e.fim && data > e.fim) return false;
+  return true;
+}
+function previstoMes(f, ym){
+  const ate = ym === mesHoje ? hoje.getDate() : (ym < mesHoje ? diasMes(ym) : 0);
+  let n = 0; for (let d = 1; d <= ate; d++) if (escalado(f, `${ym}-${pad(d)}`)) n++;
+  return n;
+}
+function statusDia(f, data){
+  if (S.diarias.some(x => x.func === f.id && x.data === data)) return escalado(f, data) ? 'ok' : 'extra';
+  if (S.faltas.some(x => x.func === f.id && x.data === data)) return 'falta';
+  if (escalado(f, data)) return data < dataHoje ? 'pend' : 'esc';
+  return null;
+}
+const ST_NOME = {ok:'trabalhou', extra:'trabalhou (fora da escala)', falta:'faltou', pend:'não lançado', esc:'na escala'};
+const curto = n => String(n).split(/[ –-]/)[0];
+function calHTML(ym){
+  const dm = diasMes(ym), first = dow(`${ym}-01`), sel = S.ui.diaEq;
+  let c = DIAS.map(x => `<div class="hd">${x}</div>`).join('');
+  for (let i = 0; i < first; i++) c += '<div class="d vz"></div>';
+  for (let d = 1; d <= dm; d++) {
+    const data = `${ym}-${pad(d)}`;
+    const pls = S.funcionarios.map(f => ({f, st:statusDia(f, data)})).filter(x => x.st).map(x => `<span class="pl ${x.st}" title="${esc(x.f.nome)}: ${ST_NOME[x.st]}">${esc(curto(x.f.nome))}</span>`).join('');
+    c += `<button class="d ${data === dataHoje ? 'hoje' : ''} ${data === sel ? 'sel' : ''}" data-act="calDia" data-v="${data}"><span class="n">${d}</span>${pls}</button>`;
+  }
+  return `<div class="cal">${c}</div>
+  <div class="legenda" style="margin-bottom:0"><span><span class="pl ok">nome</span>trabalhou</span><span><span class="pl falta">nome</span>faltou</span><span><span class="pl pend">nome</span>não lançado</span><span><span class="pl esc">nome</span>na escala</span><span><span class="pl extra">nome</span>fora da escala</span></div>`;
+}
+function diaEqHTML(data){
+  const ls = S.funcionarios.map(f => ({f, st:statusDia(f, data)})).filter(x => x.st);
+  const linhas = ls.map(({f, st}) => {
+    const lanc = S.diarias.filter(x => x.func === f.id && x.data === data), fal = S.faltas.find(x => x.func === f.id && x.data === data);
+    let acao = '';
+    if (st === 'pend' || st === 'esc') acao = `${f.tipo !== 'fixo' ? `<input id="qe-${f.id}" inputmode="numeric" placeholder="entregas" style="width:100px">` : ''}<button class="btn pri" data-act="qLancar" data-id="${f.id}" data-v="${data}">Trabalhou</button><button class="btn del" data-act="qFalta" data-id="${f.id}" data-v="${data}">Faltou</button>`;
+    else if (fal) acao = `<button class="btn" data-act="delFalta" data-id="${fal.id}">Desfazer falta</button>`;
+    else acao = lanc.map(l => `<span class="sub">${f.tipo === 'fixo' ? '' : int(l.entregas) + ' entregas · '}<b style="color:var(--txt)">${fmt(l.valor)}</b></span><button class="btn x del" data-act="delLanc" data-id="${l.id}" title="Apagar lançamento">✕</button>`).join('');
+    return `<div class="item"><span style="flex:1 1 160px">${esc(f.nome)} <span class="pl ${st}" style="display:inline-block">${ST_NOME[st]}</span></span>${acao}</div>`;
+  }).join('');
+  return `<div class="resumo"><div class="ttl">${dataBR(data)} (${DIAS_NOME[dow(data)]})</div>${linhas || '<div class="sub">Ninguém na escala neste dia.</div>'}
+    <div class="sub" style="margin-top:6px">Alguém fora da escala trabalhou? Use "Lançar dia ou falta" logo abaixo.</div></div>`;
+}
+function prevLanc(){
+  const f = document.getElementById('ld-func'), t = document.getElementById('ld-turno'), e = document.getElementById('ld-ent'), out = document.getElementById('ld-prev');
+  if (!f || !out) return;
+  const fu = byId(S.funcionarios, f.value), tu = byId(S.turnos, t.value);
+  const ehFixo = fu && fu.tipo === 'fixo';
+  document.getElementById('ld-ent-wrap').style.display = ehFixo ? 'none' : '';
+  if (!fu) { out.innerHTML = ''; return; }
+  const v = pagar(f.value, t.value, num(e.value));
+  if (ehFixo) { out.innerHTML = `Diária fixa: <b>${fmt(v)}</b>`; return; }
+  out.innerHTML = `${int(num(e.value))} × ${fmt(num(tu?.porEntrega))} = ${fmt(num(e.value) * num(tu?.porEntrega))} · mínimo ${fmt(num(tu?.minimo))} → paga <b>${fmt(v)}</b>`;
+}
+function rEquipe(){
+  const ym = S.ui.mes, eq = equipeMes(ym), lim = num(S.config.limiteFaltas);
+  const pessoas = S.funcionarios.map(f => {
+    const ls = eq.ls.filter(d => d.func === f.id), fl = eq.faltas.filter(x => x.func === f.id);
+    const dEsc = new Set(ls.filter(d => (f.escala?.dias || []).includes(dow(d.data))).map(d => d.data)).size;
+    return {f, dEsc, dias:ls.length, ent:ls.reduce((a, d) => a + num(d.entregas), 0), tot:ls.reduce((a, d) => a + num(d.valor), 0), faltas:fl.length, prev:previstoMes(f, ym)};
+  }).filter(x => x.f.ativo !== false || x.dias || x.faltas);
+  const alertas = pessoas.filter(x => lim > 0 && x.faltas >= lim && x.f.ativo !== false);
+  const dif = eq.entregas * num(S.config.taxaEntrega) - eq.pagoEntreg;
+  const lancs = [...eq.ls.map(d => ({...d, falta:false})), ...eq.faltas.map(d => ({...d, falta:true}))].sort((a, b) => b.data.localeCompare(a.data));
+  const ats = ativos(), inativos = S.funcionarios.filter(f => f.ativo === false);
+  const f0 = ats[0];
+  if (!S.ui.diaEq || !S.ui.diaEq.startsWith(ym)) S.ui.diaEq = ym === mesHoje ? dataHoje : `${ym}-01`;
+  const tEnt = num(S.config.taxaEntrega);
+  return `
+  <div class="top"><div><h2>Funcionários</h2><div class="sub">Lance cada dia trabalhado ou cada falta. O site calcula quanto pagar e avisa quem falta demais.</div></div></div>
+  ${alertas.map(x => `<div class="alerta">⚠ <b>${esc(x.f.nome)}</b> faltou <b>${x.faltas} vez${x.faltas === 1 ? '' : 'es'}</b> em ${nomeMes(ym, true)} (o limite é ${lim}). Vale conversar ou procurar outra pessoa.</div>`).join('')}
+
+  <div class="card">
+    <div class="top" style="margin-top:0"><div><h2>Escala de ${nomeMes(ym, true)}</h2><div class="sub">Clique em um dia para ver quem estava na escala e marcar se trabalhou ou faltou.</div></div>${mesPicker()}</div>
+    ${calHTML(ym)}
+    ${diaEqHTML(S.ui.diaEq)}
+  </div>
+
+  <div class="card">
+    <h2>Lançar dia ou falta</h2>
+    <div class="linha" style="padding-top:8px">
+      <label class="f" style="flex:0 1 160px">Data<input type="date" id="ld-data" value="${S.ui.diaEq}"></label>
+      <label class="f" style="flex:1 1 180px">Funcionário<select id="ld-func">${ats.map(f => `<option value="${f.id}">${esc(f.nome)}</option>`).join('')}</select></label>
+      <label class="f" style="flex:1 1 180px">Turno<select id="ld-turno">${S.turnos.map(t => `<option value="${t.id}" ${f0 && f0.escala && f0.escala.turno === t.id ? 'selected' : ''}>${esc(t.nome)}</option>`).join('')}</select></label>
+      <label class="f" style="flex:0 1 100px" id="ld-ent-wrap">Entregas<input id="ld-ent" inputmode="numeric" value="0"></label>
+      <button class="btn pri" data-act="lancar">Lançar dia</button>
+      <button class="btn del" data-act="falta">Registrar falta</button>
+    </div>
+    <div class="prev" id="ld-prev"></div>
+  </div>
+
+  <div class="card">
+    <div class="top" style="margin-top:0"><div><h2>Resumo de ${nomeMes(ym, true)}</h2><div class="sub">${eq.ls.length} dias lançados · ${eq.faltas.length} faltas</div></div></div>
+    ${pessoas.length ? `<div class="tblwrap"><table>
+      <tr><th>Funcionário</th><th class="n">Trabalhou</th><th class="n">Faltas</th><th class="n">Entregas</th><th class="n">A pagar</th></tr>
+      ${pessoas.map(x => `<tr><td>${esc(x.f.nome)}${x.f.ativo === false ? '<span class="tag">saiu</span>' : ''}${lim > 0 && x.faltas >= lim ? '<span class="tag bad">faltando demais</span>' : (x.faltas === 0 && x.dias ? '<span class="tag ok">sem faltas</span>' : '')}</td>
+        <td class="n">${x.dias} dia${x.dias === 1 ? '' : 's'}${x.prev ? ` <span class="sub">(${x.dEsc} de ${x.prev} da escala)</span>` : ''}</td><td class="n ${x.faltas >= lim && lim > 0 ? 'neg' : ''}">${x.faltas}</td><td class="n">${x.f.tipo === 'fixo' ? '—' : int(x.ent)}</td><td class="n"><b>${fmt(x.tot)}</b></td></tr>`).join('')}
+      <tr><td><b>Total</b></td><td></td><td class="n">${eq.faltas.length}</td><td class="n">${int(eq.entregas)}</td><td class="n"><b>${fmt(eq.total)}</b></td></tr>
+    </table></div>
+    <div class="resumo">
+      <div class="r"><span>Pago aos entregadores (${int(eq.entregas)} entregas)</span><span>${fmt(eq.pagoEntreg)}</span></div>
+      <div class="r"><span>Custo médio de cada entrega</span><span>${fmt(eq.entregas > 0 ? eq.pagoEntreg / eq.entregas : 0)}</span></div>
+      ${tEnt > 0 ? `<div class="r"><span>Cobrado dos clientes (${fmt(tEnt)} por entrega)</span><span>${fmt(eq.entregas * tEnt)}</span></div>
+      <div class="r tot"><span>${dif >= 0 ? 'A entrega se paga e ainda sobra' : 'A entrega custa mais do que cobra'}</span><span class="${dif >= 0 ? 'pos' : 'neg'}">${fmt(Math.abs(dif))}</span></div>` : '<div class="sub" style="margin-top:4px">O cliente não paga taxa de entrega, então esse custo sai do lucro. Dá para mudar em Ajustes.</div>'}
+    </div>` : '<div class="vazio">Nenhum lançamento neste mês.</div>'}
+  </div>
+
+  ${lancs.length ? `<div class="card"><h2>Lançamentos de ${nomeMes(ym, true)}</h2>
+    <div class="scroll tblwrap"><table>
+      <tr><th>Data</th><th>Funcionário</th><th>Turno</th><th class="n">Entregas</th><th class="n">Valor</th><th></th></tr>
+      ${lancs.map(d => { const f = byId(S.funcionarios, d.func), t = byId(S.turnos, d.turno); return `<tr class="${d.falta ? 'falta' : ''}"><td>${dataBR(d.data)}</td><td>${esc(f ? f.nome : '(removido)')}</td><td>${esc(t ? t.nome : '—')}</td><td class="n">${d.falta ? 'FALTOU' : (f && f.tipo === 'fixo' ? '—' : int(d.entregas))}</td><td class="n">${d.falta ? '—' : fmt(d.valor)}</td><td class="n"><button class="btn x del" data-act="${d.falta ? 'delFalta' : 'delLanc'}" data-id="${d.id}">✕</button></td></tr>`; }).join('')}
+    </table></div></div>` : ''}
+
+  <div class="card">
+    <div class="top" style="margin-top:0"><div><h2>Equipe na ativa</h2><div class="sub">Marque os dias combinados e, se tiver, o período do contrato (ex.: de hoje até o fim do mês). Entregador ganha por turno; diária fixa é para cozinha, atendente...</div></div><button class="btn pri" data-act="addFunc">+ Pessoa</button></div>
+    ${ats.length ? ats.map(f => `<div class="linha">
+      <label class="f" style="flex:2 1 170px">Nome<input data-k="func" data-id="${f.id}" data-f="nome" value="${esc(f.nome)}"></label>
+      <label class="f" style="flex:0 1 130px">Tipo<select data-k="func" data-id="${f.id}" data-f="tipo">
+        <option value="entregador" ${f.tipo !== 'fixo' ? 'selected' : ''}>Entregador</option>
+        <option value="fixo" ${f.tipo === 'fixo' ? 'selected' : ''}>Diária fixa</option></select></label>
+      ${f.tipo === 'fixo' ? `<label class="f" style="flex:0 1 90px">Diária (R$)<input inputmode="decimal" data-k="func" data-id="${f.id}" data-f="diaria" data-num="1" value="${nv(f.diaria)}"></label>` : ''}
+      <div class="f">Dias combinados<div class="dias">${DIAS.map((l, i) => `<button class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}" data-act="escDia" data-id="${f.id}" data-d="${i}" title="${DIAS_NOME[i]}">${l}</button>`).join('')}</div></div>
+      <label class="f" style="flex:0 1 145px">Contrato de<input type="date" data-k="func" data-id="${f.id}" data-f="escIni" value="${f.escala?.ini || ''}"></label>
+      <label class="f" style="flex:0 1 145px">até (vazio = sem fim)<input type="date" data-k="func" data-id="${f.id}" data-f="escFim" value="${f.escala?.fim || ''}"></label>
+      <label class="f" style="flex:0 1 170px">Turno combinado<select data-k="func" data-id="${f.id}" data-f="escTurno">${S.turnos.map(t => `<option value="${t.id}" ${f.escala?.turno === t.id ? 'selected' : ''}>${esc(t.nome)}</option>`).join('')}</select></label>
+      <button class="btn" data-act="inativar" data-id="${f.id}" title="Tirar da equipe (fica guardado)">Saiu</button>
+    </div>`).join('') : '<div class="vazio">Ninguém na equipe ainda.</div>'}
+    ${inativos.length ? `<div style="margin-top:14px"><div class="sub" style="margin-bottom:6px">Não trabalham mais (o histórico fica guardado):</div>
+      ${inativos.map(f => `<div class="item"><span style="flex:1">${esc(f.nome)}</span><button class="btn" data-act="reativar" data-id="${f.id}">Voltou</button><button class="btn del" data-act="delFunc" data-id="${f.id}">Excluir</button></div>`).join('')}</div>` : ''}
+  </div>
+
+  <div class="card">
+    <div class="top" style="margin-top:0"><div><h2>Turnos</h2><div class="sub">O entregador recebe o <b>maior valor</b> entre o mínimo e as entregas. Ex.: 7 × R$ 8 = R$ 56 → recebe R$ 60.</div></div><button class="btn pri" data-act="addTurno">+ Turno</button></div>
+    ${S.turnos.map(t => `<div class="linha">
+      <label class="f" style="flex:2 1 160px">Turno<input data-k="turno" data-id="${t.id}" data-f="nome" value="${esc(t.nome)}"></label>
+      <label class="f" style="flex:0 1 100px">Mínimo (R$)<input inputmode="decimal" data-k="turno" data-id="${t.id}" data-f="minimo" data-num="1" value="${nv(t.minimo)}"></label>
+      <label class="f" style="flex:0 1 100px">Por entrega<input inputmode="decimal" data-k="turno" data-id="${t.id}" data-f="porEntrega" data-num="1" value="${nv(t.porEntrega)}"></label>
+      <button class="btn x del" data-act="delTurno" data-id="${t.id}">✕</button></div>`).join('')}
+    <div class="linha"><label class="f" style="width:240px">Faltas no mês para dar o alerta<input inputmode="numeric" data-k="cfg" data-f="limiteFaltas" data-num="1" value="${nv(S.config.limiteFaltas)}"></label></div>
+  </div>`;
+}
+
+/* =================== GASTOS =================== */
+function gastosTotHTML(){
+  const fm = funcMensal(), vm = vendasMes();
+  return `<div class="r"><span>Contas fixas</span><span>${fmt(totalFixos())}</span></div>
+  <div class="r"><span>Funcionários (${fm.fonte})</span><span>${fmt(fm.valor)}</span></div>
+  <div class="r tot big"><span>Total de contas por mês</span><span>${fmt(contasMes())}</span></div>
+  <div class="r"><span>Vendas por mês (${vm.fonte})</span><span>${int(vm.valor)}</span></div>
+  <div class="r"><span>Cada venda paga de contas</span><span><b>${fmt(fixoPorVenda())}</b></span></div>`;
+}
+function rGastos(){
+  return `
+  <div class="top"><div><h2>Gastos do mês</h2><div class="sub">Contas que chegam todo mês, vendendo ou não.</div></div>
+    <button class="btn pri" data-act="addGasto">+ Adicionar gasto</button></div>
+  <div class="dica">As contas são divididas entre <b>tudo que vende</b>. O gasto com funcionários e o número de vendas são <b>calculados sozinhos</b> pelos lançamentos. Ela não precisa digitar.</div>
+  <div class="card">${S.gastos.length ? S.gastos.map(g => `
+    <div class="linha">
+      <label class="f" style="flex:2 1 220px">Gasto<input data-k="gasto" data-id="${g.id}" data-f="nome" value="${esc(g.nome)}" placeholder="Ex.: aluguel"></label>
+      <label class="f" style="flex:0 1 160px">Valor por mês (R$)<input inputmode="decimal" data-k="gasto" data-id="${g.id}" data-f="valor" data-num="1" value="${nv(g.valor)}"></label>
+      <button class="btn del" data-act="delGasto" data-id="${g.id}">Excluir</button>
+    </div>`).join('') : '<div class="vazio">Nenhum gasto ainda.</div>'}</div>
+  <div class="card">
+    <h2>Resumo das contas</h2>
+    <div class="resumo" id="gtot">${gastosTotHTML()}</div>
+    <div class="linha" style="margin-top:10px"><label class="f" style="max-width:320px">Vendas por mês (só usado enquanto não tiver lançamentos)<input inputmode="numeric" data-k="cfg" data-f="vendasMes" data-num="1" value="${nv(S.config.vendasMes)}"></label></div>
+  </div>`;
+}
+
+/* =================== VENDAS =================== */
+function itensVenda(){
+  const g = s => S.produtos.filter(p => p.setor === s).map(p => ({id:p.id, nome:p.nome, grupo:s}));
+  return [...g('hamburgueria'), ...g('almoco'), ...g('combo'), ...S.revenda.map(r => ({id:r.id, nome:r.nome, grupo:'bebida'}))];
+}
+function diaResumoHTML(){
+  const r = resultadoDia(S.ui.dia), dm = diasMes(S.ui.dia.slice(0, 7));
+  const funcDia = S.diarias.filter(d => d.data === S.ui.dia).reduce((a, d) => a + num(d.valor), 0);
+  const fixDia = totalFixos() / dm, luc = r.contrib - funcDia - fixDia;
+  return `
+    <div class="card kpi"><div class="l">Faturou no dia</div><div class="v">${fmt(r.fat)}</div><div class="s">${int(r.itens)} lanches e pratos, todos os canais</div></div>
+    <div class="card kpi"><div class="l">Sobrou antes das contas</div><div class="v">${fmt(r.contrib)}</div><div class="s">já tirando ingredientes, embalagem e taxas</div></div>
+    <div class="card kpi"><div class="l">Lucro do dia</div><div class="v ${luc >= 0 ? 'pos' : 'neg'}">${fmt(luc)}</div><div class="s">tirando ${fmt(funcDia)} de funcionários e ${fmt(fixDia)} de contas</div></div>`;
+}
+function linhaChart(ym){
+  const r = resultadoMes(ym), dm = diasMes(ym), ate = ym === mesHoje ? hoje.getDate() : (ym < mesHoje ? dm : 0);
+  if (!ate || !r.temDados) return '<div class="vazio">Sem vendas lançadas neste mês.</div>';
+  const fixDia = r.fixosCheio / dm; let af = 0, al = 0; const pf = [], pl = [];
+  r.porDia.slice(0, ate).forEach(x => { af += x.fat; al += x.contrib - x.func - fixDia; pf.push(af); pl.push(al); });
+  const W = 640, H = 240, L = 62, R = 14, T = 14, B = 28;
+  const mx = Math.max(1, ...pf), mn = Math.min(0, ...pl);
+  const X = i => L + (dm > 1 ? i / (dm - 1) : 0) * (W - L - R), Y = v => T + (mx - v) / (mx - mn) * (H - T - B);
+  const path = arr => arr.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join('');
+  const ticks = 4, grid = [];
+  for (let k = 0; k <= ticks; k++) { const v = mn + (mx - mn) * k / ticks; grid.push(`<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#36312b" stroke-width="1"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="#a59d93">${(v / 1000).toLocaleString('pt-BR', {maximumFractionDigits:1})}k</text>`); }
+  const xl = [1, 8, 15, 22, dm].filter((v, i, a) => a.indexOf(v) === i).map(d => `<text x="${X(d - 1)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#a59d93">dia ${d}</text>`).join('');
+  const last = pl.length - 1;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Faturamento e lucro acumulados no mês">
+    ${grid.join('')}${mn < 0 ? `<line x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}" stroke="#a59d93" stroke-width="1" stroke-dasharray="3 3"/>` : ''}
+    <path d="${path(pf)}" fill="none" stroke="#f2a33a" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="${path(pl)}" fill="none" stroke="#4cbb7a" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="${X(last)}" cy="${Y(pf[last])}" r="4" fill="#f2a33a"/><circle cx="${X(last)}" cy="${Y(pl[last])}" r="4" fill="#4cbb7a"/>
+    ${xl}
+  </svg>
+  <div class="legenda" style="margin-bottom:0"><span><i style="background:var(--acc)"></i>Faturamento acumulado: ${fmt(pf[last])}</span><span><i style="background:var(--ok)"></i>Lucro acumulado: ${fmt(pl[last])}</span></div>`;
+}
+function mesKPIs(ym){
+  const r = resultadoMes(ym);
+  return `
+    <div class="card kpi"><div class="l">Faturamento</div><div class="v">${fmt(r.fat)}</div><div class="s">${int(r.itens)} lanches e pratos</div></div>
+    <div class="card kpi"><div class="l">Ingredientes, embalagem, taxas</div><div class="v">${fmt(r.custos)}</div><div class="s">custo do que foi vendido</div></div>
+    <div class="card kpi"><div class="l">Contas + funcionários</div><div class="v">${fmt(r.fixos + r.func)}</div><div class="s">funcionários: ${fmt(r.func)}${ym === mesHoje ? ' · contas até hoje' : ''}</div></div>
+    <div class="card kpi"><div class="l">Lucro do mês</div><div class="v ${r.lucro >= 0 ? 'pos' : 'neg'}">${fmt(r.lucro)}</div><div class="s">${r.fat > 0 ? pct(r.lucro / r.fat * 100) + ' do faturamento' : ''}</div></div>`;
+}
+function rankHTML(ym){
+  const r = resultadoMes(ym), its = itensVenda().map(i => ({...i, ...(r.porItem[i.id] || {q:0})})).filter(i => i.q > 0).sort((a, b) => b.q - a.q);
+  if (!its.length) return '<div class="vazio">Sem vendas neste mês.</div>';
+  const mx = its[0].q;
+  return its.map(l => `<div class="rk"><span>${esc(l.nome)}</span><div class="b" style="width:${l.q / mx * 100}%;background:${COR_SETOR[l.grupo]}" title="Sobrou ${fmt(l.lucro)} antes das contas"></div><span style="text-align:right">${int(l.q)}</span></div>`).join('');
+}
+function canalHTML(ym){
+  const r = resultadoMes(ym);
+  return `<div class="tblwrap"><table><tr><th>Canal</th><th class="n">Faturou</th><th class="n">Sobrou*</th><th class="n">%</th></tr>
+    ${canais().map(c => { const x = r.porCanal[c.id] || {fat:0, contrib:0}; return `<tr><td>${esc(c.nome)}</td><td class="n">${fmt(x.fat)}</td><td class="n">${fmt(x.contrib)}</td><td class="n">${pct(x.fat > 0 ? x.contrib / x.fat * 100 : 0)}</td></tr>`; }).join('')}
+  </table></div><div class="sub" style="margin-top:6px">*Antes de pagar contas e funcionários.</div>`;
+}
+function mesesChart(){
+  const meses = [...new Set(Object.keys(S.vendas).map(d => d.slice(0, 7)))].sort().slice(-12).filter(m => resultadoMes(m).temDados);
+  if (!meses.length) return '<div class="vazio">Ainda sem meses lançados.</div>';
+  const rs = meses.map(m => ({m, r:resultadoMes(m)})), mx = Math.max(1, ...rs.map(x => x.r.fat));
+  return `<div class="chart">${rs.map(({m, r}) => `<div class="mes ${m === S.ui.mes ? 'on' : ''}"><div class="bs">
+      <div style="height:${r.fat / mx * 100}%;background:var(--acc)" title="Faturamento: ${fmt(r.fat)}"></div>
+      <div style="height:${Math.max(Math.abs(r.lucro) / mx * 100, 1)}%;background:${r.lucro >= 0 ? 'var(--ok)' : 'var(--bad)'}" title="Lucro: ${fmt(r.lucro)}"></div>
+    </div><div class="lab">${nomeMes(m)}</div></div>`).join('')}</div>
+  <div class="legenda" style="margin-bottom:0"><span><i style="background:var(--acc)"></i>Faturamento</span><span><i style="background:var(--ok)"></i>Lucro</span><span><i style="background:var(--bad)"></i>Prejuízo</span></div>`;
+}
+function rVendas(){
+  const dia = S.ui.dia, canal = S.ui.canalDia, v = (S.vendas[dia] || {})[canal] || {};
+  const ehEntrega = canal !== 'balcao';
+  const grupos = [['hamburgueria','Hamburgueria'],['almoco','Almoço'],['combo','Combos'],['bebida','Bebidas']];
+  const its = itensVenda();
+  const linhas = grupos.map(([g, nome]) => { const ls = its.filter(i => i.grupo === g); return ls.length ? `<tr class="grp"><td colspan="2">${nome}</td></tr>` + ls.map(i => `<tr><td>${esc(i.nome)}</td><td class="n" style="width:110px"><input inputmode="numeric" data-k="venda" data-id="${i.id}" data-num="1" value="${nv(v[i.id] || '')}" placeholder="0"></td></tr>`).join('') : ''; }).join('');
+  const ym = S.ui.mes;
+  return `
+  <div class="top"><div><h2>Vendas do dia</h2><div class="sub">No fim do dia, escolha o canal e coloque quanto vendeu de cada coisa.</div></div>
+    <label class="f" style="width:180px">Dia<input type="date" data-k="dia" value="${dia}"></label></div>
+  <div class="kpis" id="dk">${diaResumoHTML()}</div>
+  <div class="card">
+    <div class="chips"><span class="lbl">Canal:</span>${chipsCanal(canal, 'canalDia')}</div>
+    ${ehEntrega ? `<div class="linha" style="padding-top:0"><label class="f" style="width:220px">Quantos pedidos (entregas) no ${esc(nomeCanal(canal))}<input inputmode="numeric" data-k="pedidos" data-num="1" value="${nv(v._pedidos || '')}" placeholder="0"></label><div class="sub" style="padding-bottom:10px">Usado para a taxa de entrega e o frete grátis.</div></div>` : ''}
+    <div class="tblwrap"><table><tr><th>Item</th><th class="n">Vendeu (${esc(nomeCanal(canal))})</th></tr>${linhas}</table></div>
+  </div>
+
+  <div class="top" style="margin-top:24px"><div><h2>Mês de ${nomeMes(ym, true)}</h2><div class="sub">Tudo somado a partir dos dias lançados.</div></div>${mesPicker()}</div>
+  <div class="kpis" id="mk">${mesKPIs(ym)}</div>
+  <div class="card"><h2>Evolução do mês</h2><div class="sub">Linha subindo = dinheiro entrando. O lucro já desconta funcionários e contas dia a dia.</div><div id="lchart">${linhaChart(ym)}</div></div>
+  <div class="grid2">
+    <div class="card"><h2>O que mais sai</h2><div class="legenda"><span><i style="background:var(--c-hb)"></i>Hamburgueria</span><span><i style="background:var(--c-al)"></i>Almoço</span><span><i style="background:var(--c-cb)"></i>Combos</span><span><i style="background:var(--c-bb)"></i>Bebidas</span></div><div id="vrank">${rankHTML(ym)}</div></div>
+    <div>
+      <div class="card"><h2>Por canal</h2><div id="vcanal">${canalHTML(ym)}</div></div>
+      <div class="card"><h2>Mês a mês</h2><div id="vmeses">${mesesChart()}</div></div>
+    </div>
+  </div>`;
+}
+function refreshVendas(){
+  const ym = S.ui.mes, set = (id, h) => { const el = document.getElementById(id); if (el) el.innerHTML = h; };
+  set('dk', diaResumoHTML()); set('mk', mesKPIs(ym)); set('lchart', linhaChart(ym)); set('vrank', rankHTML(ym)); set('vcanal', canalHTML(ym)); set('vmeses', mesesChart());
+}
+
+/* =================== AJUSTES =================== */
+function custoEntregaReal(){
+  const meses = [...new Set(S.diarias.map(d => d.data.slice(0, 7)))].sort().slice(-2);
+  let ent = 0, pago = 0; meses.forEach(m => { const e = equipeMes(m); ent += e.entregas; pago += e.pagoEntreg; });
+  return ent > 0 ? pago / ent : 0;
+}
+function rAjustes(){
+  const cer = custoEntregaReal();
+  return `
+  <div class="top"><div><h2>Ajustes</h2></div></div>
+  <div class="card">
+    <h2>Geral</h2>
+    <div class="linha" style="padding-top:8px">
+      <label class="f" style="flex:2 1 240px">Nome do negócio<input data-k="loja" value="${esc(S.loja)}"></label>
+      <label class="f" style="flex:1 1 150px">Taxa da maquininha (%)<input inputmode="decimal" data-k="cfg" data-f="taxa" data-num="1" value="${nv(S.config.taxa)}"></label>
+      <label class="f" style="flex:1 1 150px">Lucro que quer ter (%)<input inputmode="decimal" data-k="cfg" data-f="margem" data-num="1" value="${nv(S.config.margem)}"></label>
+    </div>
+    <div class="sub">A taxa da maquininha vale para o balcão e a entrega própria. Se recebe muito em dinheiro ou Pix, use uma taxa média menor.</div>
+  </div>
+  <div class="card">
+    <h2>Entrega própria</h2>
+    <div class="linha" style="padding-top:8px">
+      <label class="f" style="flex:1 1 180px">Taxa cobrada do cliente (R$, 0 se não cobra)<input inputmode="decimal" data-k="cfg" data-f="taxaEntrega" data-num="1" value="${nv(S.config.taxaEntrega)}"></label>
+      <label class="f" style="flex:1 1 180px">Custo médio de cada entrega (R$)<input inputmode="decimal" data-k="cfg" data-f="custoEntrega" data-num="1" value="${nv(S.config.custoEntrega)}"></label>
+      ${cer > 0 ? `<button class="btn" data-act="usarCustoEnt" data-v="${cer.toFixed(2)}">Usar a média real: ${fmt(cer)}</button>` : ''}
+    </div>
+    <div class="sub">Custo médio = quanto ela paga ao entregador dividido pelas entregas. A média real vem dos lançamentos de funcionários.</div>
+  </div>
+  <div class="card">
+    <div class="top" style="margin-top:0"><div><h2>Apps de entrega</h2><div class="sub">Confira os valores no contrato de cada app. Os do exemplo são aproximados.</div></div><button class="btn pri" data-act="addApp">+ App</button></div>
+    ${S.apps.map(a => `<div class="linha">
+      <label class="f" style="flex:1 1 140px">App<input data-k="app" data-id="${a.id}" data-f="nome" value="${esc(a.nome)}"></label>
+      <label class="f" style="flex:0 1 110px">Comissão (%)<input inputmode="decimal" data-k="app" data-id="${a.id}" data-f="comissao" data-num="1" value="${nv(a.comissao)}"></label>
+      <label class="f" style="flex:0 1 120px">Taxa pagamento (%)<input inputmode="decimal" data-k="app" data-id="${a.id}" data-f="taxaPag" data-num="1" value="${nv(a.taxaPag)}"></label>
+      <label class="f" style="flex:0 1 160px">Quem entrega<select data-k="app" data-id="${a.id}" data-f="quemEntrega"><option value="app" ${a.quemEntrega !== 'loja' ? 'selected' : ''}>Entregador do app</option><option value="loja" ${a.quemEntrega === 'loja' ? 'selected' : ''}>Nosso entregador</option></select></label>
+      <label class="f" style="flex:0 1 110px">Valor do frete (R$)<input inputmode="decimal" data-k="app" data-id="${a.id}" data-f="frete" data-num="1" value="${nv(a.frete)}"></label>
+      <label class="ck"><input type="checkbox" data-k="app" data-id="${a.id}" data-f="freteGratis" ${a.freteGratis ? 'checked' : ''}> Frete grátis</label>
+      <button class="btn x del" data-act="delApp" data-id="${a.id}">✕</button>
+    </div>`).join('')}
+    <div class="dica" style="margin:12px 0 0">iFood Plano Básico: 12% + 3,2% e a loja entrega. Plano Entrega: 23% + 3,2% e o iFood entrega. Com <b>frete grátis</b>, quem paga a entrega é a loja.</div>
+  </div>
+  <div class="card">
+    <h2>Backup</h2>
+    <div class="sub" style="margin-bottom:10px">Copie o backup e guarde (WhatsApp, bloco de notas). Para usar em outro aparelho ou navegador, cole aqui e clique em Restaurar.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><button class="btn pri" data-act="copiar">Copiar backup</button><span id="msgb"></span></div>
+    <textarea id="bk" rows="4" placeholder="Cole o backup aqui..."></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" data-act="restaurar">Restaurar</button></div>
+  </div>
+  <div class="card">
+    <h2>Recomeçar</h2>
+    <div class="sub" style="margin-bottom:10px"><b>Voltar para o exemplo</b> troca tudo pelos dados de exemplo. <b>Apagar tudo</b> deixa o site em branco para preencher do zero. Os dois apagam o que foi preenchido, então faça um backup antes.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn del" data-act="exemplo">Voltar para o exemplo</button><button class="btn del" data-act="limpar">Apagar tudo</button></div>
+  </div>`;
+}
+
+/* =================== EVENTOS =================== */
+main.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'ld-func') { const fu = byId(S.funcionarios, t.value), ts = document.getElementById('ld-turno'); if (fu && fu.escala && fu.escala.turno && ts) ts.value = fu.escala.turno; }
+  if (t.id && t.id.startsWith('ld-')) { prevLanc(); return; }
+  const k = t.dataset.k; if (!k) return;
+  const f = t.dataset.f, val = t.type === 'checkbox' ? t.checked : (t.dataset.num ? num(t.value) : t.value);
+  const id = t.dataset.id;
+  if (k === 'ing') {
+    const i = byId(S.ingredientes, id); if (!i) return; i[f] = val; save();
+    if (f === 'cat') { render(); return; }
+    const c = document.getElementById('ic-' + i.id); if (c) c.innerHTML = custoTexto(i);
+  } else if (k === 'prod') {
+    const p = byId(S.produtos, id); if (!p) return; p[f] = val; save();
+    if (f === 'setor') { render(); return; }
+    refreshCalc(p);
+  } else if (k === 'item') {
+    const p = byId(S.produtos, id); if (!p) return; const idx = +t.dataset.idx, it = p.itens[idx]; if (!it) return;
+    it[f] = val; save();
+    if (f === 'ing') { render(); return; }
+    const lc = document.getElementById(`lc-${p.id}-${idx}`); if (lc) lc.textContent = fmt(custoItem(it));
+    refreshCalc(p);
+  } else if (k === 'comp') {
+    const p = byId(S.produtos, id); if (!p) return; const idx = +t.dataset.idx, c = p.comp[idx]; if (!c) return;
+    if (f === 'sel') { const [tp, cid] = t.value.split(':'); c.tipo = tp; c.id = cid; save(); render(); return; }
+    c[f] = val; save();
+    const lc = document.getElementById(`lc-${p.id}-${idx}`); if (lc) lc.textContent = fmt(custoComp(c));
+    refreshCalc(p);
+  } else if (k === 'rev') {
+    const r = byId(S.revenda, id); if (!r) return; r[f] = val; save();
+    const el = document.getElementById('rv-' + r.id); if (el) el.innerHTML = revTexto(r);
+  } else if (k === 'gasto') {
+    const g = byId(S.gastos, id); if (!g) return; g[f] = val; save();
+    const el = document.getElementById('gtot'); if (el) el.innerHTML = gastosTotHTML();
+  } else if (k === 'turno') {
+    const tu = byId(S.turnos, id); if (!tu) return; tu[f] = val; save();
+    if (f === 'nome') { const o = document.querySelector(`#ld-turno option[value="${tu.id}"]`); if (o) o.textContent = tu.nome; }
+    prevLanc();
+  } else if (k === 'func') {
+    const fu = byId(S.funcionarios, id); if (!fu) return;
+    if (f === 'escTurno' || f === 'escIni' || f === 'escFim') { fu.escala = fu.escala || {dias:[]}; fu.escala[{escTurno:'turno', escIni:'ini', escFim:'fim'}[f]] = val; save(); return; }
+    fu[f] = val; save();
+    if (f === 'tipo') { render(); return; }
+    if (f === 'nome') { const o = document.querySelector(`#ld-func option[value="${fu.id}"]`); if (o) o.textContent = fu.nome; }
+    prevLanc();
+  } else if (k === 'app') {
+    const a = byId(S.apps, id); if (!a) return; a[f] = val; save();
+  } else if (k === 'venda' || k === 'pedidos') {
+    const d = S.ui.dia, c = S.ui.canalDia;
+    S.vendas[d] = S.vendas[d] || {}; S.vendas[d][c] = S.vendas[d][c] || {};
+    S.vendas[d][c][k === 'pedidos' ? '_pedidos' : id] = val; save(); refreshVendas();
+  } else if (k === 'dia') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) { S.ui.dia = t.value; S.ui.mes = t.value.slice(0, 7); save(); render(); }
+  } else if (k === 'mes') {
+    if (/^\d{4}-\d{2}$/.test(t.value)) { S.ui.mes = t.value; save(); render(); }
+  } else if (k === 'cfg') {
+    S.config[f] = val; save();
+    if (f === 'sim') refreshSim();
+    const el = document.getElementById('gtot'); if (el) el.innerHTML = gastosTotHTML();
+  } else if (k === 'loja') {
+    S.loja = t.value; save(); document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
+  }
+});
+main.addEventListener('change', e => { const k = e.target.dataset.k, f = e.target.dataset.f; if (k === 'app' || (k === 'cfg' && aba === 'equipe') || (k === 'func' && (f === 'escIni' || f === 'escFim'))) { const y = window.scrollY; render(); window.scrollTo(0, y); } });
+
+function armar(btn, fn, texto){
+  if (btn.dataset.arm) { fn(); return; }
+  btn.dataset.arm = '1'; const txt = btn.textContent; btn.classList.add('arm'); btn.textContent = texto || (btn.classList.contains('x') ? '?' : 'Confirmar?');
+  setTimeout(() => { if (document.body.contains(btn)) { delete btn.dataset.arm; btn.classList.remove('arm'); btn.textContent = txt; } }, 3500);
+}
+
+main.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, id = b.dataset.id;
+  const done = () => { save(); render(); };
+  const focar = sel => { const el = main.querySelector(sel); if (el) { el.focus(); el.select && el.select(); el.scrollIntoView({block:'center'}); } };
+  if (a === 'setor') { S.ui.setor = b.dataset.v; done(); }
+  else if (a === 'painelSetor') { S.ui.painelSetor = b.dataset.v; done(); }
+  else if (a === 'canal') { const y = window.scrollY; S.ui.canal = b.dataset.v; done(); window.scrollTo(0, y); }
+  else if (a === 'canalDia') { S.ui.canalDia = b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'addProd') {
+    const st = S.ui.setor; const n = {id:uid(), nome: {hamburgueria:'Novo lanche', almoco:'Novo prato', combo:'Novo combo'}[st], setor:st, preco:0, precoApp:0, itens:[], comp:[]};
+    S.produtos.unshift(n); done(); focar('.nome');
+  }
+  else if (a === 'dupProd') {
+    const i = S.produtos.findIndex(p => p.id === id); if (i < 0) return;
+    const o = S.produtos[i], c = {...o, id:uid(), nome:o.nome + ' (cópia)', itens:(o.itens || []).map(x => ({...x})), comp:(o.comp || []).map(x => ({...x}))};
+    S.produtos.splice(i + 1, 0, c); done();
+    const el = document.getElementById('calc-' + c.id); if (el) el.closest('.card').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  else if (a === 'delProd') armar(b, () => { S.produtos = S.produtos.filter(p => p.id !== id); S.produtos.forEach(p => { if (p.comp) p.comp = p.comp.filter(c => c.id !== id); }); done(); });
+  else if (a === 'addItem') { const p = byId(S.produtos, id); const prim = S.ingredientes[0]; p.itens.push({ing: prim ? prim.id : '', qtd:1}); done(); }
+  else if (a === 'rmItem') { const p = byId(S.produtos, id); p.itens.splice(+b.dataset.idx, 1); done(); }
+  else if (a === 'addComp') { const p = byId(S.produtos, id); const prim = S.produtos.find(x => x.setor !== 'combo'); p.comp = p.comp || []; p.comp.push(prim ? {tipo:'prod', id:prim.id, qtd:1} : {tipo:'rev', id:(S.revenda[0] || {}).id, qtd:1}); done(); }
+  else if (a === 'rmComp') { const p = byId(S.produtos, id); p.comp.splice(+b.dataset.idx, 1); done(); }
+  else if (a === 'addIng') {
+    const cat = b.dataset.cat; const n = {id:uid(), nome: cat === 'embalagem' ? 'Nova embalagem' : 'Novo ingrediente', cat, preco:0, rende:1, unidade:'un'};
+    S.ingredientes.push(n); done();
+    const el = document.getElementById('ic-' + n.id); if (el) { const inp = el.closest('.linha').querySelector('input'); inp.focus(); inp.select(); inp.scrollIntoView({block:'center'}); }
+  }
+  else if (a === 'delIng') { const u = usoIng(id); armar(b, () => { S.ingredientes = S.ingredientes.filter(i => i.id !== id); S.produtos.forEach(p => p.itens = (p.itens || []).filter(it => it.ing !== id)); done(); }, u ? `Sai de ${u} ite${u === 1 ? 'm' : 'ns'}. Confirmar?` : null); }
+  else if (a === 'addRev') { S.revenda.push({id:uid(), nome:'Novo produto', custo:0, preco:0}); done(); }
+  else if (a === 'delRev') armar(b, () => { S.revenda = S.revenda.filter(r => r.id !== id); S.produtos.forEach(p => { if (p.comp) p.comp = p.comp.filter(c => c.id !== id); }); done(); });
+  else if (a === 'addGasto') { S.gastos.push({id:uid(), nome:'', valor:0}); done(); }
+  else if (a === 'delGasto') armar(b, () => { S.gastos = S.gastos.filter(g => g.id !== id); done(); });
+  else if (a === 'addTurno') { S.turnos.push({id:uid(), nome:'Novo turno', minimo:0, porEntrega:0}); done(); }
+  else if (a === 'delTurno') armar(b, () => { S.turnos = S.turnos.filter(t => t.id !== id); done(); });
+  else if (a === 'addFunc') { S.funcionarios.push({id:uid(), nome:'Novo funcionário', tipo:'entregador', diaria:0, ativo:true, escala:{dias:[], turno:(S.turnos[0] || {}).id}}); done(); }
+  else if (a === 'inativar') { const f = byId(S.funcionarios, id); armar(b, () => { f.ativo = false; done(); }, 'Saiu mesmo?'); }
+  else if (a === 'reativar') { byId(S.funcionarios, id).ativo = true; done(); }
+  else if (a === 'delFunc') armar(b, () => { S.funcionarios = S.funcionarios.filter(f => f.id !== id); done(); });
+  else if (a === 'escDia') { const f = byId(S.funcionarios, id); f.escala = f.escala || {dias:[], turno:(S.turnos[0] || {}).id}; const d = +b.dataset.d; f.escala.dias = f.escala.dias.includes(d) ? f.escala.dias.filter(x => x !== d) : [...f.escala.dias, d]; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
+  else if (a === 'calDia') { S.ui.diaEq = b.dataset.v; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
+  else if (a === 'qLancar' || a === 'qFalta') {
+    const f = byId(S.funcionarios, id), data = b.dataset.v, turno = (f.escala && f.escala.turno) || (S.turnos[0] || {}).id;
+    if (a === 'qLancar') { const inp = document.getElementById('qe-' + f.id), ent = inp ? num(inp.value) : 0; S.diarias.push({id:uid(), data, func:f.id, turno, entregas: f.tipo === 'fixo' ? 0 : ent, valor: pagar(f.id, turno, ent)}); }
+    else S.faltas.push({id:uid(), data, func:f.id, turno});
+    const y = window.scrollY; save(); render(); window.scrollTo(0, y);
+  }
+  else if (a === 'lancar' || a === 'falta') {
+    const data = document.getElementById('ld-data').value, func = document.getElementById('ld-func').value, turno = document.getElementById('ld-turno').value, ent = num(document.getElementById('ld-ent').value);
+    if (!data || !func) return;
+    const fu = byId(S.funcionarios, func); let msg;
+    if (a === 'lancar') { const valor = pagar(func, turno, ent); S.diarias.push({id:uid(), data, func, turno, entregas: fu.tipo === 'fixo' ? 0 : ent, valor}); msg = `Lançado: ${esc(fu.nome)} em ${dataBR(data)} → ${fmt(valor)}`; }
+    else { S.faltas.push({id:uid(), data, func, turno}); msg = `Falta registrada: ${esc(fu.nome)} em ${dataBR(data)}`; }
+    S.ui.mes = data.slice(0, 7); save(); render();
+    document.getElementById('ld-data').value = data; document.getElementById('ld-func').value = func; document.getElementById('ld-turno').value = turno; prevLanc();
+    document.getElementById('ld-prev').innerHTML = `<span class="ok-msg" style="margin:0;${a === 'falta' ? 'color:var(--bad)' : ''}">${msg}</span>`;
+  }
+  else if (a === 'delLanc') armar(b, () => { S.diarias = S.diarias.filter(d => d.id !== id); const y = window.scrollY; done(); window.scrollTo(0, y); });
+  else if (a === 'delFalta') armar(b, () => { S.faltas = S.faltas.filter(d => d.id !== id); const y = window.scrollY; done(); window.scrollTo(0, y); });
+  else if (a === 'addApp') { S.apps.push({id:'app_' + uid(), nome:'Novo app', comissao:0, taxaPag:0, quemEntrega:'app', freteGratis:false, frete:0}); done(); }
+  else if (a === 'delApp') armar(b, () => { S.apps = S.apps.filter(x => x.id !== id); done(); });
+  else if (a === 'usarCustoEnt') { S.config.custoEntrega = num(b.dataset.v); done(); }
+  else if (a === 'copiar') {
+    const txt = JSON.stringify(S), msg = document.getElementById('msgb');
+    const fallback = () => { const bk = document.getElementById('bk'); bk.value = txt; bk.select(); msg.innerHTML = '<span class="ok-msg">Backup colocado na caixa abaixo. Copie de lá.</span>'; };
+    try { navigator.clipboard.writeText(txt).then(() => { msg.innerHTML = '<span class="ok-msg">Copiado! Cole em um lugar seguro.</span>'; }, fallback); } catch(_) { fallback(); }
+  }
+  else if (a === 'restaurar') {
+    try { const d = JSON.parse(document.getElementById('bk').value); if (!valido(d)) throw 0; S = d; save(); render(); document.getElementById('msgb').innerHTML = '<span class="ok-msg">Restaurado!</span>'; }
+    catch(_) { document.getElementById('msgb').innerHTML = '<span class="ok-msg" style="color:var(--bad)">Esse texto não é um backup válido.</span>'; }
+  }
+  else if (a === 'exemplo') armar(b, () => { S = exemplo(); done(); });
+  else if (a === 'limpar') armar(b, () => { S = {loja:S.loja, config:{...S.config}, apps:S.apps, ingredientes:[], produtos:[], revenda:[], gastos:[], turnos:[], funcionarios:[], diarias:[], faltas:[], vendas:{}, ui:{}}; done(); });
+});
+
+render();
+</script>
+</body>
+</html>
