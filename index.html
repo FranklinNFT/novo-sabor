@@ -15,11 +15,11 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.4}
-header{max-width:1100px;margin:0 auto;padding:20px 20px 0}
+header{max-width:1480px;margin:0 auto;padding:20px 20px 0}
 h1{font-size:24px;margin:0;letter-spacing:-.3px}
 h2{font-size:17px;margin:0 0 4px}
 .sub{color:var(--mut);font-size:13px}
-nav{display:flex;gap:6px;overflow-x:auto;padding:14px 20px;max-width:1100px;margin:0 auto;position:sticky;top:0;background:var(--bg);z-index:5;align-items:center}
+nav{display:flex;gap:6px;overflow-x:auto;padding:14px 20px;max-width:1480px;margin:0 auto;position:sticky;top:0;background:var(--bg);z-index:5;align-items:center}
 nav .gbtn{background:transparent;border:1px solid var(--acc);color:var(--acc);font-weight:600}
 nav .gbtn.on{background:#2a2117;color:var(--acc);border-color:var(--acc)}
 nav .sep{width:1px;height:26px;background:var(--line);margin:0 4px;flex:none}
@@ -33,12 +33,28 @@ nav .sep{width:1px;height:26px;background:var(--line);margin:0 4px;flex:none}
 .pl{font-size:10.5px;border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .pl.ok{background:#173524;color:#9fe0b8}.pl.falta{background:#4a1d1a;color:#ffb3ab}.pl.pend{background:#3a2f1d;color:#f0d9b5}.pl.esc{background:#2c2925;color:var(--mut)}.pl.extra{background:#1d2a3a;color:#a9c8f0}
 .legenda .pl{display:inline-block;margin-right:4px}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.pcard{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.pcard.alerta-c{border-color:#6b2a25}
+.pcard .ph{display:flex;align-items:center;gap:10px}
+.av{width:44px;height:44px;border-radius:50%;background:#2a2117;border:1px solid #4a3a24;display:flex;align-items:center;justify-content:center;flex:none}
+.pcard .nm{font-weight:600;font-size:15px;line-height:1.2}
+.pst{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pst div{background:var(--card);border-radius:8px;padding:8px 10px}
+.pst .l{font-size:11px;color:var(--mut)}
+.pst .v{font-size:18px;font-weight:700}
+.pst .s{font-size:11px;color:var(--mut)}
+.ptur{font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:3px}
+.ptur b{color:var(--txt);font-weight:600}
+.hojeg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;align-items:start}
+.hojeg .card{margin-bottom:0}
+@media(max-width:900px){.hojeg{grid-template-columns:1fr}}
 nav button,.chip{background:var(--card);border:1px solid var(--line);color:var(--mut);padding:9px 14px;border-radius:999px;font:inherit;font-weight:500;cursor:pointer;white-space:nowrap}
 nav button.on,.chip.on{background:var(--acc);color:#1a1206;border-color:var(--acc)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
 .chips .lbl{font-size:12px;color:var(--mut);margin-right:4px}
 .chip{padding:7px 12px;font-size:14px}
-main{max-width:1100px;margin:0 auto;padding:4px 20px 60px}
+main{max-width:1480px;margin:0 auto;padding:4px 20px 60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:6px 0 14px}
 .dica{background:#2a2117;border:1px solid #4a3a24;color:#f0d9b5;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px}
@@ -285,7 +301,7 @@ function load(){
 }
 function save(){ CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
 function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
-S = load(); prep();
+S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje;
 
 /* =================== CÁLCULOS =================== */
 function canais(){ return [{id:'balcao', nome:'Balcão'}, {id:'propria', nome:'Entrega própria'}, ...S.apps.map(a => ({id:a.id, nome:a.nome, app:a}))]; }
@@ -417,19 +433,20 @@ function resultadoMes(ym){
 
 /* =================== NAVEGAÇÃO =================== */
 const GRUPOS = [
-  ['gestao','Gestão',[['painel','Painel'],['vendas','Vendas do dia'],['equipe','Funcionários'],['gastos','Gastos do mês'],['bebidas','Bebidas'],['ajustes','Ajustes']]],
-  ['ficha','Ficha técnica',[['cardapio','Cardápio'],['ingredientes','Ingredientes']]],
+  ['gestao','Gestão',[['painel','Painel'],['hoje','Hoje'],['relatorios','Relatórios'],['equipe','Equipe'],['contas','Contas'],['ajustes','Ajustes']]],
+  ['ficha','Ficha técnica',[['cardapio','Cardápio'],['ingredientes','Ingredientes'],['bebidas','Bebidas']]],
 ];
 const ABAS = GRUPOS.flatMap(g => g[2].map(t => t[0]));
 const grupoDe = a => GRUPOS.find(g => g[2].some(t => t[0] === a))[0];
-let aba = ABAS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'painel';
-window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (ABAS.includes(h)) { aba = h; render(); } });
+const HASH_ANTIGO = {vendas:'hoje', gastos:'contas'};
+let aba = (h0 => ABAS.includes(h0) ? h0 : (HASH_ANTIGO[h0] || 'painel'))(location.hash.slice(1));
+window.addEventListener('hashchange', () => { let h = location.hash.slice(1); h = HASH_ANTIGO[h] || h; if (ABAS.includes(h)) { aba = h; render(); } });
 const main = document.getElementById('main');
 function render(){
   prep();
   document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
   document.getElementById('nav').innerHTML = GRUPOS.map(([gk, gn, abas]) => { const on = grupoDe(aba) === gk; return `<button class="gbtn ${on ? 'on' : ''}" data-tab="${abas[0][0]}">${gn} ${on ? '▾' : '▸'}</button>` + (on ? abas.map(([k, n]) => `<button class="${k === aba ? 'on' : ''}" data-tab="${k}">${n}</button>`).join('') : ''); }).join('<span class="sep"></span>');
-  main.innerHTML = ({painel:rPainel, cardapio:rCardapio, ingredientes:rIngredientes, bebidas:rBebidas, equipe:rEquipe, gastos:rGastos, vendas:rVendas, ajustes:rAjustes})[aba]();
+  main.innerHTML = ({painel:rPainel, cardapio:rCardapio, ingredientes:rIngredientes, bebidas:rBebidas, equipe:rEquipe, contas:rGastos, hoje:rHoje, relatorios:rRelatorios, ajustes:rAjustes})[aba]();
   if (aba === 'equipe') prevLanc();
 }
 document.getElementById('nav').addEventListener('click', e => {
@@ -467,7 +484,7 @@ function rPainel(){
   <div class="kpis">
     <div class="card kpi"><div class="l">Contas do mês</div><div class="v">${fmt(contasMes())}</div><div class="s">${fmt(totalFixos())} fixas + ${fmt(funcMensal().valor)} funcionários</div></div>
     <div class="card kpi"><div class="l">Cada venda paga de contas</div><div class="v">${fmt(fixoPorVenda())}</div><div class="s">contas ÷ ${int(vendasMes().valor)} vendas por mês</div></div>
-    <div class="card kpi"><div class="l">${nomeMes(mesHoje, true)} até agora</div><div class="v ${atual.lucro >= 0 ? 'pos' : 'neg'}">${atual.temDados ? fmt(atual.lucro) : '—'}</div><div class="s">${atual.temDados ? 'de lucro · faturou ' + fmt(atual.fat) : 'lance as vendas em "Vendas do dia"'}</div></div>
+    <div class="card kpi"><div class="l">${nomeMes(mesHoje, true)} até agora</div><div class="v ${atual.lucro >= 0 ? 'pos' : 'neg'}">${atual.temDados ? fmt(atual.lucro) : '—'}</div><div class="s">${atual.temDados ? 'de lucro · faturou ' + fmt(atual.fat) : 'lance as vendas em "Hoje"'}</div></div>
     <div class="card kpi"><div class="l">Mais lucrativo (${esc(nomeCanal(canal))})</div><div class="v" style="font-size:19px">${best ? esc(best.p.nome) : '—'}</div><div class="s">${best ? fmt(best.c.lucro) + ' em cada' : ''}</div></div>
   </div>
 
@@ -683,7 +700,7 @@ function calHTML(ym){
   return `<div class="cal">${c}</div>
   <div class="legenda" style="margin-bottom:0"><span><span class="pl ok">nome</span>trabalhou</span><span><span class="pl falta">nome</span>faltou</span><span><span class="pl pend">nome</span>não lançado</span><span><span class="pl esc">nome</span>na escala</span><span><span class="pl extra">nome</span>fora da escala</span></div>`;
 }
-function diaEqHTML(data){
+function diaEqHTML(data, dica){
   const ls = S.funcionarios.map(f => ({f, st:statusDia(f, data)})).filter(x => x.st);
   const linhas = ls.map(({f, st}) => {
     const lanc = S.diarias.filter(x => x.func === f.id && x.data === data), fal = S.faltas.find(x => x.func === f.id && x.data === data);
@@ -694,7 +711,8 @@ function diaEqHTML(data){
     return `<div class="item"><span style="flex:1 1 160px">${esc(f.nome)} <span class="pl ${st}" style="display:inline-block">${ST_NOME[st]}</span></span>${acao}</div>`;
   }).join('');
   return `<div class="resumo"><div class="ttl">${dataBR(data)} (${DIAS_NOME[dow(data)]})</div>${linhas || '<div class="sub">Ninguém na escala neste dia.</div>'}
-    <div class="sub" style="margin-top:6px">Alguém fora da escala trabalhou? Use "Lançar dia ou falta" logo abaixo.</div></div>`;
+    ${(() => { const t = S.diarias.filter(x => x.data === data).reduce((a, x) => a + num(x.valor), 0); return `<div class="r tot"><span>Gasto com a equipe neste dia</span><span>${fmt(t)}</span></div>`; })()}
+    <div class="sub" style="margin-top:6px">${dica || 'Alguém fora da escala trabalhou? Use "Lançar dia ou falta" logo abaixo.'}</div></div>`;
 }
 function prevLanc(){
   const f = document.getElementById('ld-func'), t = document.getElementById('ld-turno'), e = document.getElementById('ld-ent'), out = document.getElementById('ld-prev');
@@ -707,12 +725,30 @@ function prevLanc(){
   if (ehFixo) { out.innerHTML = `Diária fixa: <b>${fmt(v)}</b>`; return; }
   out.innerHTML = `${int(num(e.value))} × ${fmt(num(tu?.porEntrega))} = ${fmt(num(e.value) * num(tu?.porEntrega))} · mínimo ${fmt(num(tu?.minimo))} → paga <b>${fmt(v)}</b>`;
 }
+const AVATAR = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f2a33a" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+function cardPessoa(x){
+  const ruim = x.lim > 0 && x.faltas >= x.lim;
+  const tag = x.f.ativo === false ? '<span class="tag">saiu</span>' : ruim ? '<span class="tag bad">faltando demais</span>' : (x.faltas === 0 && x.dias ? '<span class="tag ok">sem faltas</span>' : '');
+  const ent = x.f.tipo !== 'fixo';
+  return `<div class="pcard ${ruim ? 'alerta-c' : ''}">
+    <div class="ph"><div class="av">${AVATAR}</div><div><div class="nm">${esc(x.f.nome)}</div><div class="sub">${ent ? 'Entregador' : 'Diária fixa · ' + fmt(num(x.f.diaria))}</div></div></div>
+    <div>${tag}</div>
+    <div class="pst">
+      <div><div class="l">Trabalhou</div><div class="v">${x.dias}</div><div class="s">${x.prev ? `${x.dEsc} de ${x.prev} da escala` : 'dias'}</div></div>
+      <div><div class="l">Faltas</div><div class="v ${ruim ? 'neg' : ''}">${x.faltas}</div><div class="s">limite ${x.lim}</div></div>
+      <div><div class="l">Entregas</div><div class="v">${ent ? int(x.ent) : '—'}</div><div class="s">${ent && x.dias ? (x.ent / x.dias).toLocaleString('pt-BR', {maximumFractionDigits:1}) + ' por dia' : ''}</div></div>
+      <div><div class="l">A receber</div><div class="v">${fmt(x.tot)}</div><div class="s">no mês</div></div>
+    </div>
+    ${x.turnos.length ? `<div class="ptur">${x.turnos.map(t => `<span><b>${esc(t.t.nome)}:</b> ${t.dias} dia${t.dias === 1 ? '' : 's'}${ent ? ' · ' + int(t.ent) + ' entregas' : ''} · ${fmt(t.tot)}</span>`).join('')}</div>` : ''}
+  </div>`;
+}
 function rEquipe(){
   const ym = S.ui.mes, eq = equipeMes(ym), lim = num(S.config.limiteFaltas);
   const pessoas = S.funcionarios.map(f => {
     const ls = eq.ls.filter(d => d.func === f.id), fl = eq.faltas.filter(x => x.func === f.id);
+    const turnos = S.turnos.map(t => { const lt = ls.filter(d => d.turno === t.id); return {t, dias:lt.length, ent:lt.reduce((a, d) => a + num(d.entregas), 0), tot:lt.reduce((a, d) => a + num(d.valor), 0)}; }).filter(x => x.dias);
     const dEsc = new Set(ls.filter(d => (f.escala?.dias || []).includes(dow(d.data))).map(d => d.data)).size;
-    return {f, dEsc, dias:ls.length, ent:ls.reduce((a, d) => a + num(d.entregas), 0), tot:ls.reduce((a, d) => a + num(d.valor), 0), faltas:fl.length, prev:previstoMes(f, ym)};
+    return {f, turnos, lim, dEsc, dias:ls.length, ent:ls.reduce((a, d) => a + num(d.entregas), 0), tot:ls.reduce((a, d) => a + num(d.valor), 0), faltas:fl.length, prev:previstoMes(f, ym)};
   }).filter(x => x.f.ativo !== false || x.dias || x.faltas);
   const alertas = pessoas.filter(x => lim > 0 && x.faltas >= lim && x.f.ativo !== false);
   const dif = eq.entregas * num(S.config.taxaEntrega) - eq.pagoEntreg;
@@ -722,7 +758,7 @@ function rEquipe(){
   if (!S.ui.diaEq || !S.ui.diaEq.startsWith(ym)) S.ui.diaEq = ym === mesHoje ? dataHoje : `${ym}-01`;
   const tEnt = num(S.config.taxaEntrega);
   return `
-  <div class="top"><div><h2>Funcionários</h2><div class="sub">Lance cada dia trabalhado ou cada falta. O site calcula quanto pagar e avisa quem falta demais.</div></div></div>
+  <div class="top"><div><h2>Equipe</h2><div class="sub">Lance cada dia trabalhado ou cada falta. O site calcula quanto pagar e avisa quem falta demais.</div></div></div>
   ${alertas.map(x => `<div class="alerta">⚠ <b>${esc(x.f.nome)}</b> faltou <b>${x.faltas} vez${x.faltas === 1 ? '' : 'es'}</b> em ${nomeMes(ym, true)} (o limite é ${lim}). Vale conversar ou procurar outra pessoa.</div>`).join('')}
 
   <div class="card">
@@ -746,12 +782,8 @@ function rEquipe(){
 
   <div class="card">
     <div class="top" style="margin-top:0"><div><h2>Resumo de ${nomeMes(ym, true)}</h2><div class="sub">${eq.ls.length} dias lançados · ${eq.faltas.length} faltas</div></div></div>
-    ${pessoas.length ? `<div class="tblwrap"><table>
-      <tr><th>Funcionário</th><th class="n">Trabalhou</th><th class="n">Faltas</th><th class="n">Entregas</th><th class="n">A pagar</th></tr>
-      ${pessoas.map(x => `<tr><td>${esc(x.f.nome)}${x.f.ativo === false ? '<span class="tag">saiu</span>' : ''}${lim > 0 && x.faltas >= lim ? '<span class="tag bad">faltando demais</span>' : (x.faltas === 0 && x.dias ? '<span class="tag ok">sem faltas</span>' : '')}</td>
-        <td class="n">${x.dias} dia${x.dias === 1 ? '' : 's'}${x.prev ? ` <span class="sub">(${x.dEsc} de ${x.prev} da escala)</span>` : ''}</td><td class="n ${x.faltas >= lim && lim > 0 ? 'neg' : ''}">${x.faltas}</td><td class="n">${x.f.tipo === 'fixo' ? '—' : int(x.ent)}</td><td class="n"><b>${fmt(x.tot)}</b></td></tr>`).join('')}
-      <tr><td><b>Total</b></td><td></td><td class="n">${eq.faltas.length}</td><td class="n">${int(eq.entregas)}</td><td class="n"><b>${fmt(eq.total)}</b></td></tr>
-    </table></div>
+    ${pessoas.length ? `<div class="pcards">${pessoas.map(cardPessoa).join('')}</div>
+    <div class="kpis" style="margin:12px 0 0"><div class="card kpi"><div class="l">Total a pagar no mês</div><div class="v">${fmt(eq.total)}</div></div><div class="card kpi"><div class="l">Entregas no mês</div><div class="v">${int(eq.entregas)}</div></div><div class="card kpi"><div class="l">Faltas no mês</div><div class="v ${eq.faltas.length ? 'neg' : ''}">${eq.faltas.length}</div></div></div>
     <div class="resumo">
       <div class="r"><span>Pago aos entregadores (${int(eq.entregas)} entregas)</span><span>${fmt(eq.pagoEntreg)}</span></div>
       <div class="r"><span>Custo médio de cada entrega</span><span>${fmt(eq.entregas > 0 ? eq.pagoEntreg / eq.entregas : 0)}</span></div>
@@ -806,7 +838,7 @@ function gastosTotHTML(){
 }
 function rGastos(){
   return `
-  <div class="top"><div><h2>Gastos do mês</h2><div class="sub">Contas que chegam todo mês, vendendo ou não.</div></div>
+  <div class="top"><div><h2>Contas do mês</h2><div class="sub">Contas que chegam todo mês, vendendo ou não.</div></div>
     <button class="btn pri" data-act="addGasto">+ Adicionar gasto</button></div>
   <div class="dica">As contas são divididas entre <b>tudo que vende</b>. O gasto com funcionários e o número de vendas são <b>calculados sozinhos</b> pelos lançamentos. Ela não precisa digitar.</div>
   <div class="card">${S.gastos.length ? S.gastos.map(g => `
@@ -888,31 +920,42 @@ function mesesChart(){
     </div><div class="lab">${nomeMes(m)}</div></div>`).join('')}</div>
   <div class="legenda" style="margin-bottom:0"><span><i style="background:var(--acc)"></i>Faturamento</span><span><i style="background:var(--ok)"></i>Lucro</span><span><i style="background:var(--bad)"></i>Prejuízo</span></div>`;
 }
-function rVendas(){
+function rHoje(){
   const dia = S.ui.dia, canal = S.ui.canalDia, v = (S.vendas[dia] || {})[canal] || {};
   const ehEntrega = canal !== 'balcao';
   const grupos = [['hamburgueria','Hamburgueria'],['almoco','Almoço'],['combo','Combos'],['bebida','Bebidas']];
   const its = itensVenda();
   const linhas = grupos.map(([g, nome]) => { const ls = its.filter(i => i.grupo === g); return ls.length ? `<tr class="grp"><td colspan="2">${nome}</td></tr>` + ls.map(i => `<tr><td>${esc(i.nome)}</td><td class="n" style="width:110px"><input inputmode="numeric" data-k="venda" data-id="${i.id}" data-num="1" value="${nv(v[i.id] || '')}" placeholder="0"></td></tr>`).join('') : ''; }).join('');
+  return `
+  <div class="top"><div><h2>${dia === dataHoje ? 'Hoje' : dataBR(dia)} <span class="sub" style="font-weight:400">(${DIAS_NOME[dow(dia)]})</span></h2><div class="sub">Tudo do dia num lugar só: vendas, equipe e quanto sobrou. Salva sozinho.</div></div>
+    <div style="display:flex;gap:8px;align-items:flex-end">${dia !== dataHoje ? `<button class="btn" data-act="irHoje">Voltar para hoje</button>` : ''}<label class="f" style="width:180px">Dia<input type="date" data-k="dia" value="${dia}"></label></div></div>
+  <div class="kpis" id="dk">${diaResumoHTML()}</div>
+  <div class="hojeg">
+    <div class="card">
+      <h2>Equipe do dia</h2>
+      <div class="sub">Quem está na escala. Marque se trabalhou ou faltou.</div>
+      <div id="heq">${diaEqHTML(dia, 'Alguém fora da escala trabalhou? Lance na aba Equipe.')}</div>
+    </div>
+    <div class="card">
+      <h2>Vendas do dia</h2>
+      <div class="sub" style="margin-bottom:10px">Escolha o canal e coloque quanto vendeu de cada coisa.</div>
+      <div class="chips"><span class="lbl">Canal:</span>${chipsCanal(canal, 'canalDia')}</div>
+      ${ehEntrega ? `<div class="linha" style="padding-top:0"><label class="f" style="width:220px">Quantos pedidos (entregas) no ${esc(nomeCanal(canal))}<input inputmode="numeric" data-k="pedidos" data-num="1" value="${nv(v._pedidos || '')}" placeholder="0"></label><div class="sub" style="padding-bottom:10px">Usado para a taxa de entrega e o frete grátis.</div></div>` : ''}
+      <div class="tblwrap"><table><tr><th>Item</th><th class="n">Vendeu (${esc(nomeCanal(canal))})</th></tr>${linhas}</table></div>
+    </div>
+  </div>`;
+}
+function rRelatorios(){
   const ym = S.ui.mes;
   return `
-  <div class="top"><div><h2>Vendas do dia</h2><div class="sub">No fim do dia, escolha o canal e coloque quanto vendeu de cada coisa.</div></div>
-    <label class="f" style="width:180px">Dia<input type="date" data-k="dia" value="${dia}"></label></div>
-  <div class="kpis" id="dk">${diaResumoHTML()}</div>
-  <div class="card">
-    <div class="chips"><span class="lbl">Canal:</span>${chipsCanal(canal, 'canalDia')}</div>
-    ${ehEntrega ? `<div class="linha" style="padding-top:0"><label class="f" style="width:220px">Quantos pedidos (entregas) no ${esc(nomeCanal(canal))}<input inputmode="numeric" data-k="pedidos" data-num="1" value="${nv(v._pedidos || '')}" placeholder="0"></label><div class="sub" style="padding-bottom:10px">Usado para a taxa de entrega e o frete grátis.</div></div>` : ''}
-    <div class="tblwrap"><table><tr><th>Item</th><th class="n">Vendeu (${esc(nomeCanal(canal))})</th></tr>${linhas}</table></div>
-  </div>
-
-  <div class="top" style="margin-top:24px"><div><h2>Mês de ${nomeMes(ym, true)}</h2><div class="sub">Tudo somado a partir dos dias lançados.</div></div>${mesPicker()}</div>
+  <div class="top"><div><h2>Relatórios de ${nomeMes(ym, true)}</h2><div class="sub">Tudo somado a partir dos dias lançados em "Hoje".</div></div>${mesPicker()}</div>
   <div class="kpis" id="mk">${mesKPIs(ym)}</div>
   <div class="card"><h2>Evolução do mês</h2><div class="sub">Linha subindo = dinheiro entrando. O lucro já desconta funcionários e contas dia a dia.</div><div id="lchart">${linhaChart(ym)}</div></div>
   <div class="grid2">
     <div class="card"><h2>O que mais sai</h2><div class="legenda"><span><i style="background:var(--c-hb)"></i>Hamburgueria</span><span><i style="background:var(--c-al)"></i>Almoço</span><span><i style="background:var(--c-cb)"></i>Combos</span><span><i style="background:var(--c-bb)"></i>Bebidas</span></div><div id="vrank">${rankHTML(ym)}</div></div>
     <div>
       <div class="card"><h2>Por canal</h2><div id="vcanal">${canalHTML(ym)}</div></div>
-      <div class="card"><h2>Mês a mês</h2><div id="vmeses">${mesesChart()}</div></div>
+      <div class="card" style="margin-top:14px"><h2>Mês a mês</h2><div id="vmeses">${mesesChart()}</div></div>
     </div>
   </div>`;
 }
@@ -1088,6 +1131,7 @@ main.addEventListener('click', e => {
   else if (a === 'reativar') { byId(S.funcionarios, id).ativo = true; done(); }
   else if (a === 'delFunc') armar(b, () => { S.funcionarios = S.funcionarios.filter(f => f.id !== id); done(); });
   else if (a === 'escDia') { const f = byId(S.funcionarios, id); f.escala = f.escala || {dias:[], turno:(S.turnos[0] || {}).id}; const d = +b.dataset.d; f.escala.dias = f.escala.dias.includes(d) ? f.escala.dias.filter(x => x !== d) : [...f.escala.dias, d]; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
+  else if (a === 'irHoje') { S.ui.dia = dataHoje; S.ui.mes = mesHoje; done(); }
   else if (a === 'calDia') { S.ui.diaEq = b.dataset.v; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
   else if (a === 'qLancar' || a === 'qFalta') {
     const f = byId(S.funcionarios, id), data = b.dataset.v, turno = (f.escala && f.escala.turno) || (S.turnos[0] || {}).id;
