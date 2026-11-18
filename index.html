@@ -267,7 +267,7 @@ const COR_SETOR = {hamburgueria:'var(--c-hb)', almoco:'var(--c-al)', combo:'var(
 /* =================== EXEMPLO =================== */
 function pagEx(funcs, diarias){
   const out = [], f2 = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  funcs.filter(f => f.ativo !== false).forEach(f => {
+  funcs.forEach(f => {
     for (let back = 1; back < 70; back++) {
       const d = new Date(hoje); d.setDate(d.getDate() - back); if (d.getDay() !== 3) continue;
       const dom = new Date(d); dom.setDate(d.getDate() - 3); const seg = new Date(dom); seg.setDate(dom.getDate() - 6);
@@ -430,8 +430,9 @@ function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.fal
     const nl = S.turnos.find(t => /longa/i.test(t.nome)), fe = (S.funcoes || []).find(x => x.entrega);
     if (nl && fe && fe.valores && fe.valores[nl.id] && num(fe.valores[nl.id].porEntrega) === 10) fe.valores[nl.id].porEntrega = 12;
     S.turnosV2 = true;
-  } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
-S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
+  }
+  if (!S.exLucasPago) { S.funcionarios.filter(f => f.ativo === false && /exemplo/i.test(f.nome) && !S.pagamentos.some(p => p.func === f.id)).forEach(f => { const ls = S.diarias.filter(d => d.func === f.id).map(d => d.data).sort(); if (ls.length) S.pagamentos.push({id:uid(), func:f.id, data:ls[ls.length - 1], de:ls[0], ate:ls[ls.length - 1], valor:S.diarias.filter(d => d.func === f.id).reduce((a, d) => a + num(d.valor), 0)}); }); S.exLucasPago = true; } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
+S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; S.ui.saindo = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
 
 /* =================== CÁLCULOS =================== */
 function canais(){ return [{id:'balcao', nome:'Balcão'}, {id:'propria', nome:'Entrega própria'}, ...S.apps.map(a => ({id:a.id, nome:a.nome, app:a}))]; }
@@ -622,8 +623,8 @@ function rPainel(){
 
   return `
   <div class="kpis">
-    <div class="card kpi"><div class="l">Contas do mês</div><div class="v">${fmt(contasMes())}</div><div class="s">${fmt(totalFixos())} fixas + ${fmt(funcMensal().valor)} funcionários</div></div>
     <div class="card kpi"><div class="l">Faturamento de ${nomeMes(mesHoje, true)}</div><div class="v">${fmt(atual.fat)}</div><div class="s">${atual.temDados ? int(atual.itens) + ' lanches e pratos lançados no Caixa' : 'lance as vendas no "Caixa"'}</div></div>
+    <div class="card kpi"><div class="l">Contas até agora</div><div class="v">${fmt(atual.fixos + atual.func)}</div><div class="s">${fmt(atual.fixos)} fixas (até hoje) + ${fmt(atual.func)} equipe</div></div>
     <div class="card kpi"><div class="l">Lucro de ${nomeMes(mesHoje, true)}</div><div class="v ${atual.lucro >= 0 ? 'pos' : 'neg'}">${atual.temDados ? fmt(atual.lucro) : '—'}</div><div class="s">já tirando contas e equipe até hoje</div></div>
     <div class="card kpi"><div class="l">Mais lucrativo (${esc(nomeCanal(canal))})</div><div class="v" style="font-size:19px">${best ? emojiDe(best.p) + ' ' + esc(best.p.nome) : '—'}</div><div class="s">${best ? fmt(best.c.lucro) + ' em cada' : ''}</div></div>
   </div>
@@ -647,22 +648,7 @@ function rPainel(){
     ${barras || '<div class="vazio">Nada cadastrado aqui ainda.</div>'}
   </div>
 
-  <div class="grid2">
-    <div class="card">
-      <h2>Ponto de equilíbrio</h2>
-      <div class="sub">Quantas vendas por mês só para pagar as contas (fixas + funcionários), no canal ${esc(nomeCanal(canal))}.</div>
-      <div class="kpi"><div class="v">${equil ? int(equil) + ' vendas' : '—'}</div>
-      <div class="s">Cada venda deixa em média ${fmt(contrib)} depois de ingredientes, embalagem, taxas e entrega.</div></div>
-    </div>
-    <div class="card">
-      <h2>Simulador do mês</h2>
-      <div class="sub">E se vender essa quantidade (lanches + pratos) no canal ${esc(nomeCanal(canal))}?</div>
-      <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
-        <input style="width:120px" inputmode="numeric" data-k="cfg" data-f="sim" data-num="1" value="${nv(S.config.sim)}"> <span class="sub">vendas</span>
-      </div>
-      <div class="kpi" id="simres" style="margin-top:10px">${simTexto(contrib)}</div>
-    </div>
-  </div>`;
+`;
 }
 function simTexto(contrib){
   const sobra = num(S.config.sim) * contrib - contasMes();
@@ -733,6 +719,16 @@ function calcHTML(p){
       ${c.sugerido > 0 ? `<div class="sug">Para lucrar ${pct(num(S.config.margem))} nesse canal, o preço seria <b>${fmt(c.sugerido)}</b>${Math.abs(dif) >= 0.05 ? (dif > 0 ? ` (${fmt(dif)} a mais que hoje)` : ` (hoje já está ${fmt(-dif)} acima)`) : ''}.</div>` : ''}
     </div>`;
 }
+const comboDe = p => S.produtos.find(c => c.setor === 'combo' && (c.comp || [])[0] && c.comp[0].tipo === 'prod' && c.comp[0].id === p.id) || S.produtos.find(c => c.setor === 'combo' && (c.comp || []).some(x => x.tipo === 'prod' && x.id === p.id));
+function criarCombo(p){
+  const mod = S.produtos.find(c => c.setor === 'combo' && (c.comp || []).length > 1);
+  const extras = mod ? mod.comp.slice(1).map(x => ({...x})) : [];
+  const desc = mod ? Math.max(0, precoSeparado(mod) - num(mod.preco)) : 0;
+  const c = {id:uid(), nome:'Combo ' + p.nome, setor:'combo', emoji:'🎁', itens:[], comp:[{tipo:'prod', id:p.id, qtd:1}, ...extras], precoApp:0};
+  c.preco = Math.max(0, Math.round((precoSeparado(c) - desc) * 100) / 100);
+  if (mod && num(mod.precoApp)) c.precoApp = Math.round((c.preco + (num(mod.precoApp) - num(mod.preco))) * 100) / 100;
+  S.produtos.push(c); return c;
+}
 function rCardapio(){
   const st = S.ui.setor, lista = S.produtos.filter(p => p.setor === st);
   const novo = {hamburgueria:'lanche', almoco:'prato', combo:'combo'}[st];
@@ -749,6 +745,7 @@ function rCardapio(){
         ${p.setor !== 'combo' ? `<label class="f" style="flex:0 1 140px">Setor<select data-k="prod" data-id="${p.id}" data-f="setor">${['hamburgueria','almoco'].map(k => `<option value="${k}" ${p.setor === k ? 'selected' : ''}>${SETORES[k]}</option>`).join('')}</select></label>` : ''}
         <label class="f" style="flex:0 1 120px">Preço (R$)<input inputmode="decimal" data-k="prod" data-id="${p.id}" data-f="preco" data-num="1" value="${nv(p.preco)}"></label>
         <div class="f">Apps<button class="btn" data-act="precoApps" data-id="${p.id}">📱 Preços nos apps${Object.keys(p.precos || {}).length ? ` (${Object.keys(p.precos).length})` : ''}</button></div>
+        ${p.setor !== 'combo' ? (cb => cb ? `<div class="f">Combo<button class="btn" data-act="goCombo" data-id="${cb.id}">🎁 ${fmt(num(cb.preco))} · editar</button></div>` : `<div class="f">Combo<button class="btn" data-act="mkCombo" data-id="${p.id}">🎁 Criar combo</button></div>`)(comboDe(p)) : ''}
         <button class="btn" data-act="dupProd" data-id="${p.id}">Duplicar</button>
         <button class="btn del" data-act="delProd" data-id="${p.id}">Excluir</button>
       </div>
@@ -933,12 +930,15 @@ function pendente(f){
   const pg = S.pagamentos.filter(p => p.func === f.id).sort((a, b) => a.ate.localeCompare(b.ate));
   const ult = pg[pg.length - 1], desde = ult ? ult.ate : '';
   const prox = proxPag(f), pd = new Date(prox + 'T12:00'), dom = new Date(pd); dom.setDate(pd.getDate() - (pd.getDay() === 0 ? 7 : pd.getDay()));
-  const ate = ymd(dom), seg = new Date(dom); seg.setDate(dom.getDate() - 6);
+  const tudo = f.ativo === false || +f.pagaDia === 7;
+  const ate = tudo ? dataHoje : ymd(dom), seg = new Date(dom); seg.setDate(dom.getDate() - 6);
   const ls = S.diarias.filter(d => d.func === f.id && d.data > desde && d.data <= ate);
   const andam = S.diarias.filter(d => d.func === f.id && d.data > (desde > ate ? desde : ate) && d.data <= dataHoje);
-  return {ult, desde, ate, seg:ymd(seg), prox, ls, total: ls.reduce((a, d) => a + num(d.valor), 0), dias: new Set(ls.map(d => d.data)).size, andamento: andam.reduce((a, d) => a + num(d.valor), 0)};
+  return {ult, desde, ate, seg: tudo ? (ls.map(d => d.data).sort()[0] || dataHoje) : ymd(seg), prox, tudo, ls, total: ls.reduce((a, d) => a + num(d.valor), 0), dias: new Set(ls.map(d => d.data)).size, andamento: andam.reduce((a, d) => a + num(d.valor), 0)};
 }
+const pagaTxt = f => +f.pagaDia === 7 ? 'paga todo dia' : 'paga toda ' + DIAS_NOME[f.pagaDia == null ? 3 : +f.pagaDia];
 function proxPag(f){
+  if (+f.pagaDia === 7) return dataHoje;
   const alvo = f.pagaDia == null ? 3 : +f.pagaDia;
   for (let i = 0; i < 7; i++) { const d = new Date(hoje); d.setDate(d.getDate() + i); if (d.getDay() === alvo) return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
   return dataHoje;
@@ -947,16 +947,19 @@ function rPagamentos(){
   const ym = S.ui.mes, ats = ativos(), lim = num(S.config.limiteFaltas);
   const pm = pessoasMes(ym), byF = id => pm.find(x => x.f.id === id);
   const totalPend = ats.reduce((a, f) => a + pendente(f).total, 0), eq = equipeMes(ym);
-  const lista = [...ats, ...S.funcionarios.filter(f => f.ativo === false && byF(f.id))];
+  const devendo = S.funcionarios.filter(f => f.ativo === false && pendente(f).total > 0);
+  const lista = [...ats, ...S.funcionarios.filter(f => f.ativo === false && (byF(f.id) || devendo.includes(f)))];
+  const totDev = devendo.reduce((a, f) => a + pendente(f).total, 0);
   const hist = S.ui.hist && byId(S.funcionarios, S.ui.hist);
   return `
   <div class="top" style="margin-top:0"><div><h2>Pagamentos de ${nomeMes(ym, true)}</h2><div class="sub">A semana vai de segunda a domingo e é paga no dia escolhido da semana seguinte. Toque em 📜 para ver o histórico.</div></div>${mesPicker()}</div>
   <div class="kpis">
     <div class="card kpi"><div class="l">Próximos pagamentos (todos)</div><div class="v">${fmt(totalPend)}</div><div class="s">semanas fechadas que ainda não foram pagas</div></div>
+    ${totDev > 0 ? `<div class="card kpi" style="border-color:#6b2a25"><div class="l">Devendo a quem saiu</div><div class="v neg">${fmt(totDev)}</div><div class="s">${devendo.map(f => esc(curto(f.nome))).join(', ')}</div></div>` : ''}
     <div class="card kpi"><div class="l">Equipe no mês</div><div class="v">${fmt(eq.total)}</div><div class="s">${int(eq.entregas)} entregas · ${eq.faltas.length} faltas</div></div>
   </div>
   <div class="pcards">${lista.map(f => {
-    const x = byF(f.id) || {dias:0, faltas:0, ent:0, tot:0, prev:0, dEsc:0, turnos:[]}, p = pendente(f), prox = proxPag(f), ehHoje = prox === dataHoje;
+    const x = byF(f.id) || {dias:0, faltas:0, ent:0, tot:0, prev:0, dEsc:0, turnos:[]}, p = pendente(f), prox = proxPag(f), ehHoje = prox === dataHoje || f.ativo === false;
     const ruim = lim > 0 && x.faltas >= lim, ent = ehEnt(f), aberto = S.ui.hist === f.id;
     const tag = f.ativo === false ? '<span class="tag">saiu</span>' : ruim ? '<span class="tag bad">faltando demais</span>' : (x.faltas === 0 && x.dias ? '<span class="tag ok">sem faltas</span>' : '');
     return `<div class="pcard ${ruim ? 'alerta-c' : ''} ${aberto ? 'sel-c' : ''}">
@@ -969,9 +972,9 @@ function rPagamentos(){
         <div><div class="l">${ent ? 'Entregas' : 'Diária'}</div><div class="v">${ent ? int(x.ent) : fmt(valoresDe(f, byId(S.turnos, f.escala && f.escala.turno)).minimo)}</div><div class="s">${ent && x.dias ? (x.ent / x.dias).toLocaleString('pt-BR', {maximumFractionDigits:1}) + ' por dia' : ''}</div></div>
         <div><div class="l">Ganhou no mês</div><div class="v">${fmt(x.tot)}</div><div class="s"></div></div>
       </div>
-      ${f.ativo !== false ? `<div class="pagbox">
-        <div><div class="l">Pagar ${ehHoje ? '<b class="pos">hoje!</b>' : 'em ' + dataBR(prox).slice(0, 5)}</div><div class="v">${fmt(p.total)}</div><div class="s">${p.dias ? `${p.dias} dia${p.dias === 1 ? '' : 's'} · semana ${dataBR(p.seg).slice(0, 5)} a ${dataBR(p.ate).slice(0, 5)}` : 'nada pendente'}</div></div>
-        <div><div class="l">Paga toda</div><select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>${n}</option>`).join('')}</select><div class="s">semana atual: ${fmt(p.andamento)}</div></div>
+      ${f.ativo !== false || p.total > 0 ? `<div class="pagbox">
+        <div><div class="l">Pagar ${ehHoje ? '<b class="pos">hoje!</b>' : 'em ' + dataBR(prox).slice(0, 5)}</div><div class="v">${fmt(p.total)}</div><div class="s">${p.dias ? `${p.dias} dia${p.dias === 1 ? '' : 's'} · ${p.tudo ? 'de' : 'semana'} ${dataBR(p.seg).slice(0, 5)} a ${dataBR(p.ate).slice(0, 5)}` : 'nada pendente'}</div></div>
+        <div><div class="l">Paga toda</div><select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>${n}</option>`).join('')}<option value="7" ${+f.pagaDia === 7 ? 'selected' : ''}>todo dia</option></select><div class="s">${p.tudo ? 'paga o que trabalhou' : 'semana atual: ' + fmt(p.andamento)}</div></div>
       </div>
       <button class="btn bottom ${p.total > 0 ? 'pri' : ''}" data-act="pagarFunc" data-id="${f.id}" ${p.total > 0 ? '' : 'disabled'}>Marcar como pago (${fmt(p.total)})</button>` : ''}
     </div>`; }).join('') || '<div class="vazio">Ninguém na equipe.</div>'}</div>
@@ -985,13 +988,13 @@ function histHTML(f, ym){
   const reg = [...ls, ...fl, ...ds].sort((a, b) => b.data.localeCompare(a.data));
   const ent = ehEnt(f);
   return `<div class="card" style="margin-top:14px" id="histbox">
-    <div class="top" style="margin:0 0 8px"><div><h2>📜 Histórico de ${esc(f.nome)} · ${nomeMes(ym, true)}</h2><div class="sub">Cada dia trabalhado, com as entregas e o horário de cada uma.</div></div><button class="btn x" data-act="hist" data-id="${f.id}">Fechar</button></div>
+    <div class="top" style="margin:0 0 8px"><div><h2>📜 Histórico de ${esc(f.nome)} · ${nomeMes(ym, true)}</h2><div class="sub">Cada dia trabalhado no mês.</div></div><button class="btn x" data-act="hist" data-id="${f.id}">Fechar</button></div>
     ${reg.length ? `<div class="tblwrap"><table>
-      <tr><th>Dia</th><th>Turno</th>${ent ? '<th class="n">Entregas</th><th>Horários</th>' : ''}<th class="n">Valor</th><th></th></tr>
+      <tr><th>Dia</th><th>Turno</th>${ent ? '<th class="n">Entregas</th>' : ''}<th class="n">Valor</th><th></th></tr>
       ${reg.map(r => { const tu = byId(S.turnos, r.turno);
-        if (r.t === 'f') return `<tr class="falta"><td>${dataBR(r.data).slice(0, 5)} <span class="sub">${DIAS_NOME[dow(r.data)]}</span></td><td colspan="${ent ? 3 : 1}">faltou</td><td class="n">—</td><td class="n"><button class="btn x del" data-act="delFalta" data-id="${r.id}">✕</button></td></tr>`;
-        if (r.t === 'd') return `<tr><td>${dataBR(r.data).slice(0, 5)} <span class="sub">${DIAS_NOME[dow(r.data)]}</span></td><td colspan="${ent ? 3 : 1}" class="sub">não precisou</td><td class="n">—</td><td class="n"><button class="btn x" data-act="undoDisp" data-id="${r.id}">✕</button></td></tr>`;
-        return `<tr><td>${dataBR(r.data).slice(0, 5)} <span class="sub">${DIAS_NOME[dow(r.data)]}</span></td><td>${esc(tu ? tu.nome : '—')}</td>${ent ? `<td class="n">${int(r.entregas)}</td><td class="sub" style="font-size:12px">${(r.horas || []).join(' · ')}</td>` : ''}<td class="n"><b>${fmt(r.valor)}</b></td>
+        if (r.t === 'f') return `<tr class="falta"><td>${dataBR(r.data).slice(0, 5)} <span class="sub">${DIAS_NOME[dow(r.data)]}</span></td><td colspan="${ent ? 2 : 1}">faltou</td><td class="n">—</td><td class="n"><button class="btn x del" data-act="delFalta" data-id="${r.id}">✕</button></td></tr>`;
+        if (r.t === 'd') return `<tr><td>${dataBR(r.data).slice(0, 5)} <span class="sub">${DIAS_NOME[dow(r.data)]}</span></td><td colspan="${ent ? 2 : 1}" class="sub">não precisou</td><td class="n">—</td><td class="n"><button class="btn x" data-act="undoDisp" data-id="${r.id}">✕</button></td></tr>`;
+        return `<tr><td>${dataBR(r.data).slice(0, 5)} <span class="sub">${DIAS_NOME[dow(r.data)]}</span></td><td>${esc(tu ? tu.nome : '—')}</td>${ent ? `<td class="n">${int(r.entregas)}</td>` : ''}<td class="n"><b>${fmt(r.valor)}</b></td>
           <td class="n" style="white-space:nowrap"><button class="btn x del" data-act="delLanc" data-id="${r.id}">✕</button></td></tr>`; }).join('')}
     </table></div>` : '<div class="vazio">Nada neste mês.</div>'}
     ${pg.length ? `<div class="resumo"><div class="ttl">Pagamentos feitos no mês</div>${pg.map(p => `<div class="r"><span>${dataBR(p.data)} ${p.de ? `(${dataBR(p.de).slice(0, 5)} a ${dataBR(p.ate).slice(0, 5)})` : ''}</span><span>${fmt(p.valor)} <button class="btn x del" data-act="delPag" data-id="${p.id}">✕</button></span></div>`).join('')}</div>` : ''}
@@ -1040,7 +1043,7 @@ function rPessoas(){
         <button class="btn x" data-act="editFunc" data-id="${f.id}">${ed === f.id ? 'Fechar' : 'Editar'}</button></div>
       <div class="mini">${DIAS.map((l, i) => `<span class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}">${l}</span>`).join('')}</div>
       <div class="sub">${esc(tLabel(tu))}${f.escala?.fim ? ' · contrato até ' + dataBR(f.escala.fim) : ''}</div>
-      <div class="sub">💰 ${tu ? (ehEnt(f) ? `${fmt(v.minimo)} fixo ou ${fmt(v.porEntrega)} por entrega` : `${fmt(v.minimo)} por dia`) : '—'} · paga toda ${DIAS_NOME[f.pagaDia == null ? 3 : +f.pagaDia]}</div>
+      <div class="sub">💰 ${tu ? (ehEnt(f) ? `${fmt(v.minimo)} fixo ou ${fmt(v.porEntrega)} por entrega` : `${fmt(v.minimo)} por dia`) : '—'} · ${pagaTxt(f)}</div>
       ${ed === f.id ? `<div class="edit">
         <label class="f">Nome<input data-k="func" data-id="${f.id}" data-f="nome" value="${esc(f.nome)}"></label>
         <div class="row2"><label class="f">Função<select data-k="func" data-id="${f.id}" data-f="funcao">${optsFn(f)}</select></label>
@@ -1048,7 +1051,7 @@ function rPessoas(){
         <div class="f">Dias combinados<div class="dias">${DIAS.map((l, i) => `<button class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}" data-act="escDia" data-id="${f.id}" data-d="${i}" title="${DIAS_NOME[i]}">${l}</button>`).join('')}</div></div>
         <div class="row2"><label class="f">Contrato de<input type="date" data-k="func" data-id="${f.id}" data-f="escIni" value="${f.escala?.ini || ''}"></label>
         <label class="f">até (vazio = sem fim)<input type="date" data-k="func" data-id="${f.id}" data-f="escFim" value="${f.escala?.fim || ''}"></label></div>
-        <label class="f">Dia de pagamento<select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>Toda ${n}</option>`).join('')}</select></label>
+        <label class="f">Dia de pagamento<select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>Toda ${n}</option>`).join('')}<option value="7" ${+f.pagaDia === 7 ? 'selected' : ''}>Todo dia (no fim do dia)</option></select></label>
         <div class="sub">Quanto ganha é definido pela função, em ⏰ Turnos.</div>
         <button class="btn" data-act="inativar" data-id="${f.id}">Saiu da equipe</button>
       </div>` : ''}
@@ -1093,12 +1096,18 @@ function rEquipe(){
   if (!S.ui.diaEq || !S.ui.diaEq.startsWith(ym)) S.ui.diaEq = ym === mesHoje ? dataHoje : `${ym}-01`;
   const alertas = pessoasMes(ym).filter(x => lim > 0 && x.faltas >= lim && x.f.ativo !== false);
   const ats = ativos(), f0 = ats[0];
+  const sai = S.ui.saindo && byId(S.funcionarios, S.ui.saindo), saiP = sai ? pendente({...sai, ativo:false}) : null;
+  const saiModal = sai ? `<div class="modal-bg" data-act="saiCancel"><div class="modal" data-act="noop">
+    <h2>${esc(sai.nome)} vai sair da equipe</h2>
+    <div class="sub" style="margin:6px 0 12px">Ainda tem <b style="color:var(--txt)">${fmt(saiP.total)}</b> para receber (${saiP.dias} dia${saiP.dias === 1 ? '' : 's'} trabalhado${saiP.dias === 1 ? '' : 's'} que não foram pagos).</div>
+    <div class="cgrid"><button class="cbtn" data-act="saiPagar"><span>✅</span>Pagar tudo agora<br><span class="sub" style="font-size:12px">${fmt(saiP.total)}</span></button><button class="cbtn" data-act="saiDever"><span>📌</span>Pagar depois<br><span class="sub" style="font-size:12px">fica em Pagamentos</span></button></div>
+    <button class="btn" style="width:100%;margin-top:10px" data-act="saiCancel">Cancelar</button></div></div>` : '';
   const corpo = ({escala:() => rEscala(ym), pagamentos:rPagamentos, pessoas:rPessoas, turnos:rTurnos}[sub] || (() => rEscala(ym)))();
   return `
   <div class="top"><div><h2>Equipe</h2></div></div>
   <div class="chips">${SUBEQ.map(([k, n]) => `<button class="chip ${sub === k ? 'on' : ''}" data-act="eqTab" data-v="${k}">${n}</button>`).join('')}</div>
   ${alertas.map(x => `<div class="alerta">⚠ <b>${esc(x.f.nome)}</b> faltou <b>${x.faltas} vez${x.faltas === 1 ? '' : 'es'}</b> em ${nomeMes(ym, true)} (o limite é ${lim}). Vale conversar ou procurar outra pessoa.</div>`).join('')}
-  ${corpo}
+  ${corpo}${saiModal}
   `;
 }
 
@@ -1255,9 +1264,10 @@ const turnoEqAdd = () => (S.ui.eqAddTurno && byId(S.turnos, S.ui.eqAddTurno)) ||
 const precisaPedido = c => c !== 'balcao';
 const lojaEntrega = c => c === 'propria' || ((byId(S.apps, c) || {}).quemEntrega === 'loja');
 function vender(item, canal, entId, novo){
+  const qtd = Math.max(1, +S.ui.vendaQtd || 1);
   const d = S.ui.dia, key = `${S.ui.periodo}|${canal}`;
   S.vendas[d] = S.vendas[d] || {}; const v = S.vendas[d][key] = S.vendas[d][key] || {};
-  v[item] = num(v[item]) + 1;
+  v[item] = num(v[item]) + qtd;
   let lanc = null, ped = false;
   if (novo && canal !== 'balcao') { v._pedidos = num(v._pedidos) + 1; ped = true; }
   if (entId && novo) {
@@ -1268,14 +1278,14 @@ function vender(item, canal, entId, novo){
       l.entregas = num(l.entregas) + 1; l.horas = (l.horas || []).concat(horaAgora()); l.valor = pagar(entId, t.id, l.entregas); lanc = l.id;
     }
   }
-  S.vendaLog.push({id:uid(), data:d, key, item, ped, lanc}); if (S.vendaLog.length > 400) S.vendaLog = S.vendaLog.slice(-400);
+  S.vendaLog.push({id:uid(), data:d, key, item, ped, lanc, qtd}); if (S.vendaLog.length > 400) S.vendaLog = S.vendaLog.slice(-400);
 }
 function desfazerVenda(item){
   const d = S.ui.dia, pre = S.ui.periodo + '|', dia = S.vendas[d] || {};
   let i = -1; for (let k = S.vendaLog.length - 1; k >= 0; k--) { const x = S.vendaLog[k]; if (x.data === d && x.item === item && x.key.startsWith(pre)) { i = k; break; } }
   if (i >= 0) {
     const x = S.vendaLog[i], v = dia[x.key] || {};
-    if (num(v[item]) > 0) { v[item] = num(v[item]) - 1; if (!v[item]) delete v[item]; }
+    if (num(v[item]) > 0) { v[item] = Math.max(0, num(v[item]) - (x.qtd || 1)); if (!v[item]) delete v[item]; }
     if (x.ped && num(v._pedidos) > 0) { v._pedidos = num(v._pedidos) - 1; if (!v._pedidos) delete v._pedidos; }
     const l = x.lanc && byId(S.diarias, x.lanc);
     if (l) { l.entregas = Math.max(0, num(l.entregas) - 1); if (l.horas) l.horas.pop(); l.valor = pagar(l.func, l.turno, l.entregas); }
@@ -1340,8 +1350,10 @@ function vendaModal(){
   const it = byId(S.produtos, S.ui.vendaPop) || byId(S.revenda, S.ui.vendaPop); if (!it) return '';
   const combos = S.produtos.filter(p => p.setor === 'combo' && (p.comp || []).some(c => c.tipo === 'prod' && c.id === it.id));
   const cb = S.ui.vendaCombo && byId(S.produtos, S.ui.vendaCombo), alvo = cb || it;
-  const head = `<div class="top" style="margin:0 0 4px"><h2>${emojiDe(alvo)} ${esc(alvo.nome)} <span class="sub" style="font-weight:400">${fmt(num(alvo.preco))}</span></h2><button class="btn x" data-act="vClose">✕</button></div>
-    ${combos.length ? `<div class="chips" style="margin:6px 0 4px"><button class="chip ${!cb ? 'on' : ''}" data-act="vCombo" data-v="">Só ${esc(it.nome)}</button>${combos.map(c => `<button class="chip ${cb && cb.id === c.id ? 'on' : ''}" data-act="vCombo" data-v="${c.id}">🎁 ${esc(c.nome)} · ${fmt(num(c.preco))}</button>`).join('')}</div>` : ''}`;
+  const q = S.ui.vendaQtd || 1;
+  const qtdChips = `<div class="chips" style="margin:6px 0 2px"><span class="lbl">Quantidade:</span>${[1,2,3,4,5,6].map(n => `<button class="chip ${q === n ? 'on' : ''}" data-act="vQtd" data-v="${n}">${n}</button>`).join('')}</div>`;
+  const head = `<div class="top" style="margin:0 0 4px"><h2>${q > 1 ? q + '× ' : ''}${emojiDe(alvo)} ${esc(alvo.nome)} <span class="sub" style="font-weight:400">${fmt(num(alvo.preco))}</span></h2><button class="btn x" data-act="vClose">✕</button></div>
+    ${combos.length ? `<div class="chips" style="margin:6px 0 4px"><button class="chip ${!cb ? 'on' : ''}" data-act="vCombo" data-v="">Só ${esc(it.nome)}</button>${combos.map(c => `<button class="chip ${cb && cb.id === c.id ? 'on' : ''}" data-act="vCombo" data-v="${c.id}">🎁 ${esc(c.nome)} · ${fmt(num(c.preco))}</button>`).join('')}</div>` : ''}${S.ui.vendaCanal ? '' : qtdChips}`;
   if (!S.ui.vendaCanal) return `<div class="modal-bg" data-act="vClose"><div class="modal" data-act="noop">${head}
     <div class="sub">Onde foi essa venda? (${SETOR2[S.ui.periodo].em} ${SETOR2[S.ui.periodo].nome})</div>
     <div class="cgrid">${canais().map(c => `<button class="cbtn" data-act="vCanal" data-v="${c.id}"><span>${EMO_CANAL(c.id)}</span>${esc(c.nome)}</button>`).join('')}</div></div></div>`;
@@ -1589,17 +1601,24 @@ main.addEventListener('click', e => {
   else if (a === 'addTurno') { S.turnos.push({id:uid(), nome:'Novo turno', ini:'', fim:'', minimo:0, porEntrega:0}); done(); }
   else if (a === 'delTurno') armar(b, () => { S.turnos = S.turnos.filter(t => t.id !== id); done(); });
   else if (a === 'addFunc') { const n = {id:uid(), nome:'Novo funcionário', funcao:(S.funcoes[0] || {}).id, diaria:0, ativo:true, pagaDia:3, escala:{dias:[], turno:(S.turnos[0] || {}).id}}; S.funcionarios.push(n); S.ui.editFunc = n.id; done(); }
-  else if (a === 'inativar') { const f = byId(S.funcionarios, id); armar(b, () => { f.ativo = false; done(); }, 'Saiu mesmo?'); }
+  else if (a === 'inativar') { const f = byId(S.funcionarios, id); const pend = pendente({...f, ativo:false}).total; if (pend > 0) { S.ui.saindo = id; done(); } else armar(b, () => { f.ativo = false; done(); }, 'Saiu mesmo?'); }
+  else if (a === 'saiCancel') { S.ui.saindo = null; done(); }
+  else if (a === 'saiDever' || a === 'saiPagar') {
+    const f = byId(S.funcionarios, S.ui.saindo); if (!f) return; f.ativo = false; S.ui.saindo = null; S.ui.editFunc = null;
+    if (a === 'saiPagar') { const p = pendente(f); if (p.total > 0) S.pagamentos.push({id:uid(), func:f.id, data:dataHoje, de:p.ls.map(d => d.data).sort()[0], ate:dataHoje, valor:p.total}); toast('Pago e retirado da equipe'); }
+    else toast('Retirado da equipe. O valor fica em Pagamentos.');
+    done();
+  }
   else if (a === 'reativar') { byId(S.funcionarios, id).ativo = true; done(); }
   else if (a === 'delFunc') armar(b, () => { S.funcionarios = S.funcionarios.filter(f => f.id !== id); done(); });
   else if (a === 'escDia') { const f = byId(S.funcionarios, id); f.escala = f.escala || {dias:[], turno:(S.turnos[0] || {}).id}; const d = +b.dataset.d; f.escala.dias = f.escala.dias.includes(d) ? f.escala.dias.filter(x => x !== d) : [...f.escala.dias, d]; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
   else if (a === 'irHoje') { S.ui.dia = dataHoje; S.ui.mes = mesHoje; done(); }
   else if (a === 'noop') { return; }
   else if (a === 'vCombo') { S.ui.vendaCombo = b.dataset.v || null; const y = window.scrollY; done(); window.scrollTo(0, y); }
-  else if (a === 'vmais') { S.ui.vendaPop = id; S.ui.vendaCanal = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'vmais') { S.ui.vendaPop = id; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'vCanal') {
     const c = b.dataset.v; if (precisaPedido(c)) { S.ui.vendaCanal = c; const y = window.scrollY; done(); window.scrollTo(0, y); return; }
-    vender(S.ui.vendaCombo || S.ui.vendaPop, c, null, false); S.ui.vendaPop = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); toast('Venda registrada');
+    vender(S.ui.vendaCombo || S.ui.vendaPop, c, null, false); S.ui.vendaPop = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); toast((S.ui.vendaQtd > 1 ? S.ui.vendaQtd + ' vendas registradas' : 'Venda registrada'));
   }
   else if (a === 'vEnt') {
     const ent = b.dataset.v || null, novo = b.dataset.novo === '1';
@@ -1631,6 +1650,9 @@ main.addEventListener('click', e => {
   }
   else if (a === 'periodo') { S.ui.periodo = b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'irEquipe') { aba = 'equipe'; S.ui.eqTab = 'escala'; S.ui.diaEq = S.ui.dia; try { history.replaceState(null, '', '#equipe'); } catch(_) {} done(); window.scrollTo(0, 0); }
+  else if (a === 'mkCombo') { const pr = byId(S.produtos, id); const c = criarCombo(pr); const y = window.scrollY; done(); window.scrollTo(0, y); toast(`${c.nome} criado por ${fmt(c.preco)}. Ajuste em Combos.`); }
+  else if (a === 'goCombo') { S.ui.setor = 'combo'; done(); const el = document.getElementById('calc-' + id); if (el) el.closest('.card').scrollIntoView({behavior:'smooth', block:'start'}); }
+  else if (a === 'vQtd') { S.ui.vendaQtd = +b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'precoApps') { S.ui.precoApps = S.ui.precoApps === id ? null : id; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'emPick') { S.ui.emPick = S.ui.emPick === id ? null : id; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'emSet') { const x = byId(S.produtos, id) || byId(S.revenda, id); if (x) x.emoji = b.dataset.v; S.ui.emPick = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
