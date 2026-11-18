@@ -135,6 +135,25 @@ details.outros{margin-top:14px}details.outros summary{cursor:pointer;color:var(-
 .tdias{display:flex;gap:3px}.tdias button{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font-size:11px;font-weight:600;cursor:pointer}
 .tdias button.on{background:var(--acc);color:#1a1206;border-color:var(--acc)}
 .papps{display:flex;flex-wrap:wrap;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 12px}
+.cxgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start;margin-bottom:14px}
+.cxside{position:sticky;top:76px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 90px);overflow:auto}
+@media(max-width:1000px){.cxgrid{grid-template-columns:1fr}.cxside{position:static;max-height:none}}
+.cline{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.cline .em{font-size:24px}.cline .nm{font-weight:600;font-size:14px}
+.cq{display:flex;align-items:center;gap:6px}.cq button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;font-size:16px}
+.cq b{min-width:18px;text-align:center}
+.lnk{background:none;border:0;color:var(--acc);font:inherit;font-size:12px;cursor:pointer;padding:0;text-decoration:underline}
+.ctot{display:flex;justify-content:space-between;padding:10px 0;font-size:15px}.ctot b{font-size:20px}
+.vbadge{position:absolute;top:8px;right:8px;background:var(--acc);color:#1a1206;border-radius:999px;min-width:22px;height:22px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.vbody{position:relative}
+.hped{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;background:var(--card2)}
+.hped.on{border-color:var(--acc)}
+.hhead{display:flex;gap:8px;align-items:center;width:100%;background:none;border:0;color:var(--txt);font:inherit;font-size:13px;cursor:pointer;padding:0 0 4px}
+.hedit{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+.fstep{font-weight:600;font-size:14px;color:var(--acc);margin:14px 0 8px}
+.entb.sel{border-color:var(--ok)}
+.cartbar{display:none}
+@media(max-width:1000px){.cartbar{display:block;position:fixed;left:12px;right:12px;bottom:12px;z-index:16;background:var(--acc);color:#1a1206;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:700;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.5);cursor:pointer}}
 .hojeg{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
 .hojeg .card{margin-bottom:0}
 @media(max-width:900px){.hojeg{grid-template-columns:1fr}}
@@ -418,7 +437,7 @@ function migrarFuncoes(){
   S.funcoes = [ent, coz];
   S.funcionarios.forEach(f => { if (!f.funcao) f.funcao = f.tipo === 'fixo' ? 'fn_coz' : 'fn_ent'; });
 }
-function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.extras = S.extras || []; S.dispensas = S.dispensas || []; S.pagamentos = S.pagamentos || []; S.entLog = S.entLog || []; S.vendaLog = S.vendaLog || []; migrarFuncoes();
+function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.extras = S.extras || []; S.dispensas = S.dispensas || []; S.pagamentos = S.pagamentos || []; S.entLog = S.entLog || []; S.vendaLog = S.vendaLog || []; S.pedidos = S.pedidos || []; migrarFuncoes();
   if (!S.turnosV2) {
     S.turnos.forEach(t => {
       if (!t.ini) {
@@ -432,11 +451,11 @@ function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.fal
     S.turnosV2 = true;
   }
   if (!S.exLucasPago) { S.funcionarios.filter(f => f.ativo === false && /exemplo/i.test(f.nome) && !S.pagamentos.some(p => p.func === f.id)).forEach(f => { const ls = S.diarias.filter(d => d.func === f.id).map(d => d.data).sort(); if (ls.length) S.pagamentos.push({id:uid(), func:f.id, data:ls[ls.length - 1], de:ls[0], ate:ls[ls.length - 1], valor:S.diarias.filter(d => d.func === f.id).reduce((a, d) => a + num(d.valor), 0)}); }); S.exLucasPago = true; } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
-S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; S.ui.saindo = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
+S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; S.ui.saindo = null; S.ui.fechar = false; S.ui.pedEdit = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
 
 /* =================== CÁLCULOS =================== */
 function canais(){ return [{id:'balcao', nome:'Balcão'}, {id:'propria', nome:'Entrega própria'}, ...S.apps.map(a => ({id:a.id, nome:a.nome, app:a}))]; }
-const nomeCanal = id => (canais().find(c => c.id === id) || {nome:'?'}).nome;
+const nomeCanal = id => id === 'whats' ? 'WhatsApp/Telefone' : (canais().find(c => c.id === id) || {nome:'?'}).nome;
 const custoUn = i => num(i.rende) > 0 ? num(i.preco) / num(i.rende) : 0;
 const totalFixos = () => S.gastos.reduce((a, g) => a + num(g.valor), 0);
 const custoItem = it => { const i = byId(S.ingredientes, it.ing); return i ? custoUn(i) * num(it.qtd) : 0; };
@@ -551,6 +570,12 @@ function resultadoDia(data){
     const pc = porCanal[canal] = porCanal[canal] || {fat:0, contrib:0, pedidos:0}; pc.fat += cf; pc.contrib += cc; pc.pedidos += ped;
     fat += cf; contrib += cc;
   });
+  (S.pedidos || []).filter(p => p.data === data).forEach(pd => {
+    const c = calcPedido(pd), share = c.cheio > 0 ? c.valor / c.cheio : 1;
+    fat += c.valor; contrib += c.contrib; itens += c.itens; addS(pd.periodo, c.valor, c.contrib, c.itens);
+    const pc = porCanal[pd.origem] = porCanal[pd.origem] || {fat:0, contrib:0, pedidos:0}; pc.fat += c.valor; pc.contrib += c.contrib; pc.pedidos++;
+    c.linhas.forEach(l => { const f = l.preco * l.q * share, pi = porItem[l.id] = porItem[l.id] || {q:0, fat:0, lucro:0}; pi.q += l.q; pi.fat += f; pi.lucro += c.cheio > 0 ? c.contrib * (l.preco * l.q / c.cheio) : 0; });
+  });
   return {fat, contrib, itens, porCanal, porItem, porSetor};
 }
 function resultadoMes(ym){
@@ -587,7 +612,7 @@ function render(){
   document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
   document.getElementById('nav').innerHTML = GRUPOS.map(([gk, gn, abas]) => { const on = grupoDe(aba) === gk; return `<button class="gbtn ${on ? 'on' : ''}" data-tab="${abas[0][0]}">${gn} ${on ? '▾' : '▸'}</button>` + (on ? abas.map(([k, n]) => `<button class="${k === aba ? 'on' : ''}" data-tab="${k}">${n}</button>`).join('') : ''); }).join('<span class="sep"></span>');
   main.innerHTML = ({painel:rPainel, cardapio:rCardapio, ingredientes:rIngredientes, bebidas:rBebidas, equipe:rEquipe, contas:rGastos, caixa:rCaixa, relatorios:rRelatorios, ajustes:rAjustes})[aba]();
-  if (aba === 'caixa') main.insertAdjacentHTML('beforeend', vendaModal() + eqAddModal());
+  if (aba === 'caixa') main.insertAdjacentHTML('beforeend', fecharModal() + eqAddModal() + ((S.ui.cart || []).length ? `<button class="cartbar" data-act="fecharAbrir">🛒 ${S.ui.cart.reduce((a, x) => a + x.qtd, 0)} ite${S.ui.cart.reduce((a, x) => a + x.qtd, 0) === 1 ? 'm' : 'ns'} · ${fmt(cartTotal('balcao'))} · Fechar pedido →</button>` : ''));
   if (aba === 'equipe') prevLanc();
 }
 document.getElementById('nav').addEventListener('click', e => {
@@ -1191,7 +1216,7 @@ function rankHTML(ym){
 function canalHTML(ym){
   const r = resultadoMes(ym);
   return `<div class="tblwrap"><table><tr><th>Canal</th><th class="n">Faturou</th><th class="n">Sobrou*</th><th class="n">%</th></tr>
-    ${canais().map(c => { const x = r.porCanal[c.id] || {fat:0, contrib:0}; return `<tr><td>${esc(c.nome)}</td><td class="n">${fmt(x.fat)}</td><td class="n">${fmt(x.contrib)}</td><td class="n">${pct(x.fat > 0 ? x.contrib / x.fat * 100 : 0)}</td></tr>`; }).join('')}
+    ${[...canais(), ...(r.porCanal.whats ? [ORIGEM_WHATS] : [])].map(c => { const x = r.porCanal[c.id] || {fat:0, contrib:0}; return `<tr><td>${esc(c.nome)}</td><td class="n">${fmt(x.fat)}</td><td class="n">${fmt(x.contrib)}</td><td class="n">${pct(x.fat > 0 ? x.contrib / x.fat * 100 : 0)}</td></tr>`; }).join('')}
   </table></div><div class="sub" style="margin-top:6px">*Antes de pagar contas e funcionários.</div>`;
 }
 function mesesChart(){
@@ -1294,11 +1319,6 @@ function desfazerVenda(item){
   const k = Object.keys(dia).find(k => k.startsWith(pre) && num(dia[k][item]) > 0);
   if (k) { dia[k][item] = num(dia[k][item]) - 1; if (!dia[k][item]) delete dia[k][item]; }
 }
-function qtdPeriodo(item){
-  const dia = S.vendas[S.ui.dia] || {}, pre = S.ui.periodo + '|'; let tot = 0; const det = [];
-  canais().forEach(c => { const q = num((dia[pre + c.id] || {})[item]); if (q) { tot += q; det.push(`${c.nome} ${q}`); } });
-  return {tot, det:det.join(' · ')};
-}
 function equipeFaixa(data){
   const per = S.ui.periodo, doPer = t => t && turnoSetor(t) === per;
   const lancs = S.diarias.filter(x => x.data === data && doPer(byId(S.turnos, x.turno)));
@@ -1314,14 +1334,6 @@ function equipeFaixa(data){
   return `<div class="eqfaixa">${lancs.map(cardL).join('')}${esc2.map(cardE).join('')}<button class="eqadd" data-act="eqAddOpen"><span style="font-size:22px">+</span> Adicionar</button></div>
   <div class="sub" style="margin-top:6px">${SETOR2[per].em} Turno do ${SETOR2[per].nome.toLowerCase()}. ✓ veio · ✕ não precisou · <b class="neg">F</b> combinou e faltou. Entregadores entram sozinhos ao registrar uma entrega.</div>`;
 }
-function vcard(item){
-  const {tot, det} = item.id ? qtdPeriodo(item.id) : {tot:0, det:''};
-  return `<div class="vcard ${tot ? 'tem' : ''}" id="vc-${item.id}">
-    <button class="vbody" data-act="vmais" data-id="${item.id}"><span class="em">${emojiDe(item)}</span><span class="vn">${esc(item.nome)}</span><span class="vp">${fmt(num(item.preco))}</span></button>
-    <div class="vqs">${esc(det)}</div>
-    <div class="vctl"><button data-act="vmenos" data-id="${item.id}" aria-label="Desfazer um">−</button><span class="vq">${int(tot)}</span><button data-act="vmais" data-id="${item.id}" aria-label="Mais um">+</button></div>
-  </div>`;
-}
 function rCaixa(){
   const dia = S.ui.dia, per = S.ui.periodo;
   const prods = s => S.produtos.filter(p => p.setor === s);
@@ -1329,7 +1341,7 @@ function rCaixa(){
   const outros = per === 'almoco' ? [...prods('hamburgueria'), ...prods('combo')] : prods('almoco');
   const bloco = (titulo, lista) => lista.length ? `${titulo ? `<div class="vgt">${titulo}</div>` : ''}<div class="vgrid">${lista.map(vcard).join('')}</div>` : '';
   return `
-  <div class="top"><div><h2>Caixa · ${dia === dataHoje ? 'hoje' : dataBR(dia)} <span class="sub" style="font-weight:400">(${DIAS_NOME[dow(dia)]})</span></h2><div class="sub">Toque no item, escolha onde foi a venda e pronto. Errou? O − desfaz a última. Salva sozinho.</div></div>
+  <div class="top"><div><h2>Caixa · ${dia === dataHoje ? 'hoje' : dataBR(dia)} <span class="sub" style="font-weight:400">(${DIAS_NOME[dow(dia)]})</span></h2><div class="sub">Toque nos itens para montar o pedido e depois em "Fechar pedido". Salva sozinho.</div></div>
     <div style="display:flex;gap:8px;align-items:flex-end">${dia !== dataHoje ? `<button class="btn" data-act="irHoje">Voltar para hoje</button>` : ''}<label class="f" style="width:170px">Dia<input type="date" data-k="dia" value="${dia}"></label></div></div>
   <div class="kpis" id="dk">${diaResumoHTML()}</div>
   <div class="grid2" id="ds">${caixaSetorHTML()}</div>
@@ -1337,42 +1349,16 @@ function rCaixa(){
     <h2 style="margin-bottom:10px">Equipe do dia</h2>
     <div id="hfx">${equipeFaixa(dia)}</div>
   </div>
-  <div class="card">
+  <div class="cxgrid"><div class="card" style="margin:0">
     <div class="pertabs">${['almoco','hamburgueria'].map(s => `<button class="ptab ${per === s ? 'on' : ''}" data-act="periodo" data-v="${s}">${SETOR2[s].em} ${SETOR2[s].nome}</button>`).join('')}</div>
     ${bloco(per === 'almoco' ? '🍱 Almoço' : '🍔 Hamburgueria e combos', principais)}
     ${bloco('🥤 Bebidas', S.revenda)}
     ${outros.length ? `<details class="outros"><summary>Outros itens (${per === 'almoco' ? 'hamburgueria' : 'almoço'})</summary>${bloco('', outros)}</details>` : ''}
-  </div>`;
-}
-const EMO_CANAL = c => c === 'balcao' ? '🏪' : c === 'propria' ? '🛵' : '📱';
-function vendaModal(){
-  if (!S.ui.vendaPop) return '';
-  const it = byId(S.produtos, S.ui.vendaPop) || byId(S.revenda, S.ui.vendaPop); if (!it) return '';
-  const combos = S.produtos.filter(p => p.setor === 'combo' && (p.comp || []).some(c => c.tipo === 'prod' && c.id === it.id));
-  const cb = S.ui.vendaCombo && byId(S.produtos, S.ui.vendaCombo), alvo = cb || it;
-  const q = S.ui.vendaQtd || 1;
-  const qtdChips = `<div class="chips" style="margin:6px 0 2px"><span class="lbl">Quantidade:</span>${[1,2,3,4,5,6].map(n => `<button class="chip ${q === n ? 'on' : ''}" data-act="vQtd" data-v="${n}">${n}</button>`).join('')}</div>`;
-  const head = `<div class="top" style="margin:0 0 4px"><h2>${q > 1 ? q + '× ' : ''}${emojiDe(alvo)} ${esc(alvo.nome)} <span class="sub" style="font-weight:400">${fmt(num(alvo.preco))}</span></h2><button class="btn x" data-act="vClose">✕</button></div>
-    ${combos.length ? `<div class="chips" style="margin:6px 0 4px"><button class="chip ${!cb ? 'on' : ''}" data-act="vCombo" data-v="">Só ${esc(it.nome)}</button>${combos.map(c => `<button class="chip ${cb && cb.id === c.id ? 'on' : ''}" data-act="vCombo" data-v="${c.id}">🎁 ${esc(c.nome)} · ${fmt(num(c.preco))}</button>`).join('')}</div>` : ''}${S.ui.vendaCanal ? '' : qtdChips}`;
-  if (!S.ui.vendaCanal) return `<div class="modal-bg" data-act="vClose"><div class="modal" data-act="noop">${head}
-    <div class="sub">Onde foi essa venda? (${SETOR2[S.ui.periodo].em} ${SETOR2[S.ui.periodo].nome})</div>
-    <div class="cgrid">${canais().map(c => `<button class="cbtn" data-act="vCanal" data-v="${c.id}"><span>${EMO_CANAL(c.id)}</span>${esc(c.nome)}</button>`).join('')}</div></div></div>`;
-  const c = S.ui.vendaCanal, t = turnoCaixa(), d = S.ui.dia;
-  let corpo;
-  if (c !== 'balcao') {
-    const ents = S.funcionarios.filter(f => f.ativo !== false && ehEnt(f));
-    const noDia = ents.filter(f => S.diarias.some(x => x.func === f.id && x.data === d) || (planejado(f, d) && t && turnoDo(f, d) === t.id));
-    const resto = ents.filter(f => !noDia.includes(f));
-    const btn = (f, big) => { const l = t && S.diarias.find(x => x.func === f.id && x.data === d && x.turno === t.id); const n = l ? num(l.entregas) : 0;
-      return `<button class="entb ${big ? 'big' : ''}" data-act="vEnt" data-v="${f.id}" data-novo="1"><span class="av sm">${AVATAR(18)}</span><span style="flex:1;text-align:left"><b>${esc(f.nome)}</b><br><span class="sub">${n} entrega${n === 1 ? '' : 's'} hoje${t ? ' · ' + esc(t.nome) : ''}</span></span><span class="plus">🛵 +1</span></button>`; };
-    corpo = `<div class="sub" style="margin:4px 0 10px">Quem vai entregar?</div>
-      ${noDia.length ? `<div class="entl">${noDia.map(f => btn(f, true)).join('')}</div>` : ''}
-      ${resto.length ? `<details class="outros" ${noDia.length ? '' : 'open'}><summary>Outros entregadores</summary><div class="entl" style="margin-top:8px">${resto.map(f => btn(f, false)).join('')}</div></details>` : ''}
-      <div class="cgrid"><button class="cbtn" data-act="vEnt" data-novo="0" style="font-size:14px"><span>➕</span>Mesmo pedido de antes<br><span class="sub" style="font-size:12px">não conta outra entrega</span></button><button class="cbtn" data-act="vEnt" data-novo="1" style="font-size:14px"><span>${c === 'propria' ? '📦' : '📱'}</span>${c === 'propria' ? 'Sem entregador da casa' : 'Entregador do app'}</button></div>`;
-  }
-  return `<div class="modal-bg" data-act="vClose"><div class="modal" data-act="noop">${head}
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><button class="btn x" data-act="vBack">← Voltar</button><span class="tag" style="margin:0">${EMO_CANAL(c)} ${esc(nomeCanal(c))}</span></div>
-    ${corpo}</div></div>`;
+  </div>
+  <aside class="cxside">
+    <div class="card" style="margin:0"><h2>🛒 Pedido aberto</h2><div id="cart">${cartHTML()}</div></div>
+    <div class="card" style="margin:0"><h2>🧾 Histórico do dia</h2><div class="sub" style="margin-bottom:8px">Toque num pedido para mudar o valor, o entregador ou excluir.</div>${histHTMLdia()}</div>
+  </aside></div>`;
 }
 function eqAddModal(){
   if (!S.ui.eqAdd) return '';
@@ -1384,6 +1370,120 @@ function eqAddModal(){
     <div class="entl">${ls.map(f => { const v = valoresDe(f, t); return `<button class="entb" data-act="eqAddPessoa" data-id="${f.id}"><span class="av sm">${AVATAR(18)}</span><span style="flex:1;text-align:left"><b>${esc(f.nome)}</b><br><span class="sub">${esc((funcaoDe(f) || {}).nome || '')} · ${ehEnt(f) ? fmt(v.minimo) + ' fixo ou ' + fmt(v.porEntrega) + '/entrega' : fmt(v.minimo)}</span></span><span class="plus">+</span></button>`; }).join('') || '<div class="sub">Todo mundo já está lançado nesse turno.</div>'}</div>
     <button class="btn" style="width:100%;margin-top:6px" data-act="eqNova">👤 Não está na lista? Cadastrar nova pessoa</button>
   </div></div>`;
+}
+/* =================== PEDIDOS (carrinho do Caixa) =================== */
+const ORIGEM_WHATS = {id:'whats', nome:'WhatsApp/Telefone'};
+const origens = () => [{id:'balcao', nome:'Balcão'}, ORIGEM_WHATS, ...S.apps.map(a => ({id:a.id, nome:a.nome}))];
+const EMO_CANAL = c => c === 'balcao' ? '🏪' : c === 'whats' ? '💬' : c === 'propria' ? '🛵' : '📱';
+function precoNo(item, origem){
+  const p = byId(S.produtos, item), r = p ? null : byId(S.revenda, item), app = byId(S.apps, origem);
+  if (p) return app ? (num((p.precos || {})[app.id]) || num(p.precoApp) || num(p.preco)) : num(p.preco);
+  return r ? num(r.preco) : 0;
+}
+function calcPedido(pd){
+  const app = byId(S.apps, pd.origem); let cheio = 0, custo = 0, itens = 0; const linhas = [];
+  pd.itens.forEach(it => {
+    const p = byId(S.produtos, it.id), r = p ? null : byId(S.revenda, it.id); if (!p && !r) return;
+    const preco = precoNo(it.id, pd.origem), b = p ? base(p) : {ing:num(r.custo), emb:0}, q = num(it.qtd);
+    cheio += preco * q; custo += (b.ing + b.emb) * q; if (p) itens += q;
+    linhas.push({id:it.id, q, preco, custoU:b.ing + b.emb, prod:!!p});
+  });
+  const valor = pd.valor != null && pd.valor !== '' ? num(pd.valor) : cheio;
+  const pctT = app ? num(app.comissao) + num(app.taxaPag) : num(S.config.taxa);
+  const taxa = valor * pctT / 100, frete = (pd.saida === 'app' && app && app.freteGratis) ? num(app.frete) : 0;
+  return {cheio, valor, custo, taxa, frete, itens, linhas, contrib: valor - custo - taxa - frete};
+}
+const pedidosDia = d => S.pedidos.filter(p => p.data === d);
+function cartTotal(origem){ return (S.ui.cart || []).reduce((a, it) => a + precoNo(it.id, origem || 'balcao') * it.qtd, 0); }
+function qtdPeriodo(item){
+  const dia = S.vendas[S.ui.dia] || {}, pre = S.ui.periodo + '|'; let tot = 0; const m = {};
+  Object.keys(dia).filter(k => k.startsWith(pre)).forEach(k => { const q = num(dia[k][item]); if (q) { tot += q; const c = k.slice(pre.length); m[c] = (m[c] || 0) + q; } });
+  pedidosDia(S.ui.dia).filter(p => p.periodo === S.ui.periodo).forEach(p => p.itens.forEach(it => { if (it.id === item) { tot += num(it.qtd); m[p.origem] = (m[p.origem] || 0) + num(it.qtd); } }));
+  return {tot, det: Object.entries(m).map(([c, q]) => `${nomeCanal(c)} ${q}`).join(' · ')};
+}
+function vcard(item){
+  const {tot, det} = qtdPeriodo(item.id), noCart = ((S.ui.cart || []).find(x => x.id === item.id) || {}).qtd || 0;
+  return `<div class="vcard ${noCart ? 'tem' : ''}" id="vc-${item.id}">
+    <button class="vbody" data-act="cartAdd" data-id="${item.id}">${noCart ? `<span class="vbadge">${noCart}</span>` : ''}<span class="em">${emojiDe(item)}</span><span class="vn">${esc(item.nome)}</span><span class="vp">${fmt(num(item.preco))}</span></button>
+    <div class="vqs">${tot ? `hoje: ${int(tot)}${det ? ' · ' + esc(det) : ''}` : ''}</div>
+    <div class="vctl"><button data-act="cartSub" data-id="${item.id}" aria-label="Tirar do pedido">−</button><span class="vq">${noCart || ''}</span><button data-act="cartAdd" data-id="${item.id}" aria-label="Pôr no pedido">+</button></div>
+  </div>`;
+}
+function cartHTML(){
+  const cart = S.ui.cart || [];
+  if (!cart.length) return `<div class="vazio" style="padding:18px 6px">Toque nos itens para montar o pedido.<br><span class="sub">Pode juntar vários: X-Bacon + X-Tudo + refri…</span></div>`;
+  return `${cart.map(it => {
+    const x = byId(S.produtos, it.id) || byId(S.revenda, it.id); if (!x) return '';
+    const cb = x.setor && x.setor !== 'combo' ? comboDe(x) : null, eCombo = x.setor === 'combo';
+    const orig = eCombo && it.de ? byId(S.produtos, it.de) : null;
+    return `<div class="cline"><span class="em">${emojiDe(x)}</span><div style="flex:1;min-width:0"><div class="nm">${esc(x.nome)}</div><div class="sub">${fmt(num(x.preco))}${cb ? ` · <button class="lnk" data-act="cartCombo" data-id="${it.id}">🎁 virar combo (${fmt(num(cb.preco))})</button>` : ''}${orig ? ` · <button class="lnk" data-act="cartDescombo" data-id="${it.id}">voltar a só ${esc(orig.nome)}</button>` : ''}</div></div>
+      <div class="cq"><button data-act="cartSub" data-id="${it.id}">−</button><b>${it.qtd}</b><button data-act="cartAdd" data-id="${it.id}">+</button></div></div>`;
+  }).join('')}
+  <div class="ctot"><span>Total (balcão)</span><b>${fmt(cartTotal('balcao'))}</b></div>
+  <div style="display:flex;gap:8px"><button class="btn" data-act="cartLimpar">Limpar</button><button class="btn pri" style="flex:1" data-act="fecharAbrir">Fechar pedido →</button></div>`;
+}
+function histHTMLdia(){
+  const ls = pedidosDia(S.ui.dia).slice().sort((a, b) => b.hora.localeCompare(a.hora));
+  if (!ls.length) return '<div class="sub" style="padding:6px 0">Nenhum pedido registrado ainda neste dia.</div>';
+  return ls.map(pd => {
+    const c = calcPedido(pd), f = pd.ent && byId(S.funcionarios, pd.ent), aberto = S.ui.pedEdit === pd.id;
+    const itensTxt = pd.itens.map(it => { const x = byId(S.produtos, it.id) || byId(S.revenda, it.id); return `${it.qtd}× ${x ? esc(x.nome) : '?'}`; }).join(', ');
+    const saida = pd.saida === 'casa' ? `🛵 ${f ? esc(curto(f.nome)) : 'casa'}` : pd.saida === 'app' ? '📱 entregador do app' : '🍽️ local/retira';
+    return `<div class="hped ${aberto ? 'on' : ''}">
+      <button class="hhead" data-act="pedEdit" data-id="${pd.id}"><span class="sub">${pd.hora}</span><span style="flex:1;text-align:left">${EMO_CANAL(pd.origem)} ${esc(nomeCanal(pd.origem))} · ${saida}</span><b>${fmt(c.valor)}</b></button>
+      <div class="sub" style="padding:0 2px">${itensTxt}${c.valor !== c.cheio ? ` · <s>${fmt(c.cheio)}</s>` : ''}</div>
+      ${aberto ? `<div class="hedit">
+        <label class="f">✏️ Valor que entrou (R$)<input inputmode="decimal" data-k="pedval" data-id="${pd.id}" value="${nv(pd.valor ?? '')}" placeholder="${nv(c.cheio)}"></label>
+        <div class="sub">Sobrou neste pedido: <b class="${c.contrib >= 0 ? 'pos' : 'neg'}">${fmt(c.contrib)}</b> (já tirando ingredientes${c.taxa ? ' e taxas' : ''})</div>
+        ${pd.saida === 'casa' ? `<label class="f">Entregador<select data-k="pedent" data-id="${pd.id}">${S.funcionarios.filter(x => ehEnt(x) && (x.ativo !== false || x.id === pd.ent)).map(x => `<option value="${x.id}" ${x.id === pd.ent ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}</select></label>` : ''}
+        <button class="btn del" data-act="pedDel" data-id="${pd.id}">Excluir pedido</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+function fecharModal(){
+  if (!S.ui.fechar) return '';
+  const o = S.ui.fOrig || 'balcao', app = byId(S.apps, o), sa = S.ui.fSaida || 'local', tot = cartTotal(o), d = S.ui.dia, t = turnoCaixa();
+  const saidas = [['local','🍽️','Come no local / retira'], ['casa','🛵','Entregador da casa'], ...(app ? [['app','📱','Entregador do app']] : [])];
+  const ents = S.funcionarios.filter(f => f.ativo !== false && ehEnt(f));
+  const noDia = ents.filter(f => S.diarias.some(x => x.func === f.id && x.data === d) || (planejado(f, d) && t && turnoDo(f, d) === t.id));
+  const resto = ents.filter(f => !noDia.includes(f));
+  const eb = f => { const l = t && S.diarias.find(x => x.func === f.id && x.data === d && x.turno === t.id); const n = l ? num(l.entregas) : 0;
+    return `<button class="entb ${S.ui.fEnt === f.id ? 'big sel' : ''}" data-act="fEnt" data-v="${f.id}"><span class="av sm">${AVATAR(18)}</span><span style="flex:1;text-align:left"><b>${esc(f.nome)}</b><br><span class="sub">${n} entrega${n === 1 ? '' : 's'} hoje</span></span>${S.ui.fEnt === f.id ? '<span class="plus">✓</span>' : ''}</button>`; };
+  const pode = sa !== 'casa' || S.ui.fEnt;
+  return `<div class="modal-bg" data-act="fecharFechar"><div class="modal" data-act="noop" style="width:min(620px,100%)">
+    <div class="top" style="margin:0 0 6px"><h2>Fechar pedido</h2><button class="btn x" data-act="fecharFechar">✕</button></div>
+    <div class="sub">${(S.ui.cart || []).map(it => { const x = byId(S.produtos, it.id) || byId(S.revenda, it.id); return `${it.qtd}× ${x ? esc(x.nome) : '?'}`; }).join(', ')}</div>
+    <div class="fstep">1. Onde o cliente pediu?</div>
+    <div class="chips">${origens().map(c => `<button class="chip ${o === c.id ? 'on' : ''}" data-act="fOrig" data-v="${c.id}">${EMO_CANAL(c.id)} ${esc(c.nome)}</button>`).join('')}</div>
+    <div class="fstep">2. Como o pedido sai?</div>
+    <div class="chips">${saidas.map(([k, e, n]) => `<button class="chip ${sa === k ? 'on' : ''}" data-act="fSaida" data-v="${k}">${e} ${n}</button>`).join('')}</div>
+    ${sa === 'casa' ? `<div class="sub" style="margin:2px 0 8px">Quem vai entregar?</div><div class="entl">${noDia.map(eb).join('')}</div>${resto.length ? `<details class="outros" ${noDia.length ? '' : 'open'}><summary>Outros entregadores</summary><div class="entl" style="margin-top:8px">${resto.map(eb).join('')}</div></details>` : ''}` : ''}
+    <div class="fstep">3. Valor</div>
+    <div class="row2" style="align-items:end"><div><div class="sub">Total ${app ? 'no ' + esc(app.nome) : 'pelo cardápio'}</div><div style="font-size:24px;font-weight:700">${fmt(tot)}</div></div>
+      <label class="f">✏️ Valor que entrou (se teve cupom ou promoção)<input id="f-valor" inputmode="decimal" placeholder="${nv(tot)}" value="${esc(S.ui.fValor || '')}"></label></div>
+    <button class="btn pri" style="width:100%;margin-top:14px;padding:12px;font-size:16px" data-act="fConfirma" ${pode ? '' : 'disabled'}>✅ Registrar pedido</button>
+    ${pode ? '' : '<div class="sub" style="text-align:center;margin-top:6px">Escolha quem vai entregar.</div>'}
+  </div></div>`;
+}
+function registrarPedido(){
+  const cart = S.ui.cart || []; if (!cart.length) return;
+  const o = S.ui.fOrig || 'balcao', sa = S.ui.fSaida || 'local', d = S.ui.dia, vEl = document.getElementById('f-valor');
+  const vTxt = vEl ? vEl.value.trim() : '';
+  const pd = {id:uid(), data:d, hora:horaAgora(), periodo:S.ui.periodo, origem:o, saida:sa, ent: sa === 'casa' ? S.ui.fEnt : null, lanc:null, itens:cart.map(x => ({id:x.id, qtd:x.qtd})), valor: vTxt === '' ? null : num(vTxt)};
+  if (pd.ent) pd.lanc = somaEntrega(pd.ent, d, 1);
+  S.pedidos.push(pd); S.ui.cart = []; S.ui.fechar = false; S.ui.fValor = ''; S.ui.fEnt = null;
+}
+function somaEntrega(func, d, n){
+  const t = turnoCaixa(); if (!t) return null;
+  let l = S.diarias.find(x => x.func === func && x.data === d && x.turno === t.id);
+  if (!l) { if (n < 0) return null; l = {id:uid(), data:d, func, turno:t.id, entregas:0, valor:0}; S.diarias.push(l); S.faltas = S.faltas.filter(x => !(x.func === func && x.data === d)); S.dispensas = S.dispensas.filter(x => !(x.func === func && x.data === d)); }
+  l.entregas = Math.max(0, num(l.entregas) + n); if (n > 0) l.horas = (l.horas || []).concat(horaAgora()); else if (l.horas) l.horas.pop();
+  l.valor = pagar(func, l.turno, l.entregas); return l.id;
+}
+function tirarEntrega(pd){
+  const l = pd.lanc && byId(S.diarias, pd.lanc);
+  if (l) { l.entregas = Math.max(0, num(l.entregas) - 1); if (l.horas) l.horas.pop(); l.valor = pagar(l.func, l.turno, l.entregas); }
 }
 /* =================== ENTREGA RÁPIDA (🛵) =================== */
 function turnoAgora(){
@@ -1526,6 +1626,10 @@ main.addEventListener('input', e => {
     if (f === 'tipo' || f === 'funcao') { const y = window.scrollY; render(); window.scrollTo(0, y); return; }
     if (f === 'nome') { const o = document.querySelector(`#ld-func option[value="${fu.id}"]`); if (o) o.textContent = fu.nome; }
     prevLanc();
+  } else if (k === 'pedval') {
+    const pd = byId(S.pedidos, id); if (!pd) return; pd.valor = t.value.trim() === '' ? null : num(t.value); save(); refreshVendas();
+  } else if (k === 'pedent') {
+    const pd = byId(S.pedidos, id); if (!pd) return; tirarEntrega(pd); pd.ent = t.value; pd.lanc = somaEntrega(pd.ent, pd.data, 1); save(); const y = window.scrollY; render(); window.scrollTo(0, y);
   } else if (k === 'papp') {
     const pr = byId(S.produtos, id); if (!pr) return; pr.precos = pr.precos || {};
     if (t.value.trim() === '') delete pr.precos[t.dataset.t]; else pr.precos[t.dataset.t] = num(t.value); save(); refreshCalc(pr);
@@ -1555,7 +1659,7 @@ main.addEventListener('input', e => {
     S.loja = t.value; save(); document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
   }
 });
-main.addEventListener('change', e => { const k = e.target.dataset.k, f = e.target.dataset.f; if (k === 'app' || (k === 'cfg' && aba === 'equipe') || (k === 'func' && ['escIni','escFim','pagaDia','escTurno'].includes(f)) || (k === 'turno' && (f === 'ini' || f === 'fim'))) { const y = window.scrollY; render(); window.scrollTo(0, y); } });
+main.addEventListener('change', e => { const k = e.target.dataset.k, f = e.target.dataset.f; if (k === 'pedval') { const y = window.scrollY; render(); window.scrollTo(0, y); return; } if (k === 'app' || (k === 'cfg' && aba === 'equipe') || (k === 'func' && ['escIni','escFim','pagaDia','escTurno'].includes(f)) || (k === 'turno' && (f === 'ini' || f === 'fim'))) { const y = window.scrollY; render(); window.scrollTo(0, y); } });
 
 function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1800); }
 function armar(btn, fn, texto){
@@ -1614,6 +1718,25 @@ main.addEventListener('click', e => {
   else if (a === 'escDia') { const f = byId(S.funcionarios, id); f.escala = f.escala || {dias:[], turno:(S.turnos[0] || {}).id}; const d = +b.dataset.d; f.escala.dias = f.escala.dias.includes(d) ? f.escala.dias.filter(x => x !== d) : [...f.escala.dias, d]; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
   else if (a === 'irHoje') { S.ui.dia = dataHoje; S.ui.mes = mesHoje; done(); }
   else if (a === 'noop') { return; }
+  else if (a === 'cartAdd' || a === 'cartSub') {
+    const c = S.ui.cart = S.ui.cart || []; let it = c.find(x => x.id === id);
+    if (a === 'cartAdd') { if (it) it.qtd++; else c.push({id, qtd:1}); } else if (it) { it.qtd--; if (it.qtd <= 0) S.ui.cart = c.filter(x => x !== it); }
+    const y = window.scrollY; done(); window.scrollTo(0, y);
+  }
+  else if (a === 'cartLimpar') { S.ui.cart = []; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'cartCombo') { const it = (S.ui.cart || []).find(x => x.id === id), cb = comboDe(byId(S.produtos, id)); if (it && cb) { const ja = S.ui.cart.find(x => x.id === cb.id && x.de === id); if (ja) { ja.qtd += it.qtd; S.ui.cart = S.ui.cart.filter(x => x !== it); } else { it.de = id; it.id = cb.id; } } const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'cartDescombo') { const it = (S.ui.cart || []).find(x => x.id === id); if (it && it.de) { it.id = it.de; delete it.de; } const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'fecharAbrir') { S.ui.fechar = true; S.ui.fOrig = 'balcao'; S.ui.fSaida = 'local'; S.ui.fEnt = null; S.ui.fValor = ''; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'fecharFechar') { S.ui.fechar = false; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'fOrig' || a === 'fSaida' || a === 'fEnt') {
+    const vEl = document.getElementById('f-valor'); if (vEl) S.ui.fValor = vEl.value;
+    if (a === 'fOrig') { S.ui.fOrig = b.dataset.v; if (S.ui.fSaida === 'app' && !byId(S.apps, S.ui.fOrig)) S.ui.fSaida = 'local'; }
+    else if (a === 'fSaida') S.ui.fSaida = b.dataset.v; else S.ui.fEnt = b.dataset.v;
+    const y = window.scrollY; done(); window.scrollTo(0, y);
+  }
+  else if (a === 'fConfirma') { registrarPedido(); const y = window.scrollY; done(); window.scrollTo(0, y); toast('Pedido registrado'); }
+  else if (a === 'pedEdit') { S.ui.pedEdit = S.ui.pedEdit === id ? null : id; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'pedDel') armar(b, () => { const pd = byId(S.pedidos, id); if (pd) { tirarEntrega(pd); S.pedidos = S.pedidos.filter(x => x !== pd); } const y = window.scrollY; done(); window.scrollTo(0, y); });
   else if (a === 'vCombo') { S.ui.vendaCombo = b.dataset.v || null; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'vmais') { S.ui.vendaPop = id; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'vCanal') {
