@@ -68,6 +68,45 @@ nav .sep{width:1px;height:26px;background:var(--line);margin:0 4px;flex:none}
 .modal{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(560px,100%)}
 input[type=time]{color-scheme:dark}
 .btn:disabled{opacity:.45;cursor:default}
+.pertabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ptab{background:var(--card2);border:1px solid var(--line);color:var(--mut);border-radius:12px;padding:12px;font:inherit;font-size:16px;font-weight:600;cursor:pointer}
+.ptab.on{background:#2a2117;border-color:var(--acc);color:var(--acc)}
+.vgt{font-size:13px;font-weight:600;color:var(--acc);margin:16px 0 8px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+@media(max-width:600px){.vgrid{grid-template-columns:1fr 1fr;gap:8px}.vbody{padding:10px 6px 6px}.vbody .em{font-size:28px}.vbody .vn{font-size:13px}.pertabs .ptab{font-size:14px;padding:10px 6px}}
+.vcard{background:var(--card2);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s}
+.vcard.tem{border-color:var(--acc);background:#241d15}
+.vcard.pulse{animation:pulse .25s}
+@keyframes pulse{50%{transform:scale(.97)}}
+.vbody{background:none;border:0;color:var(--txt);font:inherit;cursor:pointer;padding:14px 10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.vbody .em{font-size:34px;line-height:1}
+.vbody .vn{font-weight:600;font-size:14px;line-height:1.2}
+.vbody .vp{font-size:12px;color:var(--mut)}
+.vctl{display:grid;grid-template-columns:44px 1fr 44px;border-top:1px solid var(--line)}
+.vctl button{background:none;border:0;color:var(--txt);font-size:22px;cursor:pointer;padding:6px 0}
+.vctl button:first-child{color:var(--mut)}
+.vctl button:last-child{color:var(--acc)}
+.vctl .vq{display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+.vcard:not(.tem) .vq{color:#6f675e}
+details.outros{margin-top:14px}details.outros summary{cursor:pointer;color:var(--mut);font-size:13px}
+.scard .sh{display:flex;gap:10px;align-items:center;margin-bottom:12px}.scard .sem{font-size:30px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sgrid div{background:var(--card2);border-radius:8px;padding:8px 10px}
+.sgrid .l{font-size:11px;color:var(--mut)}.sgrid .v{font-size:18px;font-weight:700}
+.eqfaixa{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.eqmini{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:8px 10px;min-width:210px;flex:none}
+.eqmini.ok,.eqmini.extra{border-left-color:var(--ok)}.eqmini.falta{border-left-color:var(--bad)}.eqmini.pend{border-left-color:#c9a24a}.eqmini.disp{opacity:.55}
+.eqmini .eqt{flex:1;min-width:0}.eqmini .nm{font-size:14px;font-weight:600;white-space:nowrap}
+.mini-b{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;cursor:pointer}
+.mini-b.ok{color:var(--ok)}.mini-b.no{color:var(--bad)}
+.fab.ent{left:28px;right:auto;background:#5b8fd6;color:#fff;font-size:28px}
+.entl{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.entb{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--txt);font:inherit;cursor:pointer}
+.entb.big{border-color:#5b8fd6;padding:14px}
+.entb .plus{font-size:18px;font-weight:700;color:#8fb4ea;background:#1d2a3a;border-radius:8px;padding:6px 10px}
+.embtn{width:44px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--card2);font-size:22px;cursor:pointer}
+.empal{display:flex;flex-wrap:wrap;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;margin:0 0 12px;width:100%}
+.empal button{width:40px;height:40px;border:0;background:none;font-size:22px;cursor:pointer;border-radius:8px}
+.empal button:hover{background:var(--card)}
 .hojeg{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
 .hojeg .card{margin-bottom:0}
 @media(max-width:900px){.hojeg{grid-template-columns:1fr}}
@@ -331,15 +370,15 @@ function exemplo(){
 
 /* =================== ESTADO =================== */
 let S, CACHE = {};
-const UI_PADRAO = () => ({mes:mesHoje, dia:dataHoje, setor:'hamburgueria', painelSetor:'todos', canal:'balcao', canalDia:'balcao'});
+const UI_PADRAO = () => ({mes:mesHoje, dia:dataHoje, setor:'hamburgueria', painelSetor:'todos', canal:'balcao', canalDia:'balcao', periodo:periodoAgora()});
 function valido(d){ return d && d.config && ['ingredientes','produtos','revenda','gastos','turnos','funcionarios','diarias','apps'].every(k => Array.isArray(d[k])) && d.vendas && typeof d.vendas === 'object'; }
 function load(){
   try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); if (valido(d)) return d; } } catch(e) {}
   return exemplo();
 }
 function save(){ CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
-function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.extras = S.extras || []; S.dispensas = S.dispensas || []; S.pagamentos = S.pagamentos || []; S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
-S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje;
+function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.extras = S.extras || []; S.dispensas = S.dispensas || []; S.pagamentos = S.pagamentos || []; S.entLog = S.entLog || []; if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
+S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null;
 
 /* =================== CÁLCULOS =================== */
 function canais(){ return [{id:'balcao', nome:'Balcão'}, {id:'propria', nome:'Entrega própria'}, ...S.apps.map(a => ({id:a.id, nome:a.nome, app:a}))]; }
@@ -431,60 +470,66 @@ function pagar(funcId, turnoId, entregas){
 // resultado de um dia (todas as vendas lançadas)
 function resultadoDia(data){
   const dia = S.vendas[data] || {}; let fat = 0, contrib = 0, itens = 0;
-  const porCanal = {}, porItem = {};
-  Object.entries(dia).forEach(([canal, v]) => {
+  const porCanal = {}, porItem = {}, porSetor = {almoco:{fat:0, contrib:0, itens:0}, hamburgueria:{fat:0, contrib:0, itens:0}};
+  const addS = (s, f, c, i) => { const x = porSetor[s] || porSetor.hamburgueria; x.fat += f; x.contrib += c; x.itens += i; };
+  Object.entries(dia).forEach(([chave, v]) => {
+    const [per, canal] = chave.includes('|') ? chave.split('|') : [null, chave];
     const app = byId(S.apps, canal); let cf = 0, cc = 0;
     Object.entries(v).forEach(([id, q]) => {
       if (id === '_pedidos') return; q = num(q); if (!q) return;
       const p = byId(S.produtos, id), r = p ? null : byId(S.revenda, id); if (!p && !r) return;
       const c = p ? calc(p, canal, true) : calcRev(r, canal);
       cf += q * c.preco; cc += q * c.contrib; if (p) itens += q;
+      addS(per || (p && p.setor === 'almoco' ? 'almoco' : 'hamburgueria'), q * c.preco, q * c.contrib, p ? q : 0);
       const pi = porItem[id] = porItem[id] || {q:0, fat:0, lucro:0}; pi.q += q; pi.fat += q * c.preco; pi.lucro += q * c.contrib;
     });
-    const ped = num(v._pedidos);
-    if (canal === 'propria') { cf += ped * num(S.config.taxaEntrega); cc += ped * num(S.config.taxaEntrega); }
+    const ped = num(v._pedidos); let ef = 0, ec = 0;
+    if (canal === 'propria') { ef = ped * num(S.config.taxaEntrega); ec = ef; }
     else if (app) {
-      if (app.quemEntrega === 'loja' && !app.freteGratis) { cf += ped * num(app.frete); cc += ped * num(app.frete); }
-      if (app.quemEntrega === 'app' && app.freteGratis) cc -= ped * num(app.frete);
+      if (app.quemEntrega === 'loja' && !app.freteGratis) { ef = ped * num(app.frete); ec = ef; }
+      if (app.quemEntrega === 'app' && app.freteGratis) ec -= ped * num(app.frete);
     }
-    porCanal[canal] = {fat:cf, contrib:cc, pedidos:ped};
+    cf += ef; cc += ec; addS(per || 'hamburgueria', ef, ec, 0);
+    const pc = porCanal[canal] = porCanal[canal] || {fat:0, contrib:0, pedidos:0}; pc.fat += cf; pc.contrib += cc; pc.pedidos += ped;
     fat += cf; contrib += cc;
   });
-  return {fat, contrib, itens, porCanal, porItem};
+  return {fat, contrib, itens, porCanal, porItem, porSetor};
 }
 function resultadoMes(ym){
   const key = 'rm' + ym; if (CACHE[key]) return CACHE[key];
   const dm = diasMes(ym), fixos = totalFixos(), eq = equipeMes(ym);
-  let fat = 0, contrib = 0, itens = 0; const porCanal = {}, porItem = {}, porDia = [];
+  let fat = 0, contrib = 0, itens = 0; const porCanal = {}, porItem = {}, porDia = [], porSetor = {almoco:{fat:0, contrib:0, itens:0}, hamburgueria:{fat:0, contrib:0, itens:0}};
   for (let d = 1; d <= dm; d++) {
     const data = `${ym}-${pad(d)}`, r = resultadoDia(data);
     fat += r.fat; contrib += r.contrib; itens += r.itens;
     Object.entries(r.porCanal).forEach(([c, x]) => { const pc = porCanal[c] = porCanal[c] || {fat:0, contrib:0}; pc.fat += x.fat; pc.contrib += x.contrib; });
+    Object.entries(r.porSetor).forEach(([s, x]) => { porSetor[s].fat += x.fat; porSetor[s].contrib += x.contrib; porSetor[s].itens += x.itens; });
     Object.entries(r.porItem).forEach(([id, x]) => { const pi = porItem[id] = porItem[id] || {q:0, fat:0, lucro:0}; pi.q += x.q; pi.fat += x.fat; pi.lucro += x.lucro; });
     const func = eq.ls.filter(x => x.data === data).reduce((a, x) => a + num(x.valor), 0);
     porDia.push({d, data, fat:r.fat, contrib:r.contrib, func, temVenda: !!S.vendas[data]});
   }
   const fixosM = ym === mesHoje ? fixos * hoje.getDate() / dm : (ym > mesHoje ? 0 : fixos);
   const func = eq.total, lucro = contrib - fixosM - func;
-  return CACHE[key] = {fat, contrib, custos: fat - contrib, fixos:fixosM, fixosCheio:fixos, func, lucro, itens, porCanal, porItem, porDia, temDados: fat > 0};
+  return CACHE[key] = {fat, contrib, custos: fat - contrib, fixos:fixosM, fixosCheio:fixos, func, lucro, itens, porCanal, porItem, porDia, porSetor, eqSetor: equipeSetor(eq.ls), temDados: fat > 0};
 }
 
 /* =================== NAVEGAÇÃO =================== */
 const GRUPOS = [
-  ['gestao','Gestão',[['painel','Painel'],['hoje','Hoje'],['relatorios','Relatórios'],['equipe','Equipe'],['contas','Contas'],['ajustes','Ajustes']]],
-  ['ficha','Ficha técnica',[['cardapio','Cardápio'],['ingredientes','Ingredientes'],['bebidas','Bebidas']]],
+  ['gestao','Gestão',[['caixa','Caixa'],['painel','Painel'],['relatorios','Relatórios'],['equipe','Equipe'],['ajustes','Ajustes']]],
+  ['ficha','Ficha técnica',[['cardapio','Cardápio'],['ingredientes','Ingredientes'],['bebidas','Bebidas'],['contas','Contas']]],
 ];
 const ABAS = GRUPOS.flatMap(g => g[2].map(t => t[0]));
 const grupoDe = a => GRUPOS.find(g => g[2].some(t => t[0] === a))[0];
-const HASH_ANTIGO = {vendas:'hoje', gastos:'contas'};
-let aba = (h0 => ABAS.includes(h0) ? h0 : (HASH_ANTIGO[h0] || 'painel'))(location.hash.slice(1));
+const HASH_ANTIGO = {vendas:'caixa', hoje:'caixa', gastos:'contas'};
+let aba = (h0 => ABAS.includes(h0) ? h0 : (HASH_ANTIGO[h0] || 'caixa'))(location.hash.slice(1));
 window.addEventListener('hashchange', () => { let h = location.hash.slice(1); h = HASH_ANTIGO[h] || h; if (ABAS.includes(h)) { aba = h; render(); } });
 const main = document.getElementById('main');
 function render(){
   prep();
   document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
   document.getElementById('nav').innerHTML = GRUPOS.map(([gk, gn, abas]) => { const on = grupoDe(aba) === gk; return `<button class="gbtn ${on ? 'on' : ''}" data-tab="${abas[0][0]}">${gn} ${on ? '▾' : '▸'}</button>` + (on ? abas.map(([k, n]) => `<button class="${k === aba ? 'on' : ''}" data-tab="${k}">${n}</button>`).join('') : ''); }).join('<span class="sep"></span>');
-  main.innerHTML = ({painel:rPainel, cardapio:rCardapio, ingredientes:rIngredientes, bebidas:rBebidas, equipe:rEquipe, contas:rGastos, hoje:rHoje, relatorios:rRelatorios, ajustes:rAjustes})[aba]();
+  main.innerHTML = ({painel:rPainel, cardapio:rCardapio, ingredientes:rIngredientes, bebidas:rBebidas, equipe:rEquipe, contas:rGastos, caixa:rCaixa, relatorios:rRelatorios, ajustes:rAjustes})[aba]();
+  if (grupoDe(aba) === 'gestao') main.insertAdjacentHTML('beforeend', `<button class="fab ent" data-act="openEnt" title="Registrar entrega">🛵</button>${entregaModal()}`);
   if (aba === 'equipe') prevLanc();
 }
 document.getElementById('nav').addEventListener('click', e => {
@@ -522,7 +567,7 @@ function rPainel(){
   <div class="kpis">
     <div class="card kpi"><div class="l">Contas do mês</div><div class="v">${fmt(contasMes())}</div><div class="s">${fmt(totalFixos())} fixas + ${fmt(funcMensal().valor)} funcionários</div></div>
     <div class="card kpi"><div class="l">Cada venda paga de contas</div><div class="v">${fmt(fixoPorVenda())}</div><div class="s">contas ÷ ${int(vendasMes().valor)} vendas por mês</div></div>
-    <div class="card kpi"><div class="l">${nomeMes(mesHoje, true)} até agora</div><div class="v ${atual.lucro >= 0 ? 'pos' : 'neg'}">${atual.temDados ? fmt(atual.lucro) : '—'}</div><div class="s">${atual.temDados ? 'de lucro · faturou ' + fmt(atual.fat) : 'lance as vendas em "Hoje"'}</div></div>
+    <div class="card kpi"><div class="l">${nomeMes(mesHoje, true)} até agora</div><div class="v ${atual.lucro >= 0 ? 'pos' : 'neg'}">${atual.temDados ? fmt(atual.lucro) : '—'}</div><div class="s">${atual.temDados ? 'de lucro · faturou ' + fmt(atual.fat) : 'lance as vendas no "Caixa"'}</div></div>
     <div class="card kpi"><div class="l">Mais lucrativo (${esc(nomeCanal(canal))})</div><div class="v" style="font-size:19px">${best ? esc(best.p.nome) : '—'}</div><div class="s">${best ? fmt(best.c.lucro) + ' em cada' : ''}</div></div>
   </div>
 
@@ -642,6 +687,7 @@ function rCardapio(){
   ${lista.length ? lista.map(p => `
     <div class="card">
       <div class="lh">
+        <div class="f">Emoji<button class="embtn" data-act="emPick" data-id="${p.id}">${emojiDe(p)}</button></div>
         <label class="f" style="flex:2 1 220px">Nome<input class="nome" data-k="prod" data-id="${p.id}" data-f="nome" value="${esc(p.nome)}"></label>
         ${p.setor !== 'combo' ? `<label class="f" style="flex:0 1 140px">Setor<select data-k="prod" data-id="${p.id}" data-f="setor">${['hamburgueria','almoco'].map(k => `<option value="${k}" ${p.setor === k ? 'selected' : ''}>${SETORES[k]}</option>`).join('')}</select></label>` : ''}
         <label class="f" style="flex:0 1 120px">Preço (R$)<input inputmode="decimal" data-k="prod" data-id="${p.id}" data-f="preco" data-num="1" value="${nv(p.preco)}"></label>
@@ -649,6 +695,7 @@ function rCardapio(){
         <button class="btn" data-act="dupProd" data-id="${p.id}">Duplicar</button>
         <button class="btn del" data-act="delProd" data-id="${p.id}">Excluir</button>
       </div>
+      ${S.ui.emPick === p.id ? emPal(p.id) : ''}
       ${p.setor === 'combo' ? `
         <div class="sub" style="margin-bottom:8px">O que vem no combo:</div>
         ${(p.comp || []).map((c, idx) => linhaComp(p, c, idx)).join('')}
@@ -662,6 +709,7 @@ function rCardapio(){
 }
 function refreshCalc(p){ const el = document.getElementById('calc-' + p.id); if (el) el.innerHTML = calcHTML(p); }
 
+const emPal = id => `<div class="empal">${EMOJIS.map(e => `<button data-act="emSet" data-id="${id}" data-v="${e}">${e}</button>`).join('')}</div>`;
 /* =================== INGREDIENTES =================== */
 function custoTexto(i){ const u = usoIng(i.id); return `${fmtUn(custoUn(i))} por ${esc(i.unidade || 'unidade')} <span class="sub" style="font-weight:400">· em ${u} ite${u === 1 ? 'm' : 'ns'}</span>`; }
 function rIngredientes(){
@@ -698,11 +746,13 @@ function rBebidas(){
     <button class="btn pri" data-act="addRev">+ Adicionar</button></div>
   <div class="card">${S.revenda.length ? S.revenda.map(r => `
     <div class="linha">
+      <div class="f">Emoji<button class="embtn" data-act="emPick" data-id="${r.id}">${emojiDe(r)}</button></div>
       <label class="f" style="flex:2 1 200px">Produto<input data-k="rev" data-id="${r.id}" data-f="nome" value="${esc(r.nome)}"></label>
       <label class="f" style="flex:0 1 120px">Paga (R$ cada)<input inputmode="decimal" data-k="rev" data-id="${r.id}" data-f="custo" data-num="1" value="${nv(r.custo)}"></label>
       <label class="f" style="flex:0 1 120px">Vende (R$)<input inputmode="decimal" data-k="rev" data-id="${r.id}" data-f="preco" data-num="1" value="${nv(r.preco)}"></label>
       <div class="f" style="flex:1 1 260px">Lucro em cada<div class="calcv" id="rv-${r.id}">${revTexto(r)}</div></div>
       <button class="btn del" data-act="delRev" data-id="${r.id}">Excluir</button>
+      ${S.ui.emPick === r.id ? emPal(r.id) : ''}
     </div>`).join('') : '<div class="vazio">Nenhum produto ainda.</div>'}</div>`;
 }
 
@@ -920,6 +970,7 @@ function rTurnos(){
     <label class="f">Nome do turno<input data-k="turno" data-id="${t.id}" data-f="nome" value="${esc(t.nome)}"></label>
     <div class="row2"><label class="f">Começa<input type="time" data-k="turno" data-id="${t.id}" data-f="ini" value="${t.ini || ''}"></label><label class="f">Termina<input type="time" data-k="turno" data-id="${t.id}" data-f="fim" value="${t.fim || ''}"></label></div>
     <div class="row2"><label class="f">Mínimo do dia (R$)<input inputmode="decimal" data-k="turno" data-id="${t.id}" data-f="minimo" data-num="1" value="${nv(t.minimo)}"></label><label class="f">Por entrega (R$)<input inputmode="decimal" data-k="turno" data-id="${t.id}" data-f="porEntrega" data-num="1" value="${nv(t.porEntrega)}"></label></div>
+    <label class="f">Conta para<select data-k="turno" data-id="${t.id}" data-f="setor"><option value="almoco" ${turnoSetor(t) === 'almoco' ? 'selected' : ''}>🍱 Almoço</option><option value="hamburgueria" ${turnoSetor(t) === 'hamburgueria' ? 'selected' : ''}>🍔 Hamburgueria</option></select></label>
     <button class="btn del" data-act="delTurno" data-id="${t.id}">Excluir turno</button>
   </div>`).join('')}</div>
   <div class="card" style="margin-top:14px"><label class="f" style="width:260px">Faltas no mês para dar o alerta<input inputmode="numeric" data-k="cfg" data-f="limiteFaltas" data-num="1" value="${nv(S.config.limiteFaltas)}"></label></div>`;
@@ -1028,7 +1079,7 @@ function rankHTML(ym){
   const r = resultadoMes(ym), its = itensVenda().map(i => ({...i, ...(r.porItem[i.id] || {q:0})})).filter(i => i.q > 0).sort((a, b) => b.q - a.q);
   if (!its.length) return '<div class="vazio">Sem vendas neste mês.</div>';
   const mx = its[0].q;
-  return its.map(l => `<div class="rk"><span>${esc(l.nome)}</span><div class="b" style="width:${l.q / mx * 100}%;background:${COR_SETOR[l.grupo]}" title="Sobrou ${fmt(l.lucro)} antes das contas"></div><span style="text-align:right">${int(l.q)}</span></div>`).join('');
+  return its.map(l => `<div class="rk"><span>${emojiDe(byId(S.produtos, l.id) || byId(S.revenda, l.id) || {})} ${esc(l.nome)}</span><div class="b" style="width:${l.q / mx * 100}%;background:${COR_SETOR[l.grupo]}" title="Sobrou ${fmt(l.lucro)} antes das contas"></div><span style="text-align:right">${int(l.q)}</span></div>`).join('');
 }
 function canalHTML(ym){
   const r = resultadoMes(ym);
@@ -1046,36 +1097,12 @@ function mesesChart(){
     </div><div class="lab">${nomeMes(m)}</div></div>`).join('')}</div>
   <div class="legenda" style="margin-bottom:0"><span><i style="background:var(--acc)"></i>Faturamento</span><span><i style="background:var(--ok)"></i>Lucro</span><span><i style="background:var(--bad)"></i>Prejuízo</span></div>`;
 }
-function rHoje(){
-  const dia = S.ui.dia, canal = S.ui.canalDia, v = (S.vendas[dia] || {})[canal] || {};
-  const ehEntrega = canal !== 'balcao';
-  const grupos = [['hamburgueria','Hamburgueria'],['almoco','Almoço'],['combo','Combos'],['bebida','Bebidas']];
-  const its = itensVenda();
-  const linhas = grupos.map(([g, nome]) => { const ls = its.filter(i => i.grupo === g); return ls.length ? `<tr class="grp"><td colspan="2">${nome}</td></tr>` + ls.map(i => `<tr><td>${esc(i.nome)}</td><td class="n" style="width:110px"><input inputmode="numeric" data-k="venda" data-id="${i.id}" data-num="1" value="${nv(v[i.id] || '')}" placeholder="0"></td></tr>`).join('') : ''; }).join('');
-  return `
-  <div class="top"><div><h2>${dia === dataHoje ? 'Hoje' : dataBR(dia)} <span class="sub" style="font-weight:400">(${DIAS_NOME[dow(dia)]})</span></h2><div class="sub">Tudo do dia num lugar só: vendas, equipe e quanto sobrou. Salva sozinho.</div></div>
-    <div style="display:flex;gap:8px;align-items:flex-end">${dia !== dataHoje ? `<button class="btn" data-act="irHoje">Voltar para hoje</button>` : ''}<label class="f" style="width:180px">Dia<input type="date" data-k="dia" value="${dia}"></label></div></div>
-  <div class="kpis" id="dk">${diaResumoHTML()}</div>
-  <div class="hojeg">
-    <div class="card">
-      <h2>Equipe do dia</h2>
-      <div class="sub">✓ trabalhou · Faltou · ✕ não precisou · ⇄ trocar por outra pessoa</div>
-      <div id="heq" style="margin-top:10px">${diaEqHTML(dia)}</div>
-    </div>
-    <div class="card">
-      <h2>Vendas do dia</h2>
-      <div class="sub" style="margin-bottom:10px">Escolha o canal e coloque quanto vendeu de cada coisa.</div>
-      <div class="chips"><span class="lbl">Canal:</span>${chipsCanal(canal, 'canalDia')}</div>
-      ${ehEntrega ? `<div class="linha" style="padding-top:0"><label class="f" style="width:220px">Quantos pedidos (entregas) no ${esc(nomeCanal(canal))}<input inputmode="numeric" data-k="pedidos" data-num="1" value="${nv(v._pedidos || '')}" placeholder="0"></label><div class="sub" style="padding-bottom:10px">Usado para a taxa de entrega e o frete grátis.</div></div>` : ''}
-      <div class="tblwrap"><table><tr><th>Item</th><th class="n">Vendeu (${esc(nomeCanal(canal))})</th></tr>${linhas}</table></div>
-    </div>
-  </div>`;
-}
 function rRelatorios(){
   const ym = S.ui.mes;
   return `
-  <div class="top"><div><h2>Relatórios de ${nomeMes(ym, true)}</h2><div class="sub">Tudo somado a partir dos dias lançados em "Hoje".</div></div>${mesPicker()}</div>
+  <div class="top"><div><h2>Relatórios de ${nomeMes(ym, true)}</h2><div class="sub">Tudo somado a partir do que foi lançado no Caixa.</div></div>${mesPicker()}</div>
   <div class="kpis" id="mk">${mesKPIs(ym)}</div>
+  <div class="grid2" id="msetor">${(r => setorCardsHTML(r.porSetor, r.eqSetor, 'no mês'))(resultadoMes(ym))}</div>
   <div class="card"><h2>Evolução do mês</h2><div class="sub">Linha subindo = dinheiro entrando. O lucro já desconta funcionários e contas dia a dia.</div><div id="lchart">${linhaChart(ym)}</div></div>
   <div class="grid2">
     <div class="card"><h2>O que mais sai</h2><div class="legenda"><span><i style="background:var(--c-hb)"></i>Hamburgueria</span><span><i style="background:var(--c-al)"></i>Almoço</span><span><i style="background:var(--c-cb)"></i>Combos</span><span><i style="background:var(--c-bb)"></i>Bebidas</span></div><div id="vrank">${rankHTML(ym)}</div></div>
@@ -1087,7 +1114,119 @@ function rRelatorios(){
 }
 function refreshVendas(){
   const ym = S.ui.mes, set = (id, h) => { const el = document.getElementById(id); if (el) el.innerHTML = h; };
-  set('dk', diaResumoHTML()); set('mk', mesKPIs(ym)); set('lchart', linhaChart(ym)); set('vrank', rankHTML(ym)); set('vcanal', canalHTML(ym)); set('vmeses', mesesChart());
+  set('dk', diaResumoHTML()); set('ds', caixaSetorHTML()); set('mk', mesKPIs(ym)); set('lchart', linhaChart(ym)); set('vrank', rankHTML(ym)); set('vcanal', canalHTML(ym)); set('vmeses', mesesChart());
+}
+
+/* =================== CAIXA (tela principal) =================== */
+const EMOJIS = ['🍔','🍟','🌭','🍕','🥪','🌮','🌯','🍗','🥩','🥓','🧀','🥚','🍱','🍛','🍝','🍲','🥗','🍚','🐟','🍤','🥤','🧃','🍺','🧉','☕','💧','🍦','🍰','🍫','🎁','⭐','🔥'];
+const EMOJI_PADRAO = {hamburgueria:'🍔', almoco:'🍱', combo:'🎁', bebida:'🥤'};
+const emojiDe = x => x.emoji || (x.setor ? EMOJI_PADRAO[x.setor] : EMOJI_PADRAO.bebida);
+const SETOR2 = {almoco:{nome:'Almoço', em:'🍱'}, hamburgueria:{nome:'Hamburgueria', em:'🍔'}};
+function periodoAgora(){ return hoje.getHours() < 16 ? 'almoco' : 'hamburgueria'; }
+const toMin = s => { const [a, b] = String(s || '').split(':').map(Number); return isNaN(a) ? null : a * 60 + (b || 0); };
+const turnoSetor = t => t ? (t.setor || ((toMin(t.ini) ?? 9999) < 16 * 60 ? 'almoco' : 'hamburgueria')) : 'hamburgueria';
+function equipeSetor(lista){
+  const r = {almoco:0, hamburgueria:0};
+  lista.forEach(d => { r[turnoSetor(byId(S.turnos, d.turno))] += num(d.valor); });
+  return r;
+}
+function setorCardsHTML(porSetor, eqS, titulo){
+  return ['almoco','hamburgueria'].map(s => {
+    const x = porSetor[s] || {fat:0, contrib:0, itens:0}, eq = eqS[s] || 0, sobra = x.contrib - eq;
+    return `<div class="card scard">
+      <div class="sh"><span class="sem">${SETOR2[s].em}</span><div><h2 style="margin:0">${SETOR2[s].nome}</h2><div class="sub">${titulo} · ${int(x.itens)} ${s === 'almoco' ? 'pratos' : 'lanches'}</div></div></div>
+      <div class="sgrid">
+        <div><div class="l">Faturou</div><div class="v">${fmt(x.fat)}</div></div>
+        <div><div class="l">Ingredientes e taxas</div><div class="v">${fmt(x.fat - x.contrib)}</div></div>
+        <div><div class="l">Equipe do turno</div><div class="v">${fmt(eq)}</div></div>
+        <div><div class="l">Sobrou</div><div class="v ${sobra >= 0 ? 'pos' : 'neg'}">${fmt(sobra)}</div></div>
+      </div></div>`;
+  }).join('');
+}
+function caixaSetorHTML(){
+  const r = resultadoDia(S.ui.dia);
+  return setorCardsHTML(r.porSetor, equipeSetor(S.diarias.filter(d => d.data === S.ui.dia)), 'no dia');
+}
+function equipeFaixa(data){
+  const ls = S.funcionarios.map(f => ({f, st:statusDia(f, data)})).filter(x => x.st);
+  if (!ls.length) return '<div class="sub">Ninguém na escala neste dia.</div>';
+  return `<div class="eqfaixa">${ls.map(({f, st}) => {
+    const tu = byId(S.turnos, turnoDo(f, data)), lanc = S.diarias.filter(x => x.func === f.id && x.data === data);
+    const val = lanc.reduce((a, l) => a + num(l.valor), 0), ent = lanc.reduce((a, l) => a + num(l.entregas), 0);
+    const info = st === 'ok' || st === 'extra' ? `<b>${fmt(val)}</b>${f.tipo !== 'fixo' ? ` · ${int(ent)} 🛵` : ''}` : st === 'falta' ? '<span class="neg">faltou</span>' : st === 'disp' ? 'não precisou' : 'a confirmar';
+    const ac = (st === 'pend' || st === 'esc') ? `<button class="mini-b ok" data-act="qLancar" data-id="${f.id}" data-v="${data}" title="Chegou / trabalhou">✓</button><button class="mini-b no" data-act="qFalta" data-id="${f.id}" data-v="${data}" title="Faltou">✗</button>` : '';
+    return `<div class="eqmini ${st}"><div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <span class="sub" style="font-weight:400">${esc(tu ? tu.nome : '')}</span></div><div class="sub">${info}</div></div>${ac}</div>`;
+  }).join('')}</div>`;
+}
+function vcard(item, q){
+  return `<div class="vcard ${q ? 'tem' : ''}" id="vc-${item.id}">
+    <button class="vbody" data-act="vmais" data-id="${item.id}"><span class="em">${emojiDe(item)}</span><span class="vn">${esc(item.nome)}</span><span class="vp">${fmt(num(item.preco))}</span></button>
+    <div class="vctl"><button data-act="vmenos" data-id="${item.id}" aria-label="Menos um">−</button><span class="vq" id="vq-${item.id}">${int(q)}</span><button data-act="vmais" data-id="${item.id}" aria-label="Mais um">+</button></div>
+  </div>`;
+}
+function rCaixa(){
+  const dia = S.ui.dia, per = S.ui.periodo, canal = S.ui.canalDia, v = (S.vendas[dia] || {})[`${per}|${canal}`] || {};
+  const prods = s => S.produtos.filter(p => p.setor === s);
+  const principais = per === 'almoco' ? prods('almoco') : [...prods('hamburgueria'), ...prods('combo')];
+  const outros = per === 'almoco' ? [...prods('hamburgueria'), ...prods('combo')] : prods('almoco');
+  const bloco = (titulo, lista) => lista.length ? `<div class="vgt">${titulo}</div><div class="vgrid">${lista.map(i => vcard(i, num(v[i.id]))).join('')}</div>` : '';
+  const ehEntrega = canal !== 'balcao';
+  return `
+  <div class="top"><div><h2>Caixa · ${dia === dataHoje ? 'hoje' : dataBR(dia)} <span class="sub" style="font-weight:400">(${DIAS_NOME[dow(dia)]})</span></h2><div class="sub">Toque no item para somar. Errou? Use o −. Salva sozinho.</div></div>
+    <div style="display:flex;gap:8px;align-items:flex-end">${dia !== dataHoje ? `<button class="btn" data-act="irHoje">Voltar para hoje</button>` : ''}<label class="f" style="width:170px">Dia<input type="date" data-k="dia" value="${dia}"></label></div></div>
+  <div class="kpis" id="dk">${diaResumoHTML()}</div>
+  <div class="grid2" id="ds">${caixaSetorHTML()}</div>
+  <div class="card">
+    <div class="top" style="margin:0 0 8px"><div><h2>Equipe do dia</h2></div><button class="btn x" data-act="irEquipe">Abrir equipe</button></div>
+    <div id="hfx">${equipeFaixa(dia)}</div>
+  </div>
+  <div class="card">
+    <div class="pertabs">${['almoco','hamburgueria'].map(s => `<button class="ptab ${per === s ? 'on' : ''}" data-act="periodo" data-v="${s}">${SETOR2[s].em} ${SETOR2[s].nome}</button>`).join('')}</div>
+    <div class="chips" style="margin-top:12px"><span class="lbl">Canal:</span>${chipsCanal(canal, 'canalDia')}</div>
+    ${ehEntrega ? `<div class="vgrid" style="margin-bottom:6px">${vcard({id:'_pedidos', nome:'Pedidos (entregas)', emoji:'📦', preco:0}, num(v._pedidos)).replace(/<span class="vp">[^<]*<\/span>/, '<span class="vp">para taxa e frete</span>')}</div>` : ''}
+    ${bloco(per === 'almoco' ? '🍱 Almoço' : '🍔 Hamburgueria e combos', principais)}
+    ${bloco('🥤 Bebidas', S.revenda)}
+    ${outros.length ? `<details class="outros"><summary>Outros itens (${per === 'almoco' ? 'hamburgueria' : 'almoço'})</summary>${bloco('', outros)}</details>` : ''}
+  </div>`;
+}
+/* =================== ENTREGA RÁPIDA (🛵) =================== */
+function turnoAgora(){
+  const now = new Date(), m = now.getHours() * 60 + now.getMinutes();
+  const ontem = (() => { const d = new Date(now); d.setDate(d.getDate() - 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; })();
+  for (const t of S.turnos) {
+    const i = toMin(t.ini), f = toMin(t.fim); if (i == null || f == null) continue;
+    if (i <= f) { if (m >= i - 30 && m <= f + 60) return {t, data:dataHoje}; }
+    else { if (m >= i - 30) return {t, data:dataHoje}; if (m <= f + 60) return {t, data:ontem}; }
+  }
+  const ord = S.turnos.filter(t => toMin(t.ini) != null).sort((a, b) => toMin(a.ini) - toMin(b.ini));
+  const ult = ord.filter(t => toMin(t.ini) <= m).pop() || ord[0] || S.turnos[0];
+  return {t:ult, data:dataHoje};
+}
+function turnoEntrega(){
+  const auto = turnoAgora();
+  if (S.ui.entTurno) { const t = byId(S.turnos, S.ui.entTurno); if (t) return {t, data:auto.data, manual:true}; }
+  return auto;
+}
+const horaAgora = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
+function entregaModal(){
+  if (!S.ui.entOpen) return '';
+  const {t, data, manual} = turnoEntrega();
+  if (!t) return `<div class="modal-bg" data-act="closeEnt"><div class="modal" data-act="noop"><h2>🛵 Nova entrega</h2><div class="sub">Cadastre os turnos na Equipe primeiro.</div></div></div>`;
+  const ents = S.funcionarios.filter(f => f.ativo !== false && f.tipo !== 'fixo');
+  const doTurno = ents.filter(f => planejado(f, data) && turnoDo(f, data) === t.id);
+  const outros = ents.filter(f => !doTurno.includes(f));
+  const btn = (f, grande) => { const l = S.diarias.find(x => x.func === f.id && x.data === data && x.turno === t.id); const n = l ? num(l.entregas) : 0;
+    return `<button class="entb ${grande ? 'big' : ''}" data-act="entAdd" data-id="${f.id}"><span class="av sm">${AVATAR(18)}</span><span style="flex:1;text-align:left"><b>${esc(f.nome)}</b><br><span class="sub">${n} entrega${n === 1 ? '' : 's'} neste turno${l ? ' · ' + fmt(l.valor) : ''}</span></span><span class="plus">+1</span></button>`; };
+  const log = S.entLog.filter(x => x.data === data).slice(-5).reverse();
+  return `<div class="modal-bg" data-act="closeEnt"><div class="modal" data-act="noop">
+    <div class="top" style="margin:0 0 6px"><h2>🛵 Nova entrega</h2><button class="btn x" data-act="closeEnt">✕</button></div>
+    <div class="sub">⏰ ${horaAgora()} · ${dataBR(data)} · turno ${manual ? 'escolhido' : 'detectado pela hora'}:</div>
+    <div class="chips" style="margin:8px 0 12px">${S.turnos.map(x => `<button class="chip ${x.id === t.id ? 'on' : ''}" data-act="entTurno" data-v="${x.id}">${esc(tLabel(x))}</button>`).join('')}</div>
+    ${doTurno.length ? `<div class="entl">${doTurno.map(f => btn(f, true)).join('')}</div>` : '<div class="sub" style="margin-bottom:8px">Ninguém escalado nesse turno.</div>'}
+    ${outros.length ? `<details class="outros" ${doTurno.length ? '' : 'open'}><summary>Outros entregadores</summary><div class="entl">${outros.map(f => btn(f, false)).join('')}</div></details>` : ''}
+    ${log.length ? `<div class="resumo"><div class="ttl">Últimas entregas</div>${log.map(x => { const l = byId(S.diarias, x.lanc), f = l && byId(S.funcionarios, l.func); return `<div class="r"><span>${x.hora}</span><span>${esc(f ? f.nome : '?')}</span></div>`; }).join('')}
+      <button class="btn x" style="margin-top:8px" data-act="entUndo">Desfazer a última</button></div>` : ''}
+  </div></div>`;
 }
 
 /* =================== AJUSTES =================== */
@@ -1260,6 +1399,34 @@ main.addEventListener('click', e => {
   else if (a === 'escDia') { const f = byId(S.funcionarios, id); f.escala = f.escala || {dias:[], turno:(S.turnos[0] || {}).id}; const d = +b.dataset.d; f.escala.dias = f.escala.dias.includes(d) ? f.escala.dias.filter(x => x !== d) : [...f.escala.dias, d]; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
   else if (a === 'irHoje') { S.ui.dia = dataHoje; S.ui.mes = mesHoje; done(); }
   else if (a === 'noop') { return; }
+  else if (a === 'vmais' || a === 'vmenos') {
+    const k = `${S.ui.periodo}|${S.ui.canalDia}`, d = S.ui.dia;
+    S.vendas[d] = S.vendas[d] || {}; const v = S.vendas[d][k] = S.vendas[d][k] || {};
+    const n = Math.max(0, num(v[id]) + (a === 'vmais' ? 1 : -1)); if (n) v[id] = n; else delete v[id];
+    save(); const q = document.getElementById('vq-' + id); if (q) q.textContent = int(n);
+    const c = document.getElementById('vc-' + id); if (c) { c.classList.toggle('tem', n > 0); c.classList.remove('pulse'); void c.offsetWidth; c.classList.add('pulse'); }
+    refreshVendas();
+  }
+  else if (a === 'periodo') { S.ui.periodo = b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'irEquipe') { aba = 'equipe'; S.ui.eqTab = 'escala'; S.ui.diaEq = S.ui.dia; try { history.replaceState(null, '', '#equipe'); } catch(_) {} done(); window.scrollTo(0, 0); }
+  else if (a === 'emPick') { S.ui.emPick = S.ui.emPick === id ? null : id; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'emSet') { const x = byId(S.produtos, id) || byId(S.revenda, id); if (x) x.emoji = b.dataset.v; S.ui.emPick = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'openEnt') { S.ui.entOpen = true; S.ui.entTurno = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'closeEnt') { S.ui.entOpen = false; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'entTurno') { S.ui.entTurno = b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'entAdd') {
+    const {t, data} = turnoEntrega(); if (!t) return;
+    let l = S.diarias.find(x => x.func === id && x.data === data && x.turno === t.id);
+    if (!l) { l = {id:uid(), data, func:id, turno:t.id, entregas:0, valor:0}; S.diarias.push(l); S.faltas = S.faltas.filter(x => !(x.func === id && x.data === data)); S.dispensas = S.dispensas.filter(x => !(x.func === id && x.data === data)); }
+    const hr = horaAgora(); l.entregas = num(l.entregas) + 1; l.horas = (l.horas || []).concat(hr); l.valor = pagar(id, t.id, l.entregas);
+    S.entLog.push({lanc:l.id, hora:hr, data}); if (S.entLog.length > 60) S.entLog = S.entLog.slice(-60);
+    const y = window.scrollY; done(); window.scrollTo(0, y);
+  }
+  else if (a === 'entUndo') {
+    const x = S.entLog.pop(); const l = x && byId(S.diarias, x.lanc);
+    if (l) { l.entregas = Math.max(0, num(l.entregas) - 1); if (l.horas) l.horas.pop(); l.valor = pagar(l.func, l.turno, l.entregas); }
+    const y = window.scrollY; done(); window.scrollTo(0, y);
+  }
   else if (a === 'eqTab') { S.ui.eqTab = b.dataset.v; done(); }
   else if (a === 'openLanc') { S.ui.lancOpen = true; done(); }
   else if (a === 'closeLanc') { S.ui.lancOpen = false; const y = window.scrollY; done(); window.scrollTo(0, y); }
