@@ -97,7 +97,7 @@ details.outros{margin-top:14px}details.outros summary{cursor:pointer;color:var(-
 .eqmini.ok,.eqmini.extra{border-left-color:var(--ok)}.eqmini.falta{border-left-color:var(--bad)}.eqmini.pend{border-left-color:#c9a24a}.eqmini.disp{opacity:.55}
 .eqmini .eqt{flex:1;min-width:0}.eqmini .nm{font-size:14px;font-weight:600;white-space:nowrap}
 .mini-b{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;cursor:pointer}
-.mini-b.ok{color:var(--ok)}.mini-b.no{color:var(--bad)}
+.mini-b.ok{color:var(--ok)}.mini-b.no{color:var(--bad);font-weight:700}
 .fab.ent{left:28px;right:auto;background:#5b8fd6;color:#fff;font-size:28px}
 .entl{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .entb{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--txt);font:inherit;cursor:pointer}
@@ -134,6 +134,7 @@ details.outros{margin-top:14px}details.outros summary{cursor:pointer;color:var(-
 .ftab input{padding:6px 8px}
 .tdias{display:flex;gap:3px}.tdias button{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font-size:11px;font-weight:600;cursor:pointer}
 .tdias button.on{background:var(--acc);color:#1a1206;border-color:var(--acc)}
+.papps{display:flex;flex-wrap:wrap;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 12px}
 .hojeg{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
 .hojeg .card{margin-bottom:0}
 @media(max-width:900px){.hojeg{grid-template-columns:1fr}}
@@ -265,17 +266,13 @@ const COR_SETOR = {hamburgueria:'var(--c-hb)', almoco:'var(--c-al)', combo:'var(
 
 /* =================== EXEMPLO =================== */
 function pagEx(funcs, diarias){
-  const out = [];
+  const out = [], f2 = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   funcs.filter(f => f.ativo !== false).forEach(f => {
-    let ate = ''; const d0 = new Date(hoje); d0.setDate(d0.getDate() - 1);
-    for (let back = 0; back < 70; back++) {
-      const d = new Date(d0); d.setDate(d0.getDate() - back);
-      if (d.getDay() !== 3) continue;
-      const ds = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-      if (!ate) ate = ds;
-      const de = new Date(d); de.setDate(d.getDate() - 6); const des = `${de.getFullYear()}-${pad(de.getMonth() + 1)}-${pad(de.getDate())}`;
-      const valor = diarias.filter(x => x.func === f.id && x.data >= des && x.data <= ds).reduce((a, x) => a + x.valor, 0);
-      if (valor > 0) out.push({id:uid(), func:f.id, data:ds, de:des, ate:ds, valor});
+    for (let back = 1; back < 70; back++) {
+      const d = new Date(hoje); d.setDate(d.getDate() - back); if (d.getDay() !== 3) continue;
+      const dom = new Date(d); dom.setDate(d.getDate() - 3); const seg = new Date(dom); seg.setDate(dom.getDate() - 6);
+      const de = f2(seg), ate = f2(dom), valor = diarias.filter(x => x.func === f.id && x.data >= de && x.data <= ate).reduce((a, x) => a + x.valor, 0);
+      if (valor > 0) out.push({id:uid(), func:f.id, data:f2(d), de, ate, valor});
     }
   });
   return out;
@@ -421,8 +418,20 @@ function migrarFuncoes(){
   S.funcoes = [ent, coz];
   S.funcionarios.forEach(f => { if (!f.funcao) f.funcao = f.tipo === 'fixo' ? 'fn_coz' : 'fn_ent'; });
 }
-function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.extras = S.extras || []; S.dispensas = S.dispensas || []; S.pagamentos = S.pagamentos || []; S.entLog = S.entLog || []; S.vendaLog = S.vendaLog || []; migrarFuncoes(); if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
-S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
+function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.faltas || []; S.extras = S.extras || []; S.dispensas = S.dispensas || []; S.pagamentos = S.pagamentos || []; S.entLog = S.entLog || []; S.vendaLog = S.vendaLog || []; migrarFuncoes();
+  if (!S.turnosV2) {
+    S.turnos.forEach(t => {
+      if (!t.ini) {
+        if (/^almo/i.test(t.nome)) { t.ini = '10:00'; t.fim = '14:00'; t.setor = 'almoco'; }
+        else if (/noite/i.test(t.nome) && !/longa|3h|madrug/i.test(t.nome)) { t.ini = '18:30'; t.fim = '23:30'; t.setor = 'hamburgueria'; if (!(t.dias && t.dias.length)) t.dias = [0,1,2,3,4]; if (!/23h30/.test(t.nome)) t.nome = 'Noite (até 23h30)'; }
+      }
+      if (/noite/i.test(t.nome) && t.setor === 'almoco') t.setor = 'hamburgueria';
+    });
+    const nl = S.turnos.find(t => /longa/i.test(t.nome)), fe = (S.funcoes || []).find(x => x.entrega);
+    if (nl && fe && fe.valores && fe.valores[nl.id] && num(fe.valores[nl.id].porEntrega) === 10) fe.valores[nl.id].porEntrega = 12;
+    S.turnosV2 = true;
+  } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
+S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
 
 /* =================== CÁLCULOS =================== */
 function canais(){ return [{id:'balcao', nome:'Balcão'}, {id:'propria', nome:'Entrega própria'}, ...S.apps.map(a => ({id:a.id, nome:a.nome, app:a}))]; }
@@ -491,7 +500,7 @@ function entregaPedido(canal){
 // calc de um item num canal. vendas=true: sem entrega e sem contas (usado na soma do mês)
 function calc(p, canal, vendas){
   const b = base(p), app = byId(S.apps, canal);
-  const preco = app ? (num(p.precoApp) || num(p.preco)) : num(p.preco);
+  const preco = app ? (num((p.precos || {})[app.id]) || num(p.precoApp) || num(p.preco)) : num(p.preco);
   const pctTaxa = app ? num(app.comissao) + num(app.taxaPag) : num(S.config.taxa);
   const taxa = preco * pctTaxa / 100;
   const ent = vendas ? {v:0, txt:''} : entregaPedido(canal);
@@ -739,11 +748,12 @@ function rCardapio(){
         <label class="f" style="flex:2 1 220px">Nome<input class="nome" data-k="prod" data-id="${p.id}" data-f="nome" value="${esc(p.nome)}"></label>
         ${p.setor !== 'combo' ? `<label class="f" style="flex:0 1 140px">Setor<select data-k="prod" data-id="${p.id}" data-f="setor">${['hamburgueria','almoco'].map(k => `<option value="${k}" ${p.setor === k ? 'selected' : ''}>${SETORES[k]}</option>`).join('')}</select></label>` : ''}
         <label class="f" style="flex:0 1 120px">Preço (R$)<input inputmode="decimal" data-k="prod" data-id="${p.id}" data-f="preco" data-num="1" value="${nv(p.preco)}"></label>
-        <label class="f" style="flex:0 1 120px">Preço nos apps<input inputmode="decimal" data-k="prod" data-id="${p.id}" data-f="precoApp" data-num="1" value="${nv(p.precoApp || 0)}"></label>
+        <div class="f">Apps<button class="btn" data-act="precoApps" data-id="${p.id}">📱 Preços nos apps${Object.keys(p.precos || {}).length ? ` (${Object.keys(p.precos).length})` : ''}</button></div>
         <button class="btn" data-act="dupProd" data-id="${p.id}">Duplicar</button>
         <button class="btn del" data-act="delProd" data-id="${p.id}">Excluir</button>
       </div>
       ${S.ui.emPick === p.id ? emPal(p.id) : ''}
+      ${S.ui.precoApps === p.id ? `<div class="papps"><div class="sub" style="width:100%">Preço de ${esc(p.nome)} em cada app. Vazio = usa ${fmt(num(p.precoApp) || num(p.preco))}. Para outro app, cadastre em Ajustes → Apps de entrega.</div>${S.apps.map(a => `<label class="f" style="width:150px">📱 ${esc(a.nome)} (R$)<input inputmode="decimal" data-k="papp" data-id="${p.id}" data-t="${a.id}" value="${nv((p.precos || {})[a.id] ?? '')}" placeholder="${nv(num(p.precoApp) || num(p.preco))}"></label>`).join('')}</div>` : ''}
       ${p.setor === 'combo' ? `
         <div class="sub" style="margin-bottom:8px">O que vem no combo:</div>
         ${(p.comp || []).map((c, idx) => linhaComp(p, c, idx)).join('')}
@@ -753,7 +763,7 @@ function rCardapio(){
         <button class="btn" data-act="addItem" data-id="${p.id}">+ Adicionar ingrediente ou embalagem</button>`}
       <div id="calc-${p.id}">${calcHTML(p)}</div>
     </div>`).join('') : '<div class="card vazio">Nada aqui ainda.</div>'}
-  <div class="sub">"Preço nos apps": se deixar 0, usa o mesmo preço do balcão.</div>`;
+  <div class="sub">"Preços nos apps": cada app pode ter seu preço. Se não colocar, usa o mesmo preço do balcão.</div>`;
 }
 function refreshCalc(p){ const el = document.getElementById('calc-' + p.id); if (el) el.innerHTML = calcHTML(p); }
 
@@ -918,11 +928,15 @@ function pessoasMes(ym){
   }).filter(x => x.f.ativo !== false || x.dias || x.faltas);
 }
 /* --- pagamentos --- */
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 function pendente(f){
   const pg = S.pagamentos.filter(p => p.func === f.id).sort((a, b) => a.ate.localeCompare(b.ate));
   const ult = pg[pg.length - 1], desde = ult ? ult.ate : '';
-  const ls = S.diarias.filter(d => d.func === f.id && d.data > desde && d.data <= dataHoje);
-  return {ult, desde, ls, total: ls.reduce((a, d) => a + num(d.valor), 0), dias: new Set(ls.map(d => d.data)).size};
+  const prox = proxPag(f), pd = new Date(prox + 'T12:00'), dom = new Date(pd); dom.setDate(pd.getDate() - (pd.getDay() === 0 ? 7 : pd.getDay()));
+  const ate = ymd(dom), seg = new Date(dom); seg.setDate(dom.getDate() - 6);
+  const ls = S.diarias.filter(d => d.func === f.id && d.data > desde && d.data <= ate);
+  const andam = S.diarias.filter(d => d.func === f.id && d.data > (desde > ate ? desde : ate) && d.data <= dataHoje);
+  return {ult, desde, ate, seg:ymd(seg), prox, ls, total: ls.reduce((a, d) => a + num(d.valor), 0), dias: new Set(ls.map(d => d.data)).size, andamento: andam.reduce((a, d) => a + num(d.valor), 0)};
 }
 function proxPag(f){
   const alvo = f.pagaDia == null ? 3 : +f.pagaDia;
@@ -936,9 +950,9 @@ function rPagamentos(){
   const lista = [...ats, ...S.funcionarios.filter(f => f.ativo === false && byF(f.id))];
   const hist = S.ui.hist && byId(S.funcionarios, S.ui.hist);
   return `
-  <div class="top" style="margin-top:0"><div><h2>Pagamentos de ${nomeMes(ym, true)}</h2><div class="sub">Quanto cada um ganhou no mês e quanto falta pagar. Toque em 📜 para ver o histórico.</div></div>${mesPicker()}</div>
+  <div class="top" style="margin-top:0"><div><h2>Pagamentos de ${nomeMes(ym, true)}</h2><div class="sub">A semana vai de segunda a domingo e é paga no dia escolhido da semana seguinte. Toque em 📜 para ver o histórico.</div></div>${mesPicker()}</div>
   <div class="kpis">
-    <div class="card kpi"><div class="l">Falta pagar agora (todos)</div><div class="v">${fmt(totalPend)}</div><div class="s">desde o último pagamento de cada um</div></div>
+    <div class="card kpi"><div class="l">Próximos pagamentos (todos)</div><div class="v">${fmt(totalPend)}</div><div class="s">semanas fechadas que ainda não foram pagas</div></div>
     <div class="card kpi"><div class="l">Equipe no mês</div><div class="v">${fmt(eq.total)}</div><div class="s">${int(eq.entregas)} entregas · ${eq.faltas.length} faltas</div></div>
   </div>
   <div class="pcards">${lista.map(f => {
@@ -956,8 +970,8 @@ function rPagamentos(){
         <div><div class="l">Ganhou no mês</div><div class="v">${fmt(x.tot)}</div><div class="s"></div></div>
       </div>
       ${f.ativo !== false ? `<div class="pagbox">
-        <div><div class="l">A pagar agora</div><div class="v">${fmt(p.total)}</div><div class="s">${p.dias} dia${p.dias === 1 ? '' : 's'}${p.desde ? ' desde ' + dataBR(p.desde).slice(0, 5) : ''}</div></div>
-        <div><div class="l">Paga toda</div><select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>${n}</option>`).join('')}</select><div class="s">${ehHoje ? '<b class="pos">é hoje!</b>' : 'próximo: ' + dataBR(prox).slice(0, 5)}</div></div>
+        <div><div class="l">Pagar ${ehHoje ? '<b class="pos">hoje!</b>' : 'em ' + dataBR(prox).slice(0, 5)}</div><div class="v">${fmt(p.total)}</div><div class="s">${p.dias ? `${p.dias} dia${p.dias === 1 ? '' : 's'} · semana ${dataBR(p.seg).slice(0, 5)} a ${dataBR(p.ate).slice(0, 5)}` : 'nada pendente'}</div></div>
+        <div><div class="l">Paga toda</div><select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>${n}</option>`).join('')}</select><div class="s">semana atual: ${fmt(p.andamento)}</div></div>
       </div>
       <button class="btn bottom ${p.total > 0 ? 'pri' : ''}" data-act="pagarFunc" data-id="${f.id}" ${p.total > 0 ? '' : 'disabled'}>Marcar como pago (${fmt(p.total)})</button>` : ''}
     </div>`; }).join('') || '<div class="vazio">Ninguém na equipe.</div>'}</div>
@@ -1066,7 +1080,7 @@ function rTurnos(){
     <div class="tblwrap"><table class="ftab">
       <tr><th>Função</th>${S.turnos.map(t => `<th>${esc(t.nome)}</th>`).join('')}<th></th></tr>
       ${fns.map(fn => `<tr>
-        <td style="min-width:150px"><input data-k="funcao" data-id="${fn.id}" data-f="nome" value="${esc(fn.nome)}"><label class="ck" style="font-size:12px;padding:6px 0 0"><input type="checkbox" data-k="funcao" data-id="${fn.id}" data-f="entrega" ${fn.entrega ? 'checked' : ''}> faz entregas</label></td>
+        <td style="min-width:150px"><label class="f">Função<input data-k="funcao" data-id="${fn.id}" data-f="nome" value="${esc(fn.nome)}"></label><label class="ck" style="font-size:12px;padding:6px 0 0"><input type="checkbox" data-k="funcao" data-id="${fn.id}" data-f="entrega" ${fn.entrega ? 'checked' : ''}> faz entregas</label></td>
         ${S.turnos.map(t => { const v = (fn.valores || {})[t.id] || {}; return `<td style="min-width:130px"><label class="f">Fixo (R$)<input inputmode="decimal" data-k="fnval" data-id="${fn.id}" data-t="${t.id}" data-f="fixo" value="${nv(v.fixo ?? '')}" placeholder="0"></label>${fn.entrega ? `<label class="f" style="margin-top:4px">Por entrega (R$)<input inputmode="decimal" data-k="fnval" data-id="${fn.id}" data-t="${t.id}" data-f="porEntrega" value="${nv(v.porEntrega ?? '')}" placeholder="0"></label>` : ''}</td>`; }).join('')}
         <td><button class="btn x del" data-act="delFuncao" data-id="${fn.id}">✕</button></td></tr>`).join('')}
     </table></div>
@@ -1276,12 +1290,19 @@ function qtdPeriodo(item){
   return {tot, det:det.join(' · ')};
 }
 function equipeFaixa(data){
-  const ls = S.diarias.filter(x => x.data === data);
-  return `<div class="eqfaixa">${ls.map(l => {
-    const f = byId(S.funcionarios, l.func), tu = byId(S.turnos, l.turno); if (!f) return '';
-    return `<div class="eqmini ok"><div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <span class="sub" style="font-weight:400">${esc(tu ? tu.nome : '')}</span></div><div class="sub"><b>${fmt(l.valor)}</b>${ehEnt(f) ? ` · ${int(l.entregas)} 🛵` : ` · ${esc((funcaoDe(f) || {}).nome || '')}`}</div></div><button class="mini-b no" data-act="eqTirar" data-id="${l.id}" title="Tirar do dia">✕</button></div>`;
-  }).join('')}<button class="eqadd" data-act="eqAddOpen"><span style="font-size:22px">+</span> Adicionar</button></div>
-  ${ls.length ? '' : '<div class="sub" style="margin-top:6px">Ninguém lançado ainda. Toque em + para adicionar quem está trabalhando. Entregadores entram sozinhos quando você registra uma entrega.</div>'}`;
+  const per = S.ui.periodo, doPer = t => t && turnoSetor(t) === per;
+  const lancs = S.diarias.filter(x => x.data === data && doPer(byId(S.turnos, x.turno)));
+  const comLanc = new Set(lancs.map(x => x.func));
+  const esc2 = S.funcionarios.filter(f => !comLanc.has(f.id) && (escalado(f, data) || extraDe(f, data)) && doPer(byId(S.turnos, turnoDo(f, data))));
+  const cardL = l => { const f = byId(S.funcionarios, l.func), tu = byId(S.turnos, l.turno); if (!f) return '';
+    return `<div class="eqmini ok"><div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <span class="sub" style="font-weight:400">${esc(tu ? tu.nome : '')}</span></div><div class="sub"><b>${fmt(l.valor)}</b>${ehEnt(f) ? ` · ${int(l.entregas)} 🛵` : ` · ${esc((funcaoDe(f) || {}).nome || '')}`}</div></div><button class="mini-b" data-act="eqTirar" data-id="${l.id}" title="Desfazer">↺</button></div>`; };
+  const cardE = f => { const tu = byId(S.turnos, turnoDo(f, data)), fal = S.faltas.find(x => x.func === f.id && x.data === data), dsp = dispDe(f, data);
+    const topo = `<div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <span class="sub" style="font-weight:400">${esc(tu ? tu.nome : '')}</span></div>`;
+    if (fal) return `<div class="eqmini falta">${topo}<div class="sub"><b class="neg">F · faltou</b></div></div><button class="mini-b" data-act="delFalta" data-id="${fal.id}" title="Desfazer">↺</button></div>`;
+    if (dsp) return `<div class="eqmini disp">${topo}<div class="sub">não precisou</div></div><button class="mini-b" data-act="undoDisp" data-id="${dsp.id}" title="Desfazer">↺</button></div>`;
+    return `<div class="eqmini pend">${topo}<div class="sub">na escala</div></div><button class="mini-b ok" data-act="qLancar" data-id="${f.id}" data-v="${data}" title="Veio trabalhar">✓</button><button class="mini-b" data-act="qDisp" data-id="${f.id}" data-v="${data}" title="Não precisou hoje">✕</button><button class="mini-b no" data-act="qFalta" data-id="${f.id}" data-v="${data}" title="Combinou e faltou">F</button></div>`; };
+  return `<div class="eqfaixa">${lancs.map(cardL).join('')}${esc2.map(cardE).join('')}<button class="eqadd" data-act="eqAddOpen"><span style="font-size:22px">+</span> Adicionar</button></div>
+  <div class="sub" style="margin-top:6px">${SETOR2[per].em} Turno do ${SETOR2[per].nome.toLowerCase()}. ✓ veio · ✕ não precisou · <b class="neg">F</b> combinou e faltou. Entregadores entram sozinhos ao registrar uma entrega.</div>`;
 }
 function vcard(item){
   const {tot, det} = item.id ? qtdPeriodo(item.id) : {tot:0, det:''};
@@ -1317,13 +1338,16 @@ const EMO_CANAL = c => c === 'balcao' ? '🏪' : c === 'propria' ? '🛵' : '�
 function vendaModal(){
   if (!S.ui.vendaPop) return '';
   const it = byId(S.produtos, S.ui.vendaPop) || byId(S.revenda, S.ui.vendaPop); if (!it) return '';
-  const head = `<div class="top" style="margin:0 0 4px"><h2>${emojiDe(it)} ${esc(it.nome)}</h2><button class="btn x" data-act="vClose">✕</button></div>`;
+  const combos = S.produtos.filter(p => p.setor === 'combo' && (p.comp || []).some(c => c.tipo === 'prod' && c.id === it.id));
+  const cb = S.ui.vendaCombo && byId(S.produtos, S.ui.vendaCombo), alvo = cb || it;
+  const head = `<div class="top" style="margin:0 0 4px"><h2>${emojiDe(alvo)} ${esc(alvo.nome)} <span class="sub" style="font-weight:400">${fmt(num(alvo.preco))}</span></h2><button class="btn x" data-act="vClose">✕</button></div>
+    ${combos.length ? `<div class="chips" style="margin:6px 0 4px"><button class="chip ${!cb ? 'on' : ''}" data-act="vCombo" data-v="">Só ${esc(it.nome)}</button>${combos.map(c => `<button class="chip ${cb && cb.id === c.id ? 'on' : ''}" data-act="vCombo" data-v="${c.id}">🎁 ${esc(c.nome)} · ${fmt(num(c.preco))}</button>`).join('')}</div>` : ''}`;
   if (!S.ui.vendaCanal) return `<div class="modal-bg" data-act="vClose"><div class="modal" data-act="noop">${head}
     <div class="sub">Onde foi essa venda? (${SETOR2[S.ui.periodo].em} ${SETOR2[S.ui.periodo].nome})</div>
     <div class="cgrid">${canais().map(c => `<button class="cbtn" data-act="vCanal" data-v="${c.id}"><span>${EMO_CANAL(c.id)}</span>${esc(c.nome)}</button>`).join('')}</div></div></div>`;
   const c = S.ui.vendaCanal, t = turnoCaixa(), d = S.ui.dia;
   let corpo;
-  if (lojaEntrega(c)) {
+  if (c !== 'balcao') {
     const ents = S.funcionarios.filter(f => f.ativo !== false && ehEnt(f));
     const noDia = ents.filter(f => S.diarias.some(x => x.func === f.id && x.data === d) || (planejado(f, d) && t && turnoDo(f, d) === t.id));
     const resto = ents.filter(f => !noDia.includes(f));
@@ -1332,10 +1356,7 @@ function vendaModal(){
     corpo = `<div class="sub" style="margin:4px 0 10px">Quem vai entregar?</div>
       ${noDia.length ? `<div class="entl">${noDia.map(f => btn(f, true)).join('')}</div>` : ''}
       ${resto.length ? `<details class="outros" ${noDia.length ? '' : 'open'}><summary>Outros entregadores</summary><div class="entl" style="margin-top:8px">${resto.map(f => btn(f, false)).join('')}</div></details>` : ''}
-      <div class="cgrid"><button class="cbtn" data-act="vEnt" data-novo="0" style="font-size:14px"><span>➕</span>Mesmo pedido de antes<br><span class="sub" style="font-size:12px">não conta outra entrega</span></button><button class="cbtn" data-act="vEnt" data-novo="1" style="font-size:14px"><span>📦</span>Sem entregador da casa</button></div>`;
-  } else {
-    corpo = `<div class="sub" style="margin:4px 0 0">É um pedido novo ou mais um item do mesmo pedido?</div>
-      <div class="cgrid"><button class="cbtn" data-act="vEnt" data-novo="1"><span>📦</span>Pedido novo</button><button class="cbtn" data-act="vEnt" data-novo="0"><span>➕</span>Mesmo pedido</button></div>`;
+      <div class="cgrid"><button class="cbtn" data-act="vEnt" data-novo="0" style="font-size:14px"><span>➕</span>Mesmo pedido de antes<br><span class="sub" style="font-size:12px">não conta outra entrega</span></button><button class="cbtn" data-act="vEnt" data-novo="1" style="font-size:14px"><span>${c === 'propria' ? '📦' : '📱'}</span>${c === 'propria' ? 'Sem entregador da casa' : 'Entregador do app'}</button></div>`;
   }
   return `<div class="modal-bg" data-act="vClose"><div class="modal" data-act="noop">${head}
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><button class="btn x" data-act="vBack">← Voltar</button><span class="tag" style="margin:0">${EMO_CANAL(c)} ${esc(nomeCanal(c))}</span></div>
@@ -1493,6 +1514,9 @@ main.addEventListener('input', e => {
     if (f === 'tipo' || f === 'funcao') { const y = window.scrollY; render(); window.scrollTo(0, y); return; }
     if (f === 'nome') { const o = document.querySelector(`#ld-func option[value="${fu.id}"]`); if (o) o.textContent = fu.nome; }
     prevLanc();
+  } else if (k === 'papp') {
+    const pr = byId(S.produtos, id); if (!pr) return; pr.precos = pr.precos || {};
+    if (t.value.trim() === '') delete pr.precos[t.dataset.t]; else pr.precos[t.dataset.t] = num(t.value); save(); refreshCalc(pr);
   } else if (k === 'funcao') {
     const fn = byId(S.funcoes, id); if (!fn) return; fn[f] = val; save(); if (f === 'entrega') render();
   } else if (k === 'fnval') {
@@ -1571,17 +1595,18 @@ main.addEventListener('click', e => {
   else if (a === 'escDia') { const f = byId(S.funcionarios, id); f.escala = f.escala || {dias:[], turno:(S.turnos[0] || {}).id}; const d = +b.dataset.d; f.escala.dias = f.escala.dias.includes(d) ? f.escala.dias.filter(x => x !== d) : [...f.escala.dias, d]; const y = window.scrollY; save(); render(); window.scrollTo(0, y); }
   else if (a === 'irHoje') { S.ui.dia = dataHoje; S.ui.mes = mesHoje; done(); }
   else if (a === 'noop') { return; }
-  else if (a === 'vmais') { S.ui.vendaPop = id; S.ui.vendaCanal = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'vCombo') { S.ui.vendaCombo = b.dataset.v || null; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'vmais') { S.ui.vendaPop = id; S.ui.vendaCanal = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'vCanal') {
     const c = b.dataset.v; if (precisaPedido(c)) { S.ui.vendaCanal = c; const y = window.scrollY; done(); window.scrollTo(0, y); return; }
-    vender(S.ui.vendaPop, c, null, false); S.ui.vendaPop = null; const y = window.scrollY; done(); window.scrollTo(0, y); toast('Venda registrada');
+    vender(S.ui.vendaCombo || S.ui.vendaPop, c, null, false); S.ui.vendaPop = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); toast('Venda registrada');
   }
   else if (a === 'vEnt') {
     const ent = b.dataset.v || null, novo = b.dataset.novo === '1';
-    vender(S.ui.vendaPop, S.ui.vendaCanal, ent, novo); S.ui.vendaPop = null; S.ui.vendaCanal = null; const y = window.scrollY; done(); window.scrollTo(0, y); toast(ent ? 'Venda e entrega registradas' : 'Venda registrada');
+    vender(S.ui.vendaCombo || S.ui.vendaPop, S.ui.vendaCanal, ent, novo); S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); toast(ent ? 'Venda e entrega registradas' : 'Venda registrada');
   }
   else if (a === 'vBack') { S.ui.vendaCanal = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
-  else if (a === 'vClose') { S.ui.vendaPop = null; S.ui.vendaCanal = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'vClose') { S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'vmenos') { desfazerVenda(id); const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'eqAddOpen') { S.ui.eqAdd = true; S.ui.eqAddTurno = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'eqAddClose') { S.ui.eqAdd = false; const y = window.scrollY; done(); window.scrollTo(0, y); }
@@ -1606,6 +1631,7 @@ main.addEventListener('click', e => {
   }
   else if (a === 'periodo') { S.ui.periodo = b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'irEquipe') { aba = 'equipe'; S.ui.eqTab = 'escala'; S.ui.diaEq = S.ui.dia; try { history.replaceState(null, '', '#equipe'); } catch(_) {} done(); window.scrollTo(0, 0); }
+  else if (a === 'precoApps') { S.ui.precoApps = S.ui.precoApps === id ? null : id; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'emPick') { S.ui.emPick = S.ui.emPick === id ? null : id; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'emSet') { const x = byId(S.produtos, id) || byId(S.revenda, id); if (x) x.emoji = b.dataset.v; S.ui.emPick = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'openEnt') { S.ui.entOpen = true; S.ui.entTurno = null; const y = window.scrollY; done(); window.scrollTo(0, y); }
@@ -1647,7 +1673,7 @@ main.addEventListener('click', e => {
   }
   else if (a === 'pagarFunc') {
     const f = byId(S.funcionarios, id), p = pendente(f); if (!p.total) return;
-    armar(b, () => { const de = p.ls.map(d => d.data).sort()[0]; S.pagamentos.push({id:uid(), func:id, data:dataHoje, de, ate:dataHoje, valor:p.total}); const y = window.scrollY; done(); window.scrollTo(0, y); }, `Confirmar ${fmt(p.total)}?`);
+    armar(b, () => { const de = p.ls.map(d => d.data).sort()[0]; S.pagamentos.push({id:uid(), func:id, data:dataHoje, de, ate:p.ate, valor:p.total}); const y = window.scrollY; done(); window.scrollTo(0, y); }, `Confirmar ${fmt(p.total)}?`);
   }
   else if (a === 'delPag') armar(b, () => { S.pagamentos = S.pagamentos.filter(x => x.id !== id); done(); });
   else if (a === 'calDia') { const d = b.dataset.v; S.ui.diaEq = d; S.ui.dia = d; S.ui.mes = d.slice(0, 7); aba = 'caixa'; try { history.replaceState(null, '', '#caixa'); } catch(_) {} done(); window.scrollTo(0, 0); }
