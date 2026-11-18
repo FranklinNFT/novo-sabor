@@ -514,8 +514,7 @@ function entregaPedido(canal){
   const app = byId(S.apps, canal);
   if (canal === 'propria') return {v: custoEnt() - num(S.config.taxaEntrega), txt: num(S.config.taxaEntrega) > 0 ? `Entrega (paga ${fmt(custoEnt())} ao entregador, cliente paga ${fmt(num(S.config.taxaEntrega))})` : `Entrega (paga ${fmt(custoEnt())} ao entregador, cliente não paga)`};
   if (!app) return {v:0, txt:''};
-  if (app.quemEntrega === 'loja') return app.freteGratis ? {v: custoEnt(), txt:'Entrega com frete grátis (paga o entregador)'} : {v: custoEnt() - num(app.frete), txt:`Entrega (paga ${fmt(custoEnt())} ao entregador, cliente paga ${fmt(num(app.frete))})`};
-  return app.freteGratis ? {v: num(app.frete), txt:`Frete grátis (a loja paga ${fmt(num(app.frete))} ao app)`} : {v:0, txt:''};
+  return {v:0, txt:''};
 }
 // calc de um item num canal. vendas=true: sem entrega e sem contas (usado na soma do mês)
 function calc(p, canal, vendas){
@@ -563,8 +562,6 @@ function resultadoDia(data){
     const ped = num(v._pedidos); let ef = 0, ec = 0;
     if (canal === 'propria') { ef = ped * num(S.config.taxaEntrega); ec = ef; }
     else if (app) {
-      if (app.quemEntrega === 'loja' && !app.freteGratis) { ef = ped * num(app.frete); ec = ef; }
-      if (app.quemEntrega === 'app' && app.freteGratis) ec -= ped * num(app.frete);
     }
     cf += ef; cc += ec; addS(per || 'hamburgueria', ef, ec, 0);
     const pc = porCanal[canal] = porCanal[canal] || {fat:0, contrib:0, pedidos:0}; pc.fat += cf; pc.contrib += cc; pc.pedidos += ped;
@@ -1390,7 +1387,7 @@ function calcPedido(pd){
   });
   const valor = pd.valor != null && pd.valor !== '' ? num(pd.valor) : cheio;
   const pctT = app ? num(app.comissao) + num(app.taxaPag) : num(S.config.taxa);
-  const taxa = valor * pctT / 100, frete = (pd.saida === 'app' && app && app.freteGratis) ? num(app.frete) : 0;
+  const taxa = valor * pctT / 100, frete = 0;
   return {cheio, valor, custo, taxa, frete, itens, linhas, contrib: valor - custo - taxa - frete};
 }
 const pedidosDia = d => S.pedidos.filter(p => p.data === d);
@@ -1559,12 +1556,9 @@ function rAjustes(){
       <label class="f" style="flex:1 1 140px">App<input data-k="app" data-id="${a.id}" data-f="nome" value="${esc(a.nome)}"></label>
       <label class="f" style="flex:0 1 110px">Comissão (%)<input inputmode="decimal" data-k="app" data-id="${a.id}" data-f="comissao" data-num="1" value="${nv(a.comissao)}"></label>
       <label class="f" style="flex:0 1 120px">Taxa pagamento (%)<input inputmode="decimal" data-k="app" data-id="${a.id}" data-f="taxaPag" data-num="1" value="${nv(a.taxaPag)}"></label>
-      <label class="f" style="flex:0 1 160px">Quem entrega<select data-k="app" data-id="${a.id}" data-f="quemEntrega"><option value="app" ${a.quemEntrega !== 'loja' ? 'selected' : ''}>Entregador do app</option><option value="loja" ${a.quemEntrega === 'loja' ? 'selected' : ''}>Nosso entregador</option></select></label>
-      <label class="f" style="flex:0 1 110px">Valor do frete (R$)<input inputmode="decimal" data-k="app" data-id="${a.id}" data-f="frete" data-num="1" value="${nv(a.frete)}"></label>
-      <label class="ck"><input type="checkbox" data-k="app" data-id="${a.id}" data-f="freteGratis" ${a.freteGratis ? 'checked' : ''}> Frete grátis</label>
       <button class="btn x del" data-act="delApp" data-id="${a.id}">✕</button>
     </div>`).join('')}
-    <div class="dica" style="margin:12px 0 0">iFood Plano Básico: 12% + 3,2% e a loja entrega. Plano Entrega: 23% + 3,2% e o iFood entrega. Com <b>frete grátis</b>, quem paga a entrega é a loja.</div>
+    <div class="dica" style="margin:12px 0 0">iFood Plano Básico: 12% de comissão + 3,2% de taxa de pagamento. Plano Entrega: 23% + 3,2%. Quem entrega é escolhido em cada pedido no Caixa, e cupom ou frete grátis se ajusta no "valor que entrou".</div>
   </div>
   <div class="card">
     <h2>Backup</h2>
