@@ -968,13 +968,14 @@ const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 function pendente(f){
   const pg = S.pagamentos.filter(p => p.func === f.id).sort((a, b) => a.ate.localeCompare(b.ate));
   const ult = pg[pg.length - 1], desde = ult ? ult.ate : '';
-  const prox = proxPag(f), pd = new Date(prox + 'T12:00'), dom = new Date(pd); dom.setDate(pd.getDate() - (pd.getDay() === 0 ? 7 : pd.getDay()));
+  const prox = proxPag(f), pd = new Date(prox + 'T12:00'), dom = new Date(pd), fimSem = (semIni() + 6) % 7; dom.setDate(pd.getDate() - (((pd.getDay() - fimSem + 7) % 7) || 7));
   const tudo = f.ativo === false || +f.pagaDia === 7;
   const ate = tudo ? dataHoje : ymd(dom), seg = new Date(dom); seg.setDate(dom.getDate() - 6);
   const ls = S.diarias.filter(d => d.func === f.id && d.data > desde && d.data <= ate);
   const andam = S.diarias.filter(d => d.func === f.id && d.data > (desde > ate ? desde : ate) && d.data <= dataHoje);
   return {ult, desde, ate, seg: tudo ? (ls.map(d => d.data).sort()[0] || dataHoje) : ymd(seg), prox, tudo, ls, total: ls.reduce((a, d) => a + num(d.valor), 0), dias: new Set(ls.map(d => d.data)).size, andamento: andam.reduce((a, d) => a + num(d.valor), 0)};
 }
+const semIni = () => S.config.semIni == null ? 1 : +S.config.semIni;
 const pagaTxt = f => +f.pagaDia === 7 ? 'paga todo dia' : 'paga toda ' + DIAS_NOME[f.pagaDia == null ? 3 : +f.pagaDia];
 function proxPag(f){
   if (+f.pagaDia === 7) return dataHoje;
@@ -991,7 +992,7 @@ function rPagamentos(){
   const totDev = devendo.reduce((a, f) => a + pendente(f).total, 0);
   const hist = S.ui.hist && byId(S.funcionarios, S.ui.hist);
   return `
-  <div class="top" style="margin-top:0"><div><h2>Pagamentos de ${nomeMes(ym, true)}</h2><div class="sub">A semana vai de segunda a domingo e é paga no dia escolhido da semana seguinte. Toque em 📜 para ver o histórico.</div></div>${mesPicker()}</div>
+  <div class="top" style="margin-top:0"><div><h2>Pagamentos de ${nomeMes(ym, true)}</h2><div class="sub">A semana vai de ${DIAS_NOME[semIni()]} a ${DIAS_NOME[(semIni() + 6) % 7]} e é paga no dia escolhido de cada pessoa, depois que a semana fecha. Toque em 📜 para ver o histórico.</div></div><div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap"><label class="f">Semana começa na<select data-k="cfg" data-f="semIni" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${semIni() === i ? 'selected' : ''}>${n}</option>`).join('')}</select></label>${mesPicker()}</div></div>
   <div class="kpis">
     <div class="card kpi"><div class="l">Próximos pagamentos (todos)</div><div class="v">${fmt(totalPend)}</div><div class="s">semanas fechadas que ainda não foram pagas</div></div>
     ${totDev > 0 ? `<div class="card kpi" style="border-color:#6b2a25"><div class="l">Devendo a quem saiu</div><div class="v neg">${fmt(totDev)}</div><div class="s">${devendo.map(f => esc(curto(f.nome))).join(', ')}</div></div>` : ''}
