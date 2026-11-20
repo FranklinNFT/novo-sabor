@@ -465,6 +465,7 @@ function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.fal
     if (nl && fe && fe.valores && fe.valores[nl.id] && num(fe.valores[nl.id].porEntrega) === 10) fe.valores[nl.id].porEntrega = 12;
     S.turnosV2 = true;
   }
+  if (!S.semTurnoV1) { S.funcionarios.filter(f => /^(eduardo|j[ée]ssica)\b/i.test(f.nome) && f.escala && f.escala.turno).forEach(f => { f.escala.turnoGuardado = f.escala.turno; f.escala.turno = ''; }); S.semTurnoV1 = true; }
   if (!S.exLucasPago) { S.funcionarios.filter(f => f.ativo === false && /exemplo/i.test(f.nome) && !S.pagamentos.some(p => p.func === f.id)).forEach(f => { const ls = S.diarias.filter(d => d.func === f.id).map(d => d.data).sort(); if (ls.length) S.pagamentos.push({id:uid(), func:f.id, data:ls[ls.length - 1], de:ls[0], ate:ls[ls.length - 1], valor:S.diarias.filter(d => d.func === f.id).reduce((a, d) => a + num(d.valor), 0)}); }); S.exLucasPago = true; } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
 S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; S.ui.saindo = null; S.ui.fechar = false; S.ui.pedEdit = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
 
@@ -855,7 +856,7 @@ const AVATAR = (s = 24) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" 
 const tLabel = t => t ? `${t.nome}${t.ini ? ` · ${t.ini}–${t.fim || '?'}` : ''}` : '—';
 const curto = n => String(n).split(/[ –-]/)[0];
 function escalado(f, data){
-  const e = f.escala; if (f.ativo === false || !e || !(e.dias || []).includes(dow(data))) return false;
+  const e = f.escala; if (f.ativo === false || !e || !e.turno || !(e.dias || []).includes(dow(data))) return false;
   if (e.ini && data < e.ini) return false; if (e.fim && data > e.fim) return false;
   return true;
 }
@@ -1042,8 +1043,29 @@ function histHTML(f, ym){
 function rEscala(ym){
   return `
   <div class="card">
-    <div class="top" style="margin-top:0"><div><h2>Escala de ${nomeMes(ym, true)}</h2><div class="sub">Quem trabalha em cada dia. Toque num dia para abrir ele no Caixa e confirmar quem veio.</div></div>${mesPicker()}</div>
+    <div class="top" style="margin-top:0"><div><h2>Escala de ${nomeMes(ym, true)}</h2><div class="sub">Quem trabalhou e quem está escalado. Toque num dia para escalar alguém.</div></div>${mesPicker()}</div>
     ${calHTML(ym)}
+  </div>
+  ${escDiaHTML(S.ui.diaEq)}`;
+}
+const turnosDoDia = data => { const d = dow(data), ts = S.turnos.filter(t => !(t.dias || []).length || t.dias.includes(d)); return ts.length ? ts : S.turnos; };
+function escDiaHTML(data){
+  if (!data) return '';
+  const ts = turnosDoDia(data), tSel = ts.find(t => t.id === S.ui.escTurno) || ts[0];
+  const ls = S.funcionarios.map(f => ({f, st:statusDia(f, data)})).filter(x => x.st);
+  const naEsc = ativos().filter(f => planejado(f, data) || ls.some(x => x.f === f));
+  const livres = ativos().filter(f => !naEsc.includes(f));
+  const linha = ({f, st}) => { const tu = byId(S.turnos, turnoDo(f, data)), ext = extraDe(f, data), disp = dispDe(f, data);
+    let ac = '';
+    if (st === 'esc' || st === 'pend') ac = ext && !escalado(f, data) ? `<button class="btn x" data-act="escTirar" data-id="${ext.id}">Tirar</button>` : `<button class="btn x" data-act="qDisp" data-id="${f.id}" data-v="${data}">Folga</button>`;
+    else if (st === 'disp') ac = `<button class="btn x" data-act="undoDisp" data-id="${disp.id}">Desfazer</button>`;
+    return `<div class="item"><span class="pl ${st}">${esc(curto(f.nome))}</span><span style="flex:1" class="sub">${esc(funcaoDe(f) ? funcaoDe(f).nome : '')} · ${esc(tu ? tu.nome : '')} · ${ST_NOME[st]}</span>${ac}</div>`; };
+  return `<div class="card">
+    <div class="top" style="margin-top:0"><div><h2>${DIAS_NOME[dow(data)]}, ${dataBR(data)}</h2></div><button class="btn x" data-act="abrirCaixaDia" data-v="${data}">Abrir no Caixa</button></div>
+    ${ls.length ? ls.map(linha).join('') : '<div class="sub" style="margin-bottom:8px">Ninguém escalado nesse dia.</div>'}
+    ${livres.length && data >= dataHoje ? `<div class="sub" style="margin:12px 0 6px">Escalar para o turno:</div>
+    <div class="chips">${ts.map(t => `<button class="chip ${t === tSel ? 'on' : ''}" data-act="escTurnoSel" data-v="${t.id}">${esc(tLabel(t))}</button>`).join('')}</div>
+    <div class="chips">${livres.map(f => `<button class="btn" data-act="escalar" data-id="${f.id}" data-v="${data}" data-t="${tSel ? tSel.id : ''}">+ ${esc(f.nome)} <span class="sub">${esc(funcaoDe(f) ? funcaoDe(f).nome : '')}</span></button>`).join('')}</div>` : ''}
   </div>`;
 }
 function rResumoEq(ym){
@@ -1075,27 +1097,27 @@ function rLancEq(ym){
 function rPessoas(){
   const ats = ativos(), inativos = S.funcionarios.filter(f => f.ativo === false), ed = S.ui.editFunc;
   const optsFn = f => (S.funcoes || []).map(fn => `<option value="${fn.id}" ${f.funcao === fn.id ? 'selected' : ''}>${esc(fn.nome)}</option>`).join('');
-  const card = f => { const tu = byId(S.turnos, f.escala?.turno), fn = funcaoDe(f), v = valoresDe(f, tu); return `
+  const card = f => { const tu = byId(S.turnos, f.escala?.turno), fn = funcaoDe(f), v = valoresDe(f, tu), sem = !tu; return `
     <div class="pcard">
       <div class="ph ph-fix"><div class="av">${AVATAR()}</div><div style="flex:1;min-width:0"><div class="nm">${esc(f.nome)}</div><div class="sub">${esc(fn ? fn.nome : '—')}</div></div>
         <button class="btn x" data-act="editFunc" data-id="${f.id}">${ed === f.id ? 'Fechar' : 'Editar'}</button></div>
-      <div class="mini">${DIAS.map((l, i) => `<span class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}">${l}</span>`).join('')}</div>
+      ${sem ? `<div class="sub">🙋 Sem turno combinado · chama quando precisar</div><div class="sub">💰 conforme o turno que trabalhar · ${pagaTxt(f)}</div>` : `<div class="mini">${DIAS.map((l, i) => `<span class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}">${l}</span>`).join('')}</div>
       <div class="sub">${esc(tLabel(tu))}${f.escala?.fim ? ' · contrato até ' + dataBR(f.escala.fim) : ''}</div>
-      <div class="sub">💰 ${tu ? (ehEnt(f) ? `${fmt(v.minimo)} fixo ou ${fmt(v.porEntrega)} por entrega` : `${fmt(v.minimo)} por dia`) : '—'} · ${pagaTxt(f)}</div>
+      <div class="sub">💰 ${ehEnt(f) ? `${fmt(v.minimo)} fixo ou ${fmt(v.porEntrega)} por entrega` : `${fmt(v.minimo)} por dia`} · ${pagaTxt(f)}</div>`}
       ${ed === f.id ? `<div class="edit">
         <label class="f">Nome<input data-k="func" data-id="${f.id}" data-f="nome" value="${esc(f.nome)}"></label>
         <div class="row2"><label class="f">Função<select data-k="func" data-id="${f.id}" data-f="funcao">${optsFn(f)}</select></label>
-        <label class="f">Turno combinado<select data-k="func" data-id="${f.id}" data-f="escTurno">${S.turnos.map(t => `<option value="${t.id}" ${f.escala?.turno === t.id ? 'selected' : ''}>${esc(t.nome)}</option>`).join('')}</select></label></div>
-        <div class="f">Dias combinados<div class="dias">${DIAS.map((l, i) => `<button class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}" data-act="escDia" data-id="${f.id}" data-d="${i}" title="${DIAS_NOME[i]}">${l}</button>`).join('')}</div></div>
+        <label class="f">Turno combinado<select data-k="func" data-id="${f.id}" data-f="escTurno"><option value="" ${sem ? 'selected' : ''}>Sem turno combinado</option>${S.turnos.map(t => `<option value="${t.id}" ${f.escala?.turno === t.id ? 'selected' : ''}>${esc(t.nome)}</option>`).join('')}</select></label></div>
+        ${sem ? '' : `<div class="f">Dias combinados<div class="dias">${DIAS.map((l, i) => `<button class="${(f.escala?.dias || []).includes(i) ? 'on' : ''}" data-act="escDia" data-id="${f.id}" data-d="${i}" title="${DIAS_NOME[i]}">${l}</button>`).join('')}</div></div>
         <div class="row2"><label class="f">Contrato de<input type="date" data-k="func" data-id="${f.id}" data-f="escIni" value="${f.escala?.ini || ''}"></label>
-        <label class="f">até (vazio = sem fim)<input type="date" data-k="func" data-id="${f.id}" data-f="escFim" value="${f.escala?.fim || ''}"></label></div>
+        <label class="f">até (vazio = sem fim)<input type="date" data-k="func" data-id="${f.id}" data-f="escFim" value="${f.escala?.fim || ''}"></label></div>`}
         <label class="f">Dia de pagamento<select data-k="func" data-id="${f.id}" data-f="pagaDia" data-num="1">${DIAS_NOME.map((n, i) => `<option value="${i}" ${(f.pagaDia == null ? 3 : +f.pagaDia) === i ? 'selected' : ''}>Toda ${n}</option>`).join('')}<option value="7" ${+f.pagaDia === 7 ? 'selected' : ''}>Todo dia (no fim do dia)</option></select></label>
         <div class="sub">Quanto ganha é definido pela função, em ⏰ Turnos.</div>
         <button class="btn" data-act="inativar" data-id="${f.id}">Saiu da equipe</button>
       </div>` : ''}
     </div>`; };
   return `
-  <div class="top" style="margin-top:0"><div><h2>Pessoas</h2><div class="sub">Quem trabalha com elas. Clique em Editar para mudar função, dias, turno e contrato.</div></div><button class="btn pri" data-act="addFunc">+ Pessoa</button></div>
+  <div class="top" style="margin-top:0"><div><h2>Pessoas</h2><div class="sub">Quem trabalha com elas. Quem não tem turno combinado só aparece na escala quando for escalado.</div></div><button class="btn pri" data-act="addFunc">+ Pessoa</button></div>
   <div class="pcards">${ats.map(card).join('') || '<div class="vazio">Ninguém na equipe ainda.</div>'}</div>
   ${inativos.length ? `<div class="card" style="margin-top:14px"><div class="sub" style="margin-bottom:6px">Não trabalham mais (o histórico fica guardado):</div>
     ${inativos.map(f => `<div class="item"><span style="flex:1">${esc(f.nome)}</span><button class="btn" data-act="reativar" data-id="${f.id}">Voltou</button><button class="btn del" data-act="delFunc" data-id="${f.id}">Excluir</button></div>`).join('')}</div>` : ''}`;
@@ -1677,8 +1699,8 @@ function carregarNovoSabor(){
   const fe = (S.funcoes || []).find(f => f.entrega) || (S.funcoes || [])[0], fc = (S.funcoes || []).find(f => !f.entrega) || fe;
   const noite = S.turnos.find(t => /noite/i.test(t.nome) && !/longa/i.test(t.nome)) || S.turnos[0];
   const tem = n => S.funcionarios.some(f => f.nome.toLowerCase() === n.toLowerCase());
-  if (!tem('Eduardo')) S.funcionarios.push({id:uid(), nome:'Eduardo', funcao:fe && fe.id, ativo:true, pagaDia:3, escala:{dias:[0,1,2,3,4,5,6], turno:noite && noite.id}});
-  if (!tem('Jéssica')) S.funcionarios.push({id:uid(), nome:'Jéssica', funcao:fc && fc.id, ativo:true, pagaDia:3, escala:{dias:[0,1,2,3,4,5,6], turno:noite && noite.id}});
+  if (!tem('Eduardo')) S.funcionarios.push({id:uid(), nome:'Eduardo', funcao:fe && fe.id, ativo:true, pagaDia:3, escala:{dias:[], turno:''}});
+  if (!tem('Jéssica')) S.funcionarios.push({id:uid(), nome:'Jéssica', funcao:fc && fc.id, ativo:true, pagaDia:3, escala:{dias:[], turno:''}});
   const ifood = S.apps.filter(a => /ifood/i.test(a.nome)), base = ifood[0] || {comissao:12, taxaPag:3.2};
   if (ifood[0]) ifood[0].nome = 'iFood (conta 1)'; else S.apps.unshift({id:'app_' + uid(), nome:'iFood (conta 1)', comissao:12, taxaPag:3.2});
   if (ifood.length < 2) S.apps.splice(1, 0, {id:'app_' + uid(), nome:'iFood (conta 2)', comissao:base.comissao, taxaPag:base.taxaPag});
@@ -1776,7 +1798,7 @@ main.addEventListener('input', e => {
     prevLanc();
   } else if (k === 'func') {
     const fu = byId(S.funcionarios, id); if (!fu) return;
-    if (f === 'escTurno' || f === 'escIni' || f === 'escFim') { fu.escala = fu.escala || {dias:[]}; fu.escala[{escTurno:'turno', escIni:'ini', escFim:'fim'}[f]] = val; save(); return; }
+    if (f === 'escTurno' || f === 'escIni' || f === 'escFim') { fu.escala = fu.escala || {dias:[]}; fu.escala[{escTurno:'turno', escIni:'ini', escFim:'fim'}[f]] = val; if (f === 'escTurno' && val && !(fu.escala.dias || []).length) fu.escala.dias = [0,1,2,3,4,5,6]; save(); if (f === 'escTurno') { const y = window.scrollY; render(); window.scrollTo(0, y); } return; }
     if (f === 'pagaDia') { fu.pagaDia = val; save(); return; }
     fu[f] = val; save();
     if (f === 'tipo' || f === 'funcao') { const y = window.scrollY; render(); window.scrollTo(0, y); return; }
@@ -1864,7 +1886,7 @@ main.addEventListener('click', e => {
   else if (a === 'delGasto') armar(b, () => { S.gastos = S.gastos.filter(g => g.id !== id); done(); });
   else if (a === 'addTurno') { S.turnos.push({id:uid(), nome:'Novo turno', ini:'', fim:'', minimo:0, porEntrega:0}); done(); }
   else if (a === 'delTurno') armar(b, () => { S.turnos = S.turnos.filter(t => t.id !== id); done(); });
-  else if (a === 'addFunc') { const n = {id:uid(), nome:'Novo funcionário', funcao:(S.funcoes[0] || {}).id, diaria:0, ativo:true, pagaDia:3, escala:{dias:[], turno:(S.turnos[0] || {}).id}}; S.funcionarios.push(n); S.ui.editFunc = n.id; done(); }
+  else if (a === 'addFunc') { const n = {id:uid(), nome:'Novo funcionário', funcao:(S.funcoes[0] || {}).id, diaria:0, ativo:true, pagaDia:3, escala:{dias:[], turno:''}}; S.funcionarios.push(n); S.ui.editFunc = n.id; done(); }
   else if (a === 'inativar') { const f = byId(S.funcionarios, id); const pend = pendente({...f, ativo:false}).total; if (pend > 0) { S.ui.saindo = id; done(); } else armar(b, () => { f.ativo = false; done(); }, 'Saiu mesmo?'); }
   else if (a === 'saiCancel') { S.ui.saindo = null; done(); }
   else if (a === 'saiDever' || a === 'saiPagar') {
@@ -1918,7 +1940,7 @@ main.addEventListener('click', e => {
     if (!S.diarias.some(x => x.func === id && x.data === d && x.turno === t.id)) { S.diarias.push({id:uid(), data:d, func:id, turno:t.id, entregas:0, valor:pagar(id, t.id, 0)}); S.faltas = S.faltas.filter(x => !(x.func === id && x.data === d)); S.dispensas = S.dispensas.filter(x => !(x.func === id && x.data === d)); }
     S.ui.eqAdd = false; const y = window.scrollY; done(); window.scrollTo(0, y);
   }
-  else if (a === 'eqNova') { S.ui.eqAdd = false; aba = 'equipe'; S.ui.eqTab = 'pessoas'; const n = {id:uid(), nome:'Nova pessoa', funcao:(S.funcoes[0] || {}).id, ativo:true, pagaDia:3, escala:{dias:[], turno:(S.turnos[0] || {}).id}}; S.funcionarios.push(n); S.ui.editFunc = n.id; try { history.replaceState(null, '', '#equipe'); } catch(_) {} done(); window.scrollTo(0, 0); }
+  else if (a === 'eqNova') { S.ui.eqAdd = false; aba = 'equipe'; S.ui.eqTab = 'pessoas'; const n = {id:uid(), nome:'Nova pessoa', funcao:(S.funcoes[0] || {}).id, ativo:true, pagaDia:3, escala:{dias:[], turno:''}}; S.funcionarios.push(n); S.ui.editFunc = n.id; try { history.replaceState(null, '', '#equipe'); } catch(_) {} done(); window.scrollTo(0, 0); }
   else if (a === 'eqTirar') { armar(b, () => { S.diarias = S.diarias.filter(x => x.id !== id); const y = window.scrollY; done(); window.scrollTo(0, y); }, '?'); }
   else if (a === 'turnoDia') { const t = byId(S.turnos, id); const d = +b.dataset.d; t.dias = (t.dias || []).includes(d) ? t.dias.filter(x => x !== d) : [...(t.dias || []), d]; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'addFuncao') { const fn = {id:uid(), nome:'Nova função', entrega:false, valores:{}}; S.funcoes.push(fn); done(); }
@@ -1981,7 +2003,16 @@ main.addEventListener('click', e => {
     armar(b, () => { const de = p.ls.map(d => d.data).sort()[0]; S.pagamentos.push({id:uid(), func:id, data:dataHoje, de, ate:p.ate, valor:p.total}); const y = window.scrollY; done(); window.scrollTo(0, y); }, `Confirmar ${fmt(p.total)}?`);
   }
   else if (a === 'delPag') armar(b, () => { S.pagamentos = S.pagamentos.filter(x => x.id !== id); done(); });
-  else if (a === 'calDia') { const d = b.dataset.v; S.ui.diaEq = d; S.ui.dia = d; S.ui.mes = d.slice(0, 7); aba = 'caixa'; try { history.replaceState(null, '', '#caixa'); } catch(_) {} done(); window.scrollTo(0, 0); }
+  else if (a === 'calDia') { const d = b.dataset.v; S.ui.diaEq = d; S.ui.mes = d.slice(0, 7); const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'abrirCaixaDia') { const d = b.dataset.v; S.ui.dia = d; S.ui.mes = d.slice(0, 7); aba = 'caixa'; try { history.replaceState(null, '', '#caixa'); } catch(_) {} done(); window.scrollTo(0, 0); }
+  else if (a === 'escTurnoSel') { S.ui.escTurno = b.dataset.v; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'escTirar') { S.extras = S.extras.filter(x => x.id !== id); const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'escalar') {
+    const f = byId(S.funcionarios, id), data = b.dataset.v, turno = b.dataset.t;
+    const ir = () => { S.dispensas = S.dispensas.filter(x => !(x.func === id && x.data === data)); S.extras = S.extras.filter(x => !(x.func === id && x.data === data)); S.extras.push({id:uid(), data, func:id, turno}); const y = window.scrollY; done(); window.scrollTo(0, y); };
+    const mesma = ativos().filter(o => o !== f && o.funcao === f.funcao && planejado(o, data) && turnoDo(o, data) === turno);
+    if (mesma.length) armar(b, ir, `Já tem ${mesma.length === 1 ? curto(mesma[0].nome) : mesma.length + ' pessoas'} como ${(funcaoDe(f) || {}).nome || 'essa função'}. Escalar mesmo assim?`); else ir();
+  }
   else if (a === 'hist') { S.ui.hist = S.ui.hist === id ? null : id; done(); const hb = document.getElementById('histbox'); if (hb) hb.scrollIntoView({behavior:'smooth', block:'start'}); }
   else if (a === 'toggleTarde') { const l = byId(S.diarias, id); if (l) { l.tarde = !l.tarde; l.valor = pagar(l.func, l.turno, l.entregas, l.tarde); } const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'qLancar' || a === 'qFalta') {
