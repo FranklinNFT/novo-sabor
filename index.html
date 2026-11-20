@@ -505,14 +505,19 @@ function funcMensal(){
 }
 function qtdMes(ym){
   let q = 0; Object.entries(S.vendas).forEach(([d, dia]) => { if (!d.startsWith(ym)) return; Object.values(dia).forEach(c => Object.entries(c).forEach(([id, v]) => { if (id !== '_pedidos' && byId(S.produtos, id)) q += num(v); })); });
+  (S.pedidos || []).forEach(p => { if (p.data.startsWith(ym)) p.itens.forEach(it => { if (byId(S.produtos, it.id)) q += num(it.qtd); }); });
   return q;
 }
 function vendasMes(){
   if (CACHE.vm) return CACHE.vm;
-  const meses = [...new Set(Object.keys(S.vendas).map(d => d.slice(0, 7)))].filter(m => m < mesHoje).sort().slice(-3);
+  const datas = [...Object.keys(S.vendas), ...(S.pedidos || []).map(p => p.data)].filter(d => d <= dataHoje).sort();
+  const proj = ym => { const doMes = datas.filter(d => d.startsWith(ym)); if (!doMes.length) return null;
+    const ini = +doMes[0].slice(8, 10), fim = ym === mesHoje ? hoje.getDate() : diasMes(ym), dias = fim - ini + 1;
+    return dias >= 7 ? qtdMes(ym) / dias * diasMes(ym) : null; };
+  const meses = [...new Set(datas.map(d => d.slice(0, 7)))].filter(m => m < mesHoje).sort().slice(-3).map(m => ({m, v:proj(m)})).filter(x => x.v != null);
   let r;
-  if (meses.length) r = {valor: meses.reduce((a, m) => a + qtdMes(m), 0) / meses.length, fonte: 'média real de ' + meses.map(m => nomeMes(m)).join(', ')};
-  else { const q = qtdMes(mesHoje); r = q > 0 ? {valor: q / hoje.getDate() * diasMes(mesHoje), fonte:'previsão pelo que já foi lançado este mês'} : {valor: num(S.config.vendasMes), fonte:'estimativa (ainda sem lançamentos)'}; }
+  if (meses.length) r = {valor: meses.reduce((a, x) => a + x.v, 0) / meses.length, fonte: 'média real de ' + meses.map(x => nomeMes(x.m)).join(', ')};
+  else { const v = proj(mesHoje); r = v != null ? {valor: v, fonte:'previsão pelo que já foi lançado este mês'} : {valor: num(S.config.vendasMes), fonte:'estimativa (com 1 semana de vendas passa a usar o real)'}; }
   return CACHE.vm = r;
 }
 const contasMes = () => totalFixos() + funcMensal().valor;
