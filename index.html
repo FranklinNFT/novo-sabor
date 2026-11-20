@@ -469,6 +469,7 @@ function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.fal
     if (nl && fe && fe.valores && fe.valores[nl.id] && num(fe.valores[nl.id].porEntrega) === 10) fe.valores[nl.id].porEntrega = 12;
     S.turnosV2 = true;
   }
+  if (!S.ingNSv1) { if (S.produtos.some(p => p.nome === "Casca D'Anta")) ingredientesNS(); S.ingNSv1 = true; }
   if (!S.semTurnoV1) { S.funcionarios.filter(f => /^(eduardo|j[ée]ssica)\b/i.test(f.nome) && f.escala && f.escala.turno).forEach(f => { f.escala.turnoGuardado = f.escala.turno; f.escala.turno = ''; }); S.semTurnoV1 = true; }
   if (!S.exLucasPago) { S.funcionarios.filter(f => f.ativo === false && /exemplo/i.test(f.nome) && !S.pagamentos.some(p => p.func === f.id)).forEach(f => { const ls = S.diarias.filter(d => d.func === f.id).map(d => d.data).sort(); if (ls.length) S.pagamentos.push({id:uid(), func:f.id, data:ls[ls.length - 1], de:ls[0], ate:ls[ls.length - 1], valor:S.diarias.filter(d => d.func === f.id).reduce((a, d) => a + num(d.valor), 0)}); }); S.exLucasPago = true; } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
 S = load(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; S.ui.periodo = periodoAgora(); S.ui.entOpen = false; S.ui.entTurno = null; S.ui.emPick = null; S.ui.vendaPop = null; S.ui.vendaCanal = null; S.ui.vendaCombo = null; S.ui.vendaQtd = 1; S.ui.saindo = null; S.ui.fechar = false; S.ui.pedEdit = null; S.ui.precoApps = null; S.ui.eqAdd = false; S.ui.lancOpen = false;
@@ -1719,6 +1720,56 @@ function rFinancas(){
   <div class="chips">${SUBFIN.map(([k, n]) => `<button class="chip ${sub === k ? 'on' : ''}" data-act="finTab" data-v="${k}">${n}</button>`).join('')}</div>
   ${corpo}`;
 }
+function ingredientesNS(){
+  // [nome, rende, unidade, tipo]
+  const LISTA = [
+    ['Pão brioche (pacote)', 12, 'un'], ['Manteiga (kg)', 1000, 'g'],
+    ['Blend bovino (kg)', 1000, 'g'], ['Blend de angus (kg)', 1000, 'g'], ['Carne para smash (kg)', 1000, 'g'],
+    ['Bife de frango empanado', 1, 'un'], ['Bacon (kg)', 1000, 'g'], ['Panceta defumada (kg)', 1000, 'g'], ['Fraldinha desfiada (kg)', 1000, 'g'],
+    ['Queijo cheddar fatiado (kg)', 1000, 'g'], ['Cheddar cremoso (kg)', 1000, 'g'], ['Muçarela (kg)', 1000, 'g'], ['Muçarela empanada', 1, 'un'],
+    ['Queijo prato (kg)', 1000, 'g'], ['Queijo provolone (kg)', 1000, 'g'], ['Queijo blue cheese (kg)', 1000, 'g'], ['Queijo canastra (kg)', 1000, 'g'], ['Catupiry (kg)', 1000, 'g'],
+    ['Alface (pé)', 20, 'porção'], ['Tomate (kg)', 40, 'fatia'], ['Cebola roxa (kg)', 40, 'porção'], ['Cebola caramelizada (receita)', 15, 'porção'],
+    ['Rúcula (maço)', 10, 'porção'], ['Azedinha (maço)', 10, 'porção'], ['Abacaxi', 8, 'fatia'], ['Mel (pote)', 500, 'g'],
+    ['Tomate confitado (receita)', 15, 'porção'], ['Alho torrado (receita)', 20, 'porção'], ['Pickles (pote)', 30, 'porção'], ['Cebolinha (maço)', 20, 'porção'],
+    ['Molho especial da casa (receita)', 30, 'porção'], ['Molho do chef (receita)', 30, 'porção'], ['Molho confit (receita)', 20, 'porção'],
+    ['Geleia de frutas vermelhas (pote)', 20, 'porção'], ['Geleia de maracujá apimentada (pote)', 20, 'porção'],
+    ['Batata frita McCain (pacote 2 kg)', 2000, 'g'], ['Óleo de fritura (lata 900 ml)', 900, 'ml'],
+    ['Pudim (receita)', 10, 'fatia'], ['Cookie recheado de Nutella', 1, 'un'], ['Gelato (pote)', 15, 'bola'], ['Brownie (receita)', 12, 'pedaço'],
+    ['Caixa de hambúrguer (pacote)', 100, 'un', 'embalagem'], ['Embalagem de batata (pacote)', 100, 'un', 'embalagem'],
+    ['Pote de sobremesa (pacote)', 100, 'un', 'embalagem'], ['Guardanapo + saquinho (pacote)', 100, 'un', 'embalagem'],
+  ];
+  const EXEMPLOS = ['Pão de hambúrguer (pacote)','Carne moída (kg)','Mussarela (kg)','Bacon (kg)','Alface (pé)','Tomate (kg)','Cebola caramelizada (receita)','Maionese da casa (pote)','Ovo (bandeja com 30)','Batata palito congelada (2 kg)','Caixa de hambúrguer (pacote 100)','Embalagem de batata (pacote 100)','Sachê de ketchup (caixa 200)','Guardanapo + saquinho (pacote 100)'];
+  const usados = new Set(); S.produtos.forEach(p => (p.itens || []).forEach(it => usados.add(it.ing)));
+  S.ingredientes = S.ingredientes.filter(i => usados.has(i.id) || !EXEMPLOS.includes(i.nome));
+  const achar = n => S.ingredientes.find(i => i.nome.toLowerCase() === n.toLowerCase());
+  LISTA.forEach(([nome, rende, unidade, cat]) => { if (!achar(nome)) S.ingredientes.push({id:uid(), nome, cat:cat || 'ingrediente', preco:0, rende, unidade}); });
+  const g = n => { const i = S.ingredientes.find(x => x.nome.toLowerCase().startsWith(n.toLowerCase())); return i && i.id; };
+  const it = (n, q) => ({ing:g(n), qtd:q});
+  const pao = () => [it('Pão brioche', 1), it('Manteiga', 10)], emb = () => [it('Caixa de hambúrguer', 1), it('Guardanapo', 1)];
+  const sal = () => [it('Alface', 1), it('Tomate (kg)', 2)];
+  const R = {
+    'Novo Sabor': [...pao(), it('Blend bovino', 360), it('Bacon', 80), it('Queijo cheddar', 60), it('Cebola caramelizada', 1), ...sal(), it('Molho especial', 1)],
+    'Nobre Sabor': [...pao(), it('Blend bovino', 180), it('Bacon', 40), it('Muçarela empanada', 1), it('Geleia de frutas', 1), ...sal()],
+    'Confit': [...pao(), it('Blend de angus', 160), it('Queijo blue', 30), it('Tomate confitado', 1), it('Alho torrado', 1), it('Mel', 10), it('Rúcula', 1), it('Azedinha', 1), it('Molho confit', 1)],
+    'Sweet Tropical': [...pao(), it('Blend bovino', 180), it('Queijo provolone', 30), it('Abacaxi', 1), it('Mel', 10), it('Bacon', 40), it('Rúcula', 1), it('Azedinha', 1), it('Molho do chef', 1)],
+    "Casca D'Anta": [...pao(), it('Blend bovino', 180), it('Queijo canastra', 40), it('Panceta', 50), it('Rúcula', 1), it('Azedinha', 1), it('Geleia de maracujá', 1), it('Molho especial', 1)],
+    'Sabor Bacon': [...pao(), it('Blend bovino', 180), it('Queijo cheddar', 30), it('Bacon', 40), ...sal(), it('Cebola roxa', 1), it('Molho especial', 1)],
+    'Sabor Queijo': [...pao(), it('Blend bovino', 180), it('Queijo prato', 30), it('Catupiry', 30), it('Bacon', 40), it('Cebola caramelizada', 1), ...sal(), it('Molho especial', 1)],
+    'Sabor Frango': [...pao(), it('Bife de frango', 1), it('Queijo prato', 30), ...sal(), it('Molho especial', 1)],
+    'Smash Burger': [...pao(), it('Carne para smash', 80), it('Queijo cheddar', 60), it('Bacon', 40), it('Molho do chef', 1)],
+    'Smash do Chef': [...pao(), it('Carne para smash', 80), it('Muçarela (kg)', 30), it('Pickles', 1), it('Molho do chef', 1)],
+    'Smash Triplo': [...pao(), it('Carne para smash', 240), it('Queijo cheddar', 90), it('Bacon', 40), it('Molho especial', 1)],
+    'Batata frita (individual)': [it('Batata frita', 200), it('Óleo de fritura', 50), it('Embalagem de batata', 1), it('Guardanapo', 1)],
+    'Batata com cheddar/mussarela e bacon': [it('Batata frita', 400), it('Óleo de fritura', 80), it('Cheddar cremoso', 80), it('Bacon', 60), it('Embalagem de batata', 1), it('Guardanapo', 1)],
+    'Batata com cheddar/mussarela e fraldinha': [it('Batata frita', 400), it('Óleo de fritura', 80), it('Cheddar cremoso', 80), it('Fraldinha', 120), it('Cebolinha', 1), it('Embalagem de batata', 1), it('Guardanapo', 1)],
+    'Pudim de leite condensado': [it('Pudim', 1), it('Pote de sobremesa', 1)],
+    'Cookie recheado de Nutella com gelato': [it('Cookie recheado', 1), it('Gelato', 1), it('Pote de sobremesa', 1)],
+    'Brownie de chocolate': [it('Brownie', 1), it('Pote de sobremesa', 1)],
+  };
+  let n = 0;
+  S.produtos.forEach(p => { const r = R[p.nome]; if (r && !(p.itens || []).length) { const lanche = p.emoji === '🍔'; p.itens = [...r, ...(lanche ? emb() : [])].filter(x => x.ing); n++; } });
+  return n;
+}
 function carregarCardapioNS(){
   const L = (nome, preco, combo, desc, emoji) => ({nome, preco, combo, desc, emoji});
   const lanches = [
@@ -1757,6 +1808,7 @@ function carregarCardapioNS(){
   const ks = bebidas[2];
   ps.forEach(({x, p}) => S.produtos.push({id:uid(), nome:'Combo ' + x.nome, setor:'combo', emoji:'🎁', preco:x.combo, precoApp:0, precos:{}, itens:[], comp:[{tipo:'prod', id:p.id, qtd:1}, {tipo:'prod', id:bat.id, qtd:1}, {tipo:'rev', id:ks.id, qtd:1}]}));
   S.ui.cart = (S.ui.cart || []).filter(it => !sai.includes(it.id));
+  ingredientesNS();
 }
 function carregarNovoSabor(){
   const ex = S.funcionarios.filter(f => /exemplo/i.test(f.nome)).map(f => f.id);
@@ -1818,7 +1870,7 @@ function rAjustes(){
     <h2>🍔 Dados da Novo Sabor</h2>
     <div class="sub" style="margin-bottom:10px">Tira as pessoas de exemplo e coloca a equipe de verdade (Eduardo e Jéssica) e os apps (iFood conta 1, iFood conta 2 e 99Food). Vendas, cardápio e o resto continuam.</div>
     <button class="btn pri" data-act="carregarNS">Carregar dados da Novo Sabor</button>
-    <div class="sub" style="margin:16px 0 10px">Troca os lanches, combos e bebidas de exemplo pelo cardápio da Novo Sabor (11 lanches, 11 combos, batatas, sobremesas e 20 bebidas), com os preços. Os pratos do almoço e os ingredientes continuam.</div>
+    <div class="sub" style="margin:16px 0 10px">Troca os lanches, combos e bebidas de exemplo pelo cardápio da Novo Sabor (11 lanches, 11 combos, batatas, sobremesas e 20 bebidas), com os preços. Já vem com os ingredientes de cada um (sem preço, pra vocês preencherem). Os pratos do almoço continuam.</div>
     <button class="btn pri" data-act="carregarCardNS">Carregar cardápio da Novo Sabor</button>
   </div>
   <div class="card">
