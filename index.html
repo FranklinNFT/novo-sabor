@@ -76,6 +76,10 @@ input[type=time]{color-scheme:dark}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 @media(max-width:600px){.vgrid{grid-template-columns:1fr 1fr;gap:8px}.vbody{padding:10px 6px 6px}.vbody .em{font-size:28px}.vbody .vn{font-size:13px}.pertabs .ptab{font-size:14px;padding:10px 6px}}
 .vcard{background:var(--card2);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s}
+.vcard.falta{opacity:.55;border-style:dashed}.vcard.falta .vn{text-decoration:line-through}.vcard.falta .vp{color:var(--neg,#e5544b)}
+.estbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#241d15;border:1px solid var(--acc);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.estlinha{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.chip.off{opacity:.6;text-decoration:line-through;border-style:dashed}
 .vcard.tem{border-color:var(--acc);background:#241d15}
 .vcard.pulse{animation:pulse .25s}
 @keyframes pulse{50%{transform:scale(.97)}}
@@ -1375,6 +1379,7 @@ function rCaixa(){
   const prods = s => S.produtos.filter(p => p.setor === s);
   const principais = per === 'almoco' ? prods('almoco') : [...prods('hamburgueria'), ...prods('combo')];
   const outros = per === 'almoco' ? [...prods('hamburgueria'), ...prods('combo')] : prods('almoco');
+  const tem = l => l.filter(x => !motivoFalta(x)), nFalta = [...principais, ...S.revenda].filter(x => motivoFalta(x)).length;
   const bloco = (titulo, lista) => lista.length ? `${titulo ? `<div class="vgt">${titulo}</div>` : ''}<div class="vgrid">${lista.map(vcard).join('')}</div>` : '';
   return `
   <div class="top"><div><h2>Caixa · ${dia === dataHoje ? 'hoje' : dataBR(dia)} <span class="sub" style="font-weight:400">(${DIAS_NOME[dow(dia)]})</span></h2><div class="sub">Toque nos itens para montar o pedido e depois em "Fechar pedido". Salva sozinho.</div></div>
@@ -1387,9 +1392,11 @@ function rCaixa(){
   </div>
   <div class="cxgrid"><div class="card" style="margin:0">
     <div class="pertabs">${['almoco','hamburgueria'].map(s => `<button class="ptab ${per === s ? 'on' : ''}" data-act="periodo" data-v="${s}">${SETOR2[s].em} ${SETOR2[s].nome}</button>`).join('')}</div>
-    ${bloco(per === 'almoco' ? '🍱 Almoço' : '🍔 Hamburgueria e combos', principais)}
-    ${bloco('🥤 Bebidas', S.revenda)}
-    ${outros.length ? `<details class="outros"><summary>Outros itens (${per === 'almoco' ? 'hamburgueria' : 'almoço'})</summary>${bloco('', outros)}</details>` : ''}
+    ${S.ui.estoque ? estoqueHTML(principais, outros) : `
+    <div class="estlinha"><button class="btn x" data-act="estModo">📦 Estoque</button>${nFalta ? `<span class="sub">${nFalta} ite${nFalta === 1 ? 'm' : 'ns'} em falta, fora do caixa</span>` : ''}</div>
+    ${bloco(per === 'almoco' ? '🍱 Almoço' : '🍔 Hamburgueria e combos', tem(principais))}
+    ${bloco('🥤 Bebidas', tem(S.revenda))}
+    ${tem(outros).length ? `<details class="outros"><summary>Outros itens (${per === 'almoco' ? 'hamburgueria' : 'almoço'})</summary>${bloco('', tem(outros))}</details>` : ''}`}
   </div>
   <aside class="cxside">
     <div class="card" style="margin:0"><h2>🛒 Pedido aberto</h2><div id="cart">${cartHTML()}</div></div>
@@ -1436,6 +1443,27 @@ function qtdPeriodo(item){
   Object.keys(dia).filter(k => k.startsWith(pre)).forEach(k => { const q = num(dia[k][item]); if (q) { tot += q; const c = k.slice(pre.length); m[c] = (m[c] || 0) + q; } });
   pedidosDia(S.ui.dia).filter(p => p.periodo === S.ui.periodo).forEach(p => p.itens.forEach(it => { if (it.id === item) { tot += num(it.qtd); m[p.origem] = (m[p.origem] || 0) + num(it.qtd); } }));
   return {tot, det: Object.entries(m).map(([c, q]) => `${nomeCanal(c)} ${q}`).join(' · ')};
+}
+function motivoFalta(x, n = 0){
+  if (!x || n > 4) return '';
+  if (x.falta) return 'em falta';
+  const ing = (x.itens || []).map(it => byId(S.ingredientes, it.ing)).find(i => i && i.falta);
+  if (ing) return 'sem ' + ing.nome.replace(/\s*\(.*\)\s*/g, '');
+  for (const c of (x.comp || [])) { const y = c.tipo === 'rev' ? byId(S.revenda, c.id) : byId(S.produtos, c.id); const m = motivoFalta(y, n + 1); if (m) return m === 'em falta' ? 'sem ' + y.nome : m; }
+  return '';
+}
+function ecard(item){
+  const m = motivoFalta(item), proprio = !!item.falta;
+  return `<div class="vcard ${m ? 'falta' : 'okest'}"><button class="vbody" data-act="${m && !proprio ? 'noop' : 'estToggle'}" data-id="${item.id}"><span class="em">${emojiDe(item)}</span><span class="vn">${esc(item.nome)}</span><span class="vp">${m && !proprio ? esc(m) : fmt(num(item.preco))}</span></button>
+    <div class="vctl" style="justify-content:center"><span class="${m ? 'neg' : 'pos'}" style="font-size:12px;font-weight:600;white-space:nowrap;width:auto;flex:none">${m ? (proprio ? '✕ em falta' : '✕ falta item') : '✓ tem'}</span></div></div>`;
+}
+function estoqueHTML(principais, outros){
+  const usados = new Set(); S.produtos.forEach(p => (p.itens || []).forEach(it => usados.add(it.ing)));
+  const ings = S.ingredientes.filter(i => usados.has(i.id));
+  const bl = (t, l) => l.length ? `<div class="vgt">${t}</div><div class="vgrid">${l.map(ecard).join('')}</div>` : '';
+  return `<div class="estbar"><div><b>📦 Estoque</b><div class="sub">Toque no que acabou para tirar do caixa. Toque de novo quando chegar.</div></div><button class="btn pri" data-act="estModo">Pronto</button></div>
+    ${ings.length ? `<div class="vgt">🧂 Ingredientes <span class="sub" style="font-weight:400">· marcando um, sai tudo que leva ele</span></div><div class="chips">${ings.map(i => `<button class="chip ${i.falta ? 'off' : 'on'}" data-act="estIng" data-id="${i.id}">${i.falta ? '✕ ' : ''}${esc(i.nome.replace(/\s*\(.*\)\s*/g, ''))}</button>`).join('')}</div>` : ''}
+    ${bl(S.ui.periodo === 'almoco' ? '🍱 Almoço' : '🍔 Hamburgueria e combos', principais)}${bl('🥤 Bebidas', S.revenda)}${bl('Outros', outros)}`;
 }
 function vcard(item){
   const {tot, det} = qtdPeriodo(item.id), noCart = ((S.ui.cart || []).find(x => x.id === item.id) || {}).qtd || 0;
@@ -2087,6 +2115,9 @@ main.addEventListener('click', e => {
     try { const d = JSON.parse(document.getElementById('bk').value); if (!valido(d)) throw 0; S = d; save(); render(); document.getElementById('msgb').innerHTML = '<span class="ok-msg">Restaurado!</span>'; }
     catch(_) { document.getElementById('msgb').innerHTML = '<span class="ok-msg" style="color:var(--bad)">Esse texto não é um backup válido.</span>'; }
   }
+  else if (a === 'estModo') { S.ui.estoque = !S.ui.estoque; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'estToggle') { const x = byId(S.produtos, id) || byId(S.revenda, id); if (x) x.falta = !x.falta; const y = window.scrollY; done(); window.scrollTo(0, y); }
+  else if (a === 'estIng') { const x = byId(S.ingredientes, id); if (x) x.falta = !x.falta; const y = window.scrollY; done(); window.scrollTo(0, y); }
   else if (a === 'carregarCardNS') armar(b, () => { carregarCardapioNS(); done(); toast('Cardápio da Novo Sabor carregado'); }, 'Confirmar? Troca os lanches e bebidas');
   else if (a === 'carregarNS') armar(b, () => { carregarNovoSabor(); done(); toast('Equipe e apps da Novo Sabor carregados'); }, 'Confirmar?');
   else if (a === 'finTab') { S.ui.finTab = b.dataset.v; done(); }
