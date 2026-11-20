@@ -1691,6 +1691,45 @@ function rFinancas(){
   <div class="chips">${SUBFIN.map(([k, n]) => `<button class="chip ${sub === k ? 'on' : ''}" data-act="finTab" data-v="${k}">${n}</button>`).join('')}</div>
   ${corpo}`;
 }
+function carregarCardapioNS(){
+  const L = (nome, preco, combo, desc, emoji) => ({nome, preco, combo, desc, emoji});
+  const lanches = [
+    L('Novo Sabor', 50, 63, 'Dois blends bovinos de 180g, bacon crocante em dobro, cheddar derretido em dobro, cebola caramelizada, alface, tomate, molho especial e pão brioche'),
+    L('Nobre Sabor', 47, 60, 'Blend bovino de 180g, bacon crocante, muçarela empanada, geleia de frutas vermelhas, alface, tomate e pão brioche'),
+    L('Confit', 48, 60, 'Blend de angus 160g, queijo blue cheese, tomate confitado, alho torrado, toque de mel, rúcula, azedinha, molho confit e pão brioche'),
+    L('Sweet Tropical', 46, 59, 'Blend bovino de 180g, queijo provolone, abacaxi ao mel, bacon crocante, rúcula, azedinha, molho do chef e pão brioche'),
+    L("Casca D'Anta", 45, 58, 'Blend bovino de 180g, queijo canastra maçaricado, panceta defumada, rúcula, azedinha, geleia de maracujá apimentada, molho da casa e pão brioche'),
+    L('Sabor Bacon', 35, 50, 'Blend bovino de 180g, cheddar, bacon crocante, alface, tomate, cebola roxa, molho especial e pão brioche'),
+    L('Sabor Queijo', 38, 51, 'Blend bovino de 180g, queijo prato, catupiry, bacon crocante, cebola caramelizada, alface, tomate, molho especial e pão brioche'),
+    L('Sabor Frango', 35, 48, 'Bife de frango empanado, queijo prato, alface, tomate, molho especial e pão brioche'),
+    L('Smash Burger', 28, 40, 'Smash de 80g, cheddar em dobro, bacon crocante e molho do chef'),
+    L('Smash do Chef', 32, 45, 'Smash de 80g, muçarela, pickles e molho do chef'),
+    L('Smash Triplo', 38, 51, 'Três smash de 80g, três fatias de cheddar, bacon crocante e molho da casa'),
+  ];
+  const outros = [
+    L('Batata frita (individual)', 16, 0, '', '🍟'),
+    L('Batata com cheddar/mussarela e bacon', 38, 0, '', '🍟'),
+    L('Batata com cheddar/mussarela e fraldinha', 45, 0, 'Fraldinha desfiada e cebolinha', '🍟'),
+    L('Pudim de leite condensado', 15, 0, '', '🍮'),
+    L('Cookie recheado de Nutella com gelato', 25, 0, '', '🍪'),
+    L('Brownie de chocolate', 10, 0, '', '🍫'),
+  ];
+  const B = (nome, preco, emoji) => ({id:uid(), nome, custo:0, preco, emoji});
+  const bebidas = [
+    B('Refrigerante 1 litro', 13, '🥤'), B('Refrigerante 350ml', 8, '🥤'), B('Refrigerante KS 290ml', 10, '🥤'),
+    B('Suco Del Valle 290ml', 8, '🧃'), B('Suco Kapo 200ml', 5, '🧃'), B('Água sem gás', 5, '💧'), B('Água com gás', 6, '💧'),
+    ...['Pink Lemonade','Limão Siciliano','Morango','Maçã Verde','Chá Mate Tostado'].map(n => B('Soda italiana ' + n, 18, '🍹')),
+    ...['Heineken','Eisenbahn Pilsen','Eisenbahn IPA','Eisenbahn Pale','Eisenbahn Weizenbier','Eisenbahn Unfiltered','Heineken 0.0','Sol'].map(n => B(n + ' long neck', 15, '🍺')),
+  ];
+  const sai = S.produtos.filter(p => p.setor !== 'almoco').map(p => p.id).concat(S.revenda.map(r => r.id));
+  S.produtos = S.produtos.filter(p => p.setor === 'almoco');
+  S.revenda = bebidas;
+  const P = x => { const p = {id:uid(), nome:x.nome, setor:'hamburgueria', emoji:x.emoji || '🍔', desc:x.desc, preco:x.preco, precoApp:0, precos:{}, itens:[]}; S.produtos.push(p); return p; };
+  const ps = lanches.map(x => ({x, p:P(x)})), bat = P(outros[0]); outros.slice(1).forEach(P);
+  const ks = bebidas[2];
+  ps.forEach(({x, p}) => S.produtos.push({id:uid(), nome:'Combo ' + x.nome, setor:'combo', emoji:'🎁', preco:x.combo, precoApp:0, precos:{}, itens:[], comp:[{tipo:'prod', id:p.id, qtd:1}, {tipo:'prod', id:bat.id, qtd:1}, {tipo:'rev', id:ks.id, qtd:1}]}));
+  S.ui.cart = (S.ui.cart || []).filter(it => !sai.includes(it.id));
+}
 function carregarNovoSabor(){
   const ex = S.funcionarios.filter(f => /exemplo/i.test(f.nome)).map(f => f.id);
   S.funcionarios = S.funcionarios.filter(f => !ex.includes(f.id));
@@ -1751,6 +1790,8 @@ function rAjustes(){
     <h2>🍔 Dados da Novo Sabor</h2>
     <div class="sub" style="margin-bottom:10px">Tira as pessoas de exemplo e coloca a equipe de verdade (Eduardo e Jéssica) e os apps (iFood conta 1, iFood conta 2 e 99Food). Vendas, cardápio e o resto continuam.</div>
     <button class="btn pri" data-act="carregarNS">Carregar dados da Novo Sabor</button>
+    <div class="sub" style="margin:16px 0 10px">Troca os lanches, combos e bebidas de exemplo pelo cardápio da Novo Sabor (11 lanches, 11 combos, batatas, sobremesas e 20 bebidas), com os preços. Os pratos do almoço e os ingredientes continuam.</div>
+    <button class="btn pri" data-act="carregarCardNS">Carregar cardápio da Novo Sabor</button>
   </div>
   <div class="card">
     <h2>Recomeçar</h2>
@@ -2046,6 +2087,7 @@ main.addEventListener('click', e => {
     try { const d = JSON.parse(document.getElementById('bk').value); if (!valido(d)) throw 0; S = d; save(); render(); document.getElementById('msgb').innerHTML = '<span class="ok-msg">Restaurado!</span>'; }
     catch(_) { document.getElementById('msgb').innerHTML = '<span class="ok-msg" style="color:var(--bad)">Esse texto não é um backup válido.</span>'; }
   }
+  else if (a === 'carregarCardNS') armar(b, () => { carregarCardapioNS(); done(); toast('Cardápio da Novo Sabor carregado'); }, 'Confirmar? Troca os lanches e bebidas');
   else if (a === 'carregarNS') armar(b, () => { carregarNovoSabor(); done(); toast('Equipe e apps da Novo Sabor carregados'); }, 'Confirmar?');
   else if (a === 'finTab') { S.ui.finTab = b.dataset.v; done(); }
   else if (a === 'finIr') { S.ui.finTab = b.dataset.v; aba = 'financas'; try { history.replaceState(null, '', '#financas'); } catch(_) {} done(); window.scrollTo(0, 0); }
