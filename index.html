@@ -80,6 +80,7 @@ input[type=time]{color-scheme:dark}
 .estbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#241d15;border:1px solid var(--acc);border-radius:12px;padding:10px 12px;margin-bottom:12px}
 .estlinha{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .chip.off{opacity:.6;text-decoration:line-through;border-style:dashed}
+.tsel{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--mut);font:inherit;font-size:11px;font-weight:400;padding:1px 2px;max-width:120px;cursor:pointer}
 .vcard.tem{border-color:var(--acc);background:#241d15}
 .vcard.pulse{animation:pulse .25s}
 @keyframes pulse{50%{transform:scale(.97)}}
@@ -1058,7 +1059,7 @@ function rEscala(ym){
 const turnosDoDia = data => { const d = dow(data), ts = S.turnos.filter(t => !(t.dias || []).length || t.dias.includes(d)); return ts.length ? ts : S.turnos; };
 function escDiaHTML(data){
   if (!data) return '';
-  const ts = turnosDoDia(data), tSel = ts.find(t => t.id === S.ui.escTurno) || ts[0];
+  const ts = S.turnos, tSel = ts.find(t => t.id === S.ui.escTurno) || turnosDoDia(data)[0] || ts[0];
   const ls = S.funcionarios.map(f => ({f, st:statusDia(f, data)})).filter(x => x.st);
   const naEsc = ativos().filter(f => planejado(f, data) || ls.some(x => x.f === f));
   const livres = ativos().filter(f => !naEsc.includes(f));
@@ -1367,7 +1368,7 @@ function equipeFaixa(data){
   const comLanc = new Set(lancs.map(x => x.func));
   const esc2 = S.funcionarios.filter(f => !comLanc.has(f.id) && (escalado(f, data) || extraDe(f, data)) && doPer(byId(S.turnos, turnoDo(f, data))));
   const cardL = l => { const f = byId(S.funcionarios, l.func), tu = byId(S.turnos, l.turno); if (!f) return '';
-    return `<div class="eqmini ok"><div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <span class="sub" style="font-weight:400">${esc(tu ? tu.nome : '')}</span></div><div class="sub"><b>${fmt(l.valor)}</b>${ehEnt(f) ? ` · ${int(l.entregas)} 🛵` : ` · ${esc((funcaoDe(f) || {}).nome || '')}`}</div></div><button class="mini-b" data-act="eqTirar" data-id="${l.id}" title="Desfazer">↺</button></div>`; };
+    return `<div class="eqmini ok"><div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <select class="tsel" data-k="lancTurno" data-id="${l.id}" title="Trocar turno">${S.turnos.map(t => `<option value="${t.id}" ${tu && t.id === tu.id ? 'selected' : ''}>${esc(t.nome)}</option>`).join('')}</select></div><div class="sub"><b>${fmt(l.valor)}</b>${ehEnt(f) ? ` · ${int(l.entregas)} 🛵` : ` · ${esc((funcaoDe(f) || {}).nome || '')}`}</div></div><button class="mini-b" data-act="eqTirar" data-id="${l.id}" title="Desfazer">↺</button></div>`; };
   const cardE = f => { const tu = byId(S.turnos, turnoDo(f, data)), fal = S.faltas.find(x => x.func === f.id && x.data === data), dsp = dispDe(f, data);
     const topo = `<div class="av sm">${AVATAR(16)}</div><div class="eqt"><div class="nm">${esc(curto(f.nome))} <span class="sub" style="font-weight:400">${esc(tu ? tu.nome : '')}</span></div>`;
     if (fal) return `<div class="eqmini falta">${topo}<div class="sub"><b class="neg">F · faltou</b></div></div><button class="mini-b" data-act="delFalta" data-id="${fal.id}" title="Desfazer">↺</button></div>`;
@@ -1964,7 +1965,7 @@ main.addEventListener('input', e => {
     S.loja = t.value; save(); document.getElementById('loja').textContent = S.loja || 'Novo Sabor';
   }
 });
-main.addEventListener('change', e => { const k = e.target.dataset.k, f = e.target.dataset.f; if (k === 'fin' || k === 'cc') { const y = window.scrollY; render(); window.scrollTo(0, y); return; } if (k === 'pedval') { const y = window.scrollY; render(); window.scrollTo(0, y); return; } if (k === 'app' || (k === 'cfg' && aba === 'equipe') || (k === 'func' && ['escIni','escFim','pagaDia','escTurno'].includes(f)) || (k === 'turno' && (f === 'ini' || f === 'fim'))) { const y = window.scrollY; render(); window.scrollTo(0, y); } });
+main.addEventListener('change', e => { const k = e.target.dataset.k, f = e.target.dataset.f; if (k === 'lancTurno') { const l = byId(S.diarias, e.target.dataset.id); if (l) { l.turno = e.target.value; l.valor = pagar(l.func, l.turno, l.entregas); save(); } const y = window.scrollY; render(); window.scrollTo(0, y); return; } if (k === 'fin' || k === 'cc') { const y = window.scrollY; render(); window.scrollTo(0, y); return; } if (k === 'pedval') { const y = window.scrollY; render(); window.scrollTo(0, y); return; } if (k === 'app' || (k === 'cfg' && aba === 'equipe') || (k === 'func' && ['escIni','escFim','pagaDia','escTurno'].includes(f)) || (k === 'turno' && (f === 'ini' || f === 'fim'))) { const y = window.scrollY; render(); window.scrollTo(0, y); } });
 
 function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1800); }
 function armar(btn, fn, texto){
