@@ -437,7 +437,7 @@ const UI_PADRAO = () => ({mes:mesHoje, dia:dataHoje, setor:'hamburgueria', paine
 function valido(d){ return d && d.config && ['ingredientes','produtos','revenda','gastos','turnos','funcionarios','diarias','apps'].every(k => Array.isArray(d[k])) && d.vendas && typeof d.vendas === 'object'; }
 function load(){
   try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); if (valido(d)) return d; } } catch(e) {}
-  return exemplo();
+  return dadosNS();
 }
 function save(){ CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
 function hm2min(s){ const [a, b] = String(s || '').split(':').map(Number); return isNaN(a) ? null : a * 60 + (b || 0); }
@@ -470,6 +470,7 @@ function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.fal
     if (nl && fe && fe.valores && fe.valores[nl.id] && num(fe.valores[nl.id].porEntrega) === 10) fe.valores[nl.id].porEntrega = 12;
     S.turnosV2 = true;
   }
+  if (!S.turnosNSv1) { garantirTurnosNS(); S.turnosNSv1 = true; }
   if (!S.batNomeV1) { S.produtos.forEach(p => { if (p.nome === 'Batata com cheddar/mussarela e bacon') p.nome = 'Batata cheddar e bacon'; if (p.nome === 'Batata com cheddar/mussarela e fraldinha') p.nome = 'Batata cheddar e fraldinha'; }); S.batNomeV1 = true; }
   if (!S.ingNSv1) { if (S.produtos.some(p => p.nome === "Casca D'Anta")) ingredientesNS(); S.ingNSv1 = true; }
   if (!S.semTurnoV1) { S.funcionarios.filter(f => /^(eduardo|j[ée]ssica)\b/i.test(f.nome) && f.escala && f.escala.turno).forEach(f => { f.escala.turnoGuardado = f.escala.turno; f.escala.turno = ''; }); S.semTurnoV1 = true; }
@@ -1812,6 +1813,28 @@ function carregarCardapioNS(){
   S.ui.cart = (S.ui.cart || []).filter(it => !sai.includes(it.id));
   ingredientesNS();
 }
+function garantirTurnosNS(){
+  S.funcoes = S.funcoes && S.funcoes.length ? S.funcoes : [{id:'fn_ent', nome:'Entregador', entrega:true, valores:{}}, {id:'fn_coz', nome:'Cozinha', entrega:false, valores:{}}];
+  const PAD = [
+    {re:/^almo/i, t:{nome:'Almoço', ini:'10:00', fim:'14:00', dias:[], setor:'almoco'}, ent:{fixo:60, porEntrega:8}, coz:{fixo:70}},
+    {re:/^(?!.*longa).*noite/i, t:{nome:'Noite (até 23h30)', ini:'18:30', fim:'23:30', dias:[0,1,2,3,4], setor:'hamburgueria'}, ent:{fixo:80, porEntrega:10}, coz:{fixo:70}},
+    {re:/longa/i, t:{nome:'Noite longa (até 3h)', ini:'18:30', fim:'03:00', dias:[5,6], setor:'hamburgueria'}, ent:{fixo:100, porEntrega:12}, coz:{fixo:90}},
+  ];
+  PAD.forEach(x => {
+    let t = S.turnos.find(y => x.re.test(y.nome));
+    if (!t) { t = {id:uid(), ...x.t, dias:[...x.t.dias]}; S.turnos.push(t); }
+    S.funcoes.forEach(f => { f.valores = f.valores || {}; if (!f.valores[t.id]) f.valores[t.id] = f.entrega ? {...x.ent} : {...x.coz}; });
+  });
+  const ordem = t => PAD.findIndex(x => x.re.test(t.nome)); S.turnos.sort((a, b) => (ordem(a) + 1 || 9) - (ordem(b) + 1 || 9));
+}
+function dadosNS(){
+  S = {loja:'Novo Sabor', config:{taxa:3.5, margem:30, vendasMes:1900, taxaEntrega:0, custoEntrega:9, limiteFaltas:2, sim:1900},
+    apps:[], ingredientes:[], produtos:[], revenda:[], turnos:[], funcionarios:[], diarias:[], faltas:[], vendas:{}, extras:[], dispensas:[], pagamentos:[], pedidos:[],
+    gastos:['Aluguel','Energia','Gás','Água','Internet','MEI / contador'].map(nome => ({id:uid(), nome, valor:0})), ui:{}};
+  garantirTurnosNS(); carregarNovoSabor(); carregarCardapioNS();
+  Object.assign(S, {semTurnoV1:true, ingNSv1:true, batNomeV1:true, turnosNSv1:true});
+  return S;
+}
 function carregarNovoSabor(){
   const ex = S.funcionarios.filter(f => /exemplo/i.test(f.nome)).map(f => f.id);
   S.funcionarios = S.funcionarios.filter(f => !ex.includes(f.id));
@@ -1869,16 +1892,9 @@ function rAjustes(){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" data-act="restaurar">Restaurar</button></div>
   </div>
   <div class="card">
-    <h2>🍔 Dados da Novo Sabor</h2>
-    <div class="sub" style="margin-bottom:10px">Tira as pessoas de exemplo e coloca a equipe de verdade (Eduardo e Jéssica) e os apps (iFood conta 1, iFood conta 2 e 99Food). Vendas, cardápio e o resto continuam.</div>
-    <button class="btn pri" data-act="carregarNS">Carregar dados da Novo Sabor</button>
-    <div class="sub" style="margin:16px 0 10px">Troca os lanches, combos e bebidas de exemplo pelo cardápio da Novo Sabor (11 lanches, 11 combos, batatas, sobremesas e 20 bebidas), com os preços. Já vem com os ingredientes de cada um (sem preço, pra vocês preencherem). Os pratos do almoço continuam.</div>
-    <button class="btn pri" data-act="carregarCardNS">Carregar cardápio da Novo Sabor</button>
-  </div>
-  <div class="card">
     <h2>Recomeçar</h2>
-    <div class="sub" style="margin-bottom:10px"><b>Voltar para o exemplo</b> troca tudo pelos dados de exemplo. <b>Apagar tudo</b> deixa o site em branco para preencher do zero. Os dois apagam o que foi preenchido, então faça um backup antes.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn del" data-act="exemplo">Voltar para o exemplo</button><button class="btn del" data-act="limpar">Apagar tudo</button></div>
+    <div class="sub" style="margin-bottom:10px"><b>Dados da Novo Sabor</b> volta pro começo com a equipe (Eduardo e Jéssica), os turnos, os apps e o cardápio completo com os ingredientes. <b>Apagar tudo</b> deixa o site em branco (só os turnos e os apps continuam). Os dois apagam vendas e lançamentos, então faça um backup antes.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="dadosNS">Recomeçar com os dados da Novo Sabor</button><button class="btn del" data-act="limpar">Apagar tudo</button></div>
   </div>`;
 }
 
@@ -2194,8 +2210,8 @@ main.addEventListener('click', e => {
   else if (a === 'cpAdd') { const c = document.getElementById('cp-cc').value, d = document.getElementById('cp-desc').value.trim(), v = num(document.getElementById('cp-valor').value), dt = document.getElementById('cp-data').value || dataHoje, n = Math.max(1, Math.round(num(document.getElementById('cp-parc').value)) || 1); if (!d || !v) { toast('Coloque descrição e valor'); return; } S.fin.compras.push({id:uid(), cartao:c, desc:d, valor:v, data:dt, parcelas:n}); done(); toast('Compra lançada no cartão'); }
   else if (a === 'cpDel') armar(b, () => { S.fin.compras = S.fin.compras.filter(x => x.id !== id); done(); });
   else if (a === 'fatPagar') { S.fin.faturasPagas.push({id:uid(), cartao:id, venc:b.dataset.v, valor:Math.round(num(b.dataset.n) * 100) / 100, data:dataHoje}); done(); toast('Fatura paga e tirada do caixa'); }
-  else if (a === 'exemplo') armar(b, () => { S = exemplo(); done(); });
-  else if (a === 'limpar') armar(b, () => { S = {loja:S.loja, config:{...S.config}, apps:S.apps, ingredientes:[], produtos:[], revenda:[], gastos:[], turnos:[], funcionarios:[], diarias:[], faltas:[], vendas:{}, ui:{}}; done(); });
+  else if (a === 'dadosNS') armar(b, () => { dadosNS(); prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; S.ui.diaEq = dataHoje; done(); toast('Dados da Novo Sabor carregados'); }, 'Confirmar? Apaga vendas e lançamentos');
+  else if (a === 'limpar') armar(b, () => { S = {loja:S.loja, config:{...S.config}, apps:S.apps, funcoes:S.funcoes, ingredientes:[], produtos:[], revenda:[], gastos:[], turnos:S.turnos, funcionarios:[], diarias:[], faltas:[], vendas:{}, ui:{}, semTurnoV1:true, ingNSv1:true, batNomeV1:true, turnosNSv1:true}; prep(); S.ui.dia = dataHoje; S.ui.mes = mesHoje; done(); });
 });
 
 render();
