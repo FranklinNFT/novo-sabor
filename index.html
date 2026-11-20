@@ -83,11 +83,11 @@ input[type=time]{color-scheme:dark}
 .vcard.tem{border-color:var(--acc);background:#241d15}
 .vcard.pulse{animation:pulse .25s}
 @keyframes pulse{50%{transform:scale(.97)}}
-.vbody{background:none;border:0;color:var(--txt);font:inherit;cursor:pointer;padding:14px 10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.vbody{background:none;border:0;color:var(--txt);font:inherit;cursor:pointer;padding:14px 10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;text-align:center;flex:1 1 auto}
 .vbody .em{font-size:34px;line-height:1}
-.vbody .vn{font-weight:600;font-size:14px;line-height:1.2}
+.vbody .vn{font-weight:600;font-size:14px;line-height:1.2;height:2.4em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;align-content:center}
 .vbody .vp{font-size:12px;color:var(--mut)}
-.vctl{display:grid;grid-template-columns:44px 1fr 44px;border-top:1px solid var(--line)}
+.vctl{display:grid;grid-template-columns:44px 1fr 44px;border-top:1px solid var(--line);height:42px;flex:none}
 .vctl button{background:none;border:0;color:var(--txt);font-size:22px;cursor:pointer;padding:6px 0}
 .vctl button:first-child{color:var(--mut)}
 .vctl button:last-child{color:var(--acc)}
@@ -132,7 +132,7 @@ details.outros{margin-top:14px}details.outros summary{cursor:pointer;color:var(-
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .cbtn{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:18px 10px;font:inherit;color:var(--txt);font-size:16px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
 .cbtn span{font-size:28px}.cbtn:hover{border-color:var(--acc)}
-.vqs{font-size:11px;color:var(--mut);text-align:center;padding:0 6px 6px;min-height:15px}
+.vqs{font-size:11px;color:var(--mut);text-align:center;padding:0 6px 6px;height:34px;line-height:14px;overflow:hidden;flex:none}
 .eqadd{display:flex;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--line);border-radius:10px;min-width:150px;padding:8px 14px;color:var(--mut);background:none;font:inherit;cursor:pointer;flex:none}
 .eqadd:hover{border-color:var(--acc);color:var(--acc)}
 .ftab{width:100%;border-collapse:collapse}.ftab td,.ftab th{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -469,6 +469,7 @@ function prep(){ S.ui = Object.assign(UI_PADRAO(), S.ui || {}); S.faltas = S.fal
     if (nl && fe && fe.valores && fe.valores[nl.id] && num(fe.valores[nl.id].porEntrega) === 10) fe.valores[nl.id].porEntrega = 12;
     S.turnosV2 = true;
   }
+  if (!S.batNomeV1) { S.produtos.forEach(p => { if (p.nome === 'Batata com cheddar/mussarela e bacon') p.nome = 'Batata cheddar e bacon'; if (p.nome === 'Batata com cheddar/mussarela e fraldinha') p.nome = 'Batata cheddar e fraldinha'; }); S.batNomeV1 = true; }
   if (!S.ingNSv1) { if (S.produtos.some(p => p.nome === "Casca D'Anta")) ingredientesNS(); S.ingNSv1 = true; }
   if (!S.semTurnoV1) { S.funcionarios.filter(f => /^(eduardo|j[ée]ssica)\b/i.test(f.nome) && f.escala && f.escala.turno).forEach(f => { f.escala.turnoGuardado = f.escala.turno; f.escala.turno = ''; }); S.semTurnoV1 = true; }
   if (!S.exLucasPago) { S.funcionarios.filter(f => f.ativo === false && /exemplo/i.test(f.nome) && !S.pagamentos.some(p => p.func === f.id)).forEach(f => { const ls = S.diarias.filter(d => d.func === f.id).map(d => d.data).sort(); if (ls.length) S.pagamentos.push({id:uid(), func:f.id, data:ls[ls.length - 1], de:ls[0], ate:ls[ls.length - 1], valor:S.diarias.filter(d => d.func === f.id).reduce((a, d) => a + num(d.valor), 0)}); }); S.exLucasPago = true; } if (!S.vendasV2) { Object.entries(S.vendas).forEach(([d, dia]) => { const novo = {}; Object.entries(dia).forEach(([k, v]) => { if (k.includes('|')) { novo[k] = Object.assign(novo[k] || {}, v); return; } Object.entries(v).forEach(([id, q]) => { const pr = byId(S.produtos, id); const nk = `${pr && pr.setor === 'almoco' ? 'almoco' : 'hamburgueria'}|${k}`; novo[nk] = novo[nk] || {}; novo[nk][id] = num(novo[nk][id]) + num(q); }); }); S.vendas[d] = novo; }); S.vendasV2 = true; CACHE = {}; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} } S.ui.dia = S.ui.dia || dataHoje; if (!canais().some(c => c.id === S.ui.canal)) S.ui.canal = 'balcao'; if (!canais().some(c => c.id === S.ui.canalDia)) S.ui.canalDia = 'balcao'; }
@@ -1760,8 +1761,8 @@ function ingredientesNS(){
     'Smash do Chef': [...pao(), it('Carne para smash', 80), it('Muçarela (kg)', 30), it('Pickles', 1), it('Molho do chef', 1)],
     'Smash Triplo': [...pao(), it('Carne para smash', 240), it('Queijo cheddar', 90), it('Bacon', 40), it('Molho especial', 1)],
     'Batata frita (individual)': [it('Batata frita', 200), it('Óleo de fritura', 50), it('Embalagem de batata', 1), it('Guardanapo', 1)],
-    'Batata com cheddar/mussarela e bacon': [it('Batata frita', 400), it('Óleo de fritura', 80), it('Cheddar cremoso', 80), it('Bacon', 60), it('Embalagem de batata', 1), it('Guardanapo', 1)],
-    'Batata com cheddar/mussarela e fraldinha': [it('Batata frita', 400), it('Óleo de fritura', 80), it('Cheddar cremoso', 80), it('Fraldinha', 120), it('Cebolinha', 1), it('Embalagem de batata', 1), it('Guardanapo', 1)],
+    'Batata cheddar e bacon': [it('Batata frita', 400), it('Óleo de fritura', 80), it('Cheddar cremoso', 80), it('Bacon', 60), it('Embalagem de batata', 1), it('Guardanapo', 1)],
+    'Batata cheddar e fraldinha': [it('Batata frita', 400), it('Óleo de fritura', 80), it('Cheddar cremoso', 80), it('Fraldinha', 120), it('Cebolinha', 1), it('Embalagem de batata', 1), it('Guardanapo', 1)],
     'Pudim de leite condensado': [it('Pudim', 1), it('Pote de sobremesa', 1)],
     'Cookie recheado de Nutella com gelato': [it('Cookie recheado', 1), it('Gelato', 1), it('Pote de sobremesa', 1)],
     'Brownie de chocolate': [it('Brownie', 1), it('Pote de sobremesa', 1)],
@@ -1787,8 +1788,8 @@ function carregarCardapioNS(){
   ];
   const outros = [
     L('Batata frita (individual)', 16, 0, '', '🍟'),
-    L('Batata com cheddar/mussarela e bacon', 38, 0, '', '🍟'),
-    L('Batata com cheddar/mussarela e fraldinha', 45, 0, 'Fraldinha desfiada e cebolinha', '🍟'),
+    L('Batata cheddar e bacon', 38, 0, '', '🍟'),
+    L('Batata cheddar e fraldinha', 45, 0, 'Fraldinha desfiada e cebolinha', '🍟'),
     L('Pudim de leite condensado', 15, 0, '', '🍮'),
     L('Cookie recheado de Nutella com gelato', 25, 0, '', '🍪'),
     L('Brownie de chocolate', 10, 0, '', '🍫'),
